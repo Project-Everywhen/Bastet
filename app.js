@@ -264,7 +264,7 @@ function updateCarouselDots(activeIndex) {
     // Dots are built once so the width transition can animate.
     // Rebuild only if the dot count drifted from the config.
     if (dots.length !== FEATURED_MOVIES.length) {
-        createCarouselDots();
+        createCarouselDots(activeIndex);
         return;
     }
 
@@ -277,7 +277,7 @@ function updateCarouselDots(activeIndex) {
     });
 }
 
-function createCarouselDots() {
+function createCarouselDots(activeIndex = currentFeaturedIndex) {
     const dotsContainer = document.querySelector("#hero-dots");
 
     if (!dotsContainer) {
@@ -303,7 +303,7 @@ function createCarouselDots() {
         dot.className = "hero-dot";
         dot.setAttribute("aria-label", `Show ${title}`);
 
-        if (index === currentFeaturedIndex) {
+        if (index === activeIndex) {
             dot.setAttribute("aria-current", "true");
         }
 
