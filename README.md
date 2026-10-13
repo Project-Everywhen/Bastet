@@ -32,6 +32,18 @@ The `CONTINUE_WATCHING` array is demo data. Its progress is not real playback pr
 - `/discover/movie?sort_by=primary_release_date.desc&watch_region={WATCH_REGION}&with_watch_monetization_types=flatrate` powers the New on Streaming shelf — the API behind the website's `discover_preset=new-on-streaming` view, limited to already-released titles. Change `WATCH_REGION` in `config.js` to retarget it.
 - `/search/multi` powers the `#search` view: debounced live search across movies and TV, reusing the shelf cards (posters only, top 18).
 
+## Theming
+
+All colors live as CSS custom properties in `:root` (`styles.css`), grouped as:
+
+- `--accent`, `--accent-ink`, `--accent-hover` — brand accent (default monochrome white): primary button, active hero dot, progress fill.
+- `--bg` + `--bg-rgb`, `--ink-rgb`, `--frost-rgb`, `--shadow-rgb` — base channels; every translucent tint, scrim, and frost derives from these via `rgba(var(--…-rgb), …)`.
+- `--surface-*` — solid surfaces (raised, controls, placeholder).
+- `--text-*` — text ramp from primary to separator.
+- `--line-frost`, `--control-frost`, `--track-frost`, `--dot-idle`, `--tint-*`, `--scrim-*`, `--shadow-*` — translucent layers.
+
+A future accent theme only overrides this block — e.g. `html[data-theme="ember"] { --accent: #ff6b3d; ... }` — with no per-component edits. Two exceptions can't read page variables: the `theme-color` meta tag in `index.html` (keep it in sync with `--bg` manually) and `bastet-logo.svg` colors (it's loaded via `<img>`; inline it if it ever needs theming).
+
 ## Important credential note
 
 A token used by browser JavaScript is visible to anyone who can inspect the page or its network requests. This is acceptable for a local learning prototype, but **do not deploy this version publicly with the token in the browser**. In the Rust phase, move TMDB requests to the backend and keep the credential in a server-side environment variable; have the browser call your own `/api/...` endpoints instead.
