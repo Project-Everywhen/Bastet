@@ -1,7 +1,7 @@
 import {
     TMDB_ACCESS_TOKEN,
     TMDB_API_KEY,
-    TMDB_LANUAGE,
+    TMDB_LANGUAGE,
     FEATURED_MOVIES,
     CONTINUE_WATCHING
 } from "./config.js";
@@ -23,8 +23,8 @@ async function tmdb(path, params = {}) {
         }
     }
 
-    const token = TMDB_ACCESS_TOKEN.trim();
-    const apiKey = TMDB_API_KEY.trim();
+    const token = (TMDB_ACCESS_TOKEN || "").trim();
+    const apiKey = (TMDB_API_KEY || "").trim();
 
     if (!token && !apiKey) {
         throw new Error("TMDB credentials are missing.");
@@ -41,21 +41,19 @@ async function tmdb(path, params = {}) {
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
-    const details = await response.json().catch(() => null);
+        const details = await response.json().catch(() => null);
 
-    console.error("TMDB request failed:", {
-        url: url.pathname,
-        status: response.status,
-        details
-    });
+        console.error("TMDB request failed:", {
+            url: url.pathname,
+            status: response.status,
+            details
+        });
 
-    throw new Error(
-        details?.status_message ||
-        `TMDB request failed: ${response.status}`
-    );
-}
-
-return response.json();
+        throw new Error(
+            details?.status_message ||
+            `TMDB request failed: ${response.status}`
+        );
+    }
 
     return response.json();
 }
@@ -65,7 +63,7 @@ async function loadFeaturedMovie(featuredConfig) {
     const mediaType = featuredConfig.mediaType || "movie";
 
     const movie = await tmdb(`/${mediaType}/${featuredConfig.id}`, {
-        language: TMDB_LANUAGE,
+        language: TMDB_LANGUAGE,
         append_to_response: "images",
         include_image_language: "en,null"
     });
@@ -146,17 +144,44 @@ function createMediaCard(media, options = {}) {
     return card;
 }
 
+// Format a runtime in minutes as "2h 5m" or "45m".
+function formatRuntime(minutes) {
+    if (!Number.isFinite(minutes) || minutes <= 0) {
+        return "";
+    }
+
+    const total = Math.round(minutes);
+    const hours = Math.floor(total / 60);
+    const mins = total % 60;
+
+    if (hours <= 0) {
+        return `${mins}m`;
+    }
+
+    return mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
+}
+
 // Populate the hero section with the movie's title, artwork, and metadata.
-function renderFeaturedMovie(movie, searchResult) {
+function renderFeaturedMovie(movie, featuredConfig) {
     const hero = document.querySelector("#featured-hero");
     const title = document.querySelector("#featured-title");
     const logo = document.querySelector("#featured-logo");
-    
+
     // Show the text title first in case no usable logo is available.
-    const displayTitle = movie.title || movie.name || searchResult.title;
+    const displayTitle =
+        movie.title ||
+        movie.name ||
+        featuredConfig?.title ||
+        featuredConfig?.query ||
+        "Untitled";
     title.textContent = displayTitle;
     title.hidden = false;
+
+    // Clear any previous logo so a missing logo never shows stale artwork.
     logo.hidden = true;
+    logo.removeAttribute("src");
+    logo.alt = "";
+    logo.onerror = null;
 
     const backdrop = movie.backdrop_path;
 
@@ -165,6 +190,8 @@ function renderFeaturedMovie(movie, searchResult) {
             "--hero-backdrop",
             `url("${imageUrl(backdrop, "w1280")}")`
         );
+    } else {
+        hero.style.removeProperty("--hero-backdrop");
     }
 
     // Prefer an English logo, then a language-neutral logo, then any logo.
@@ -189,7 +216,7 @@ function renderFeaturedMovie(movie, searchResult) {
 
     // Update the movie metadata, using friendly fallbacks for missing fields.
     document.querySelector("#featured-year").textContent =
-    (movie.release_date || movie.first_air_date || "").slice(0, 4) || "—";
+        (movie.release_date || movie.first_air_date || "").slice(0, 4) || "—";
 
     document.querySelector("#featured-rating").textContent =
         Number(movie.vote_average || 0).toFixed(1);
@@ -199,6 +226,18 @@ function renderFeaturedMovie(movie, searchResult) {
             .slice(0, 3)
             .map(genre => genre.name)
             .join(", ") || "Movie";
+
+    // Movies expose `runtime`; TV exposes `episode_run_time[]`.
+    const runtimeMinutes = Number.isFinite(movie.runtime)
+        ? movie.runtime
+        : movie.episode_run_time?.[0];
+    const runtimeText = formatRuntime(runtimeMinutes);
+    const runtimeElement = document.querySelector("#featured-runtime");
+
+    if (runtimeElement) {
+        runtimeElement.textContent = runtimeText ? `• ${runtimeText}` : "";
+        runtimeElement.hidden = !runtimeText;
+    }
 
     document.querySelector("#featured-synopsis").textContent =
         movie.overview || "No synopsis is available.";
@@ -240,6 +279,7 @@ function updateCarouselDots(activeIndex) {
         const featuredMovie = FEATURED_MOVIES[index];
         const title = featuredMovie.title ||
             featuredMovie.name ||
+            featuredMovie.query ||
             `featured item ${index + 1}`;
 
         const dot = document.createElement("button");
@@ -267,7 +307,7 @@ function createCarouselDots() {
 
 async function showFeaturedMovie(index) {
     if (isFeaturedLoading || FEATURED_MOVIES.length === 0) {
-        return;
+        return false;
     }
 
     const nextIndex =
@@ -280,10 +320,15 @@ async function showFeaturedMovie(index) {
 
     isFeaturedLoading = true;
 
-    previousButton.disabled = true;
-    nextButton.disabled = true;
+    if (previousButton) {
+        previousButton.disabled = true;
+    }
 
-    dotsContainer.querySelectorAll("button").forEach(dot => {
+    if (nextButton) {
+        nextButton.disabled = true;
+    }
+
+    dotsContainer?.querySelectorAll("button").forEach(dot => {
         dot.disabled = true;
     });
 
@@ -296,6 +341,8 @@ async function showFeaturedMovie(index) {
 
         currentFeaturedIndex = nextIndex;
         updateCarouselDots(currentFeaturedIndex);
+
+        return true;
     } catch (error) {
         console.error(error);
 
@@ -303,13 +350,20 @@ async function showFeaturedMovie(index) {
             status.textContent = error.message;
             status.hidden = false;
         }
+
+        return false;
     } finally {
         isFeaturedLoading = false;
 
-        previousButton.disabled = false;
-        nextButton.disabled = false;
+        if (previousButton) {
+            previousButton.disabled = false;
+        }
 
-        dotsContainer.querySelectorAll("button").forEach(dot => {
+        if (nextButton) {
+            nextButton.disabled = false;
+        }
+
+        dotsContainer?.querySelectorAll("button").forEach(dot => {
             dot.disabled = false;
         });
     }
@@ -375,6 +429,10 @@ document.querySelectorAll(".shelf-arrow").forEach(button => {
         const row = document.getElementById(button.dataset.target);
         const direction = Number(button.dataset.direction);
 
+        if (!row || !Number.isFinite(direction) || direction === 0) {
+            return;
+        }
+
         row.scrollBy({
             left: direction * row.clientWidth * 0.8,
             behavior: "smooth"
@@ -384,55 +442,69 @@ document.querySelectorAll(".shelf-arrow").forEach(button => {
 
 async function loadContinueWatching() {
     const container = document.querySelector("#continue-track");
-    container.replaceChildren();
 
-    const results = await Promise.all(
-        CONTINUE_WATCHING.map(async entry => {
-            try {
-                const type = entry.mediaType === "tv" ? "tv" : "movie";
-
-                const media = await tmdb(`/${type}/${entry.id}`, {
-                    language: TMDB_LANUAGE
-                });
-
-                return {
-                    media: { ...media, media_type: type },
-                    progress: entry.progress
-                };
-            } catch (error) {
-                console.warn(
-                    `Could not load Continue Watching item ${entry.id}:`,
-                    error
-                );
-
-                return null;
-            }
-        })
-    );
-
-    const validItems = results.filter(Boolean);
-
-    if (validItems.length === 0) {
-        container.textContent = "No Continue Watching titles available.";
+    if (!container) {
         return;
     }
 
-    validItems.forEach(({ media, progress }, index) => {
-        const card = createMediaCard(media, { progress });
+    container.replaceChildren();
 
-        card.style.animationDelay = `${index * 35}ms`;
-        container.append(card);
-    });
+    try {
+        const results = await Promise.all(
+            CONTINUE_WATCHING.map(async entry => {
+                try {
+                    const type = entry.mediaType === "tv" ? "tv" : "movie";
+
+                    const media = await tmdb(`/${type}/${entry.id}`, {
+                        language: TMDB_LANGUAGE
+                    });
+
+                    return {
+                        media: { ...media, media_type: type },
+                        progress: entry.progress
+                    };
+                } catch (error) {
+                    console.warn(
+                        `Could not load Continue Watching item ${entry.id}:`,
+                        error
+                    );
+
+                    return null;
+                }
+            })
+        );
+
+        const validItems = results.filter(Boolean);
+
+        if (validItems.length === 0) {
+            container.textContent = "No Continue Watching titles available.";
+            return;
+        }
+
+        validItems.forEach(({ media, progress }, index) => {
+            const card = createMediaCard(media, { progress });
+
+            card.style.animationDelay = `${index * 35}ms`;
+            container.append(card);
+        });
+    } catch (error) {
+        console.error("Could not load Continue Watching titles:", error);
+        container.textContent = "Unable to load Continue Watching titles.";
+    }
 }
 
 async function loadTrending() {
-
     const container = document.querySelector("#trending-track");
+
+    if (!container) {
+        return;
+    }
+
     container.replaceChildren();
 
     try {
         const data = await tmdb("/trending/all/week", {
-            language: TMDB_LANUAGE
+            language: TMDB_LANGUAGE
         });
 
         const trendingItems = (data.results || [])
@@ -609,17 +681,30 @@ function enableMouseDragScroll(row) {
     function finishDrag(event) {
         if (event.pointerId !== pointerId) return;
 
-        if (dragging) {
-            latestX = event.clientX;
-            samplePointer(latestX, performance.now());
-
-            if (frameId) cancelAnimationFrame(frameId);
-            frameId = 0;
-            updateDragPosition();
-        }
-
         const wasDragging = dragging;
-        const releaseVelocity = wasDragging ? estimateVelocity() : 0;
+        const releaseVelocity = wasDragging
+            ? (() => {
+                latestX = event.clientX;
+                samplePointer(latestX, performance.now());
+
+                if (frameId) cancelAnimationFrame(frameId);
+                frameId = 0;
+
+                // Apply the final scroll position before clearing the flag,
+                // since updateDragPosition() early-returns when not dragging.
+                const desiredScroll = startScrollLeft - (latestX - startX);
+
+                if (desiredScroll < 0) {
+                    row.scrollLeft = 0;
+                } else if (desiredScroll > maxScroll) {
+                    row.scrollLeft = maxScroll;
+                } else {
+                    row.scrollLeft = desiredScroll;
+                }
+
+                return estimateVelocity();
+            })()
+            : 0;
 
         pointerId = null;
         dragging = false;
@@ -633,8 +718,12 @@ function enableMouseDragScroll(row) {
             setRubberBand(0);
         }
 
-        if (row.hasPointerCapture(event.pointerId)) {
-            row.releasePointerCapture(event.pointerId);
+        try {
+            if (row.hasPointerCapture(event.pointerId)) {
+                row.releasePointerCapture(event.pointerId);
+            }
+        } catch {
+            // Pointer was already released; nothing to clean up.
         }
 
         if (wasDragging && Math.abs(releaseVelocity) >= MIN_VELOCITY) {
@@ -664,9 +753,17 @@ function enableMouseDragScroll(row) {
     });
 }
 createCarouselDots();
-showFeaturedMovie(0).then(startHeroAutoplay);
+showFeaturedMovie(0).then(loaded => {
+    if (loaded) {
+        startHeroAutoplay();
+    }
+});
 
 document.querySelectorAll(".media-row").forEach(enableMouseDragScroll);
 
-loadContinueWatching();
-loadTrending();
+loadContinueWatching().catch(error => {
+    console.error("Could not load Continue Watching titles:", error);
+});
+loadTrending().catch(error => {
+    console.error("Could not load trending titles:", error);
+});

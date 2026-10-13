@@ -1,3 +1,2 @@
 # Local credentials/configuration. Track config.example.js instead.
-# Disabled for now since repo is private and this file is not being tracked.
-#config.js
+config.js

@@ -1,6 +1,6 @@
 # Bastet — Phase 1.5: TMDB artwork
 
-This version keeps the project in plain HTML, CSS and JavaScript modules. It loads featured movie details, transparent title logos, backdrops, a sample Continue Watching card, and trending posters from TMDB.
+This version keeps the project in plain HTML, CSS and JavaScript modules. It loads featured movie/TV details, transparent title logos, backdrops, Continue Watching cards, and trending posters from TMDB.
 
 ## Run it
 
@@ -12,26 +12,23 @@ This version keeps the project in plain HTML, CSS and JavaScript modules. It loa
 
 ## Choosing the featured movies
 
-Edit `FEATURED_MOVIES` in `config.js`. Each entry has a title search and an optional year to help choose the right movie:
+Edit `FEATURED_MOVIES` in `config.js`. Each entry is a direct TMDB ID plus its media type. `query`/`year` are human-readable labels/fallbacks only — no search is performed:
 
 ```js
 export const FEATURED_MOVIES = [
-  { query: "Obsession", year: 2025 },
-  { query: "The Substance", year: 2024 },
-  { query: "Carrie", year: 1976 },
-  { query: "X2", year: 2003 }
+  { id: 213375, mediaType: "tv", query: "VisionQuest", year: 2026 },
+  { id: 1339713, mediaType: "movie", query: "Obsession", year: 2025 }
 ];
 ```
 
-The `CONTINUE_WATCHING` object is demo data. Its progress is not real playback progress yet; it will later come from Bastet's API/database.
+The `CONTINUE_WATCHING` array is demo data. Its progress is not real playback progress yet; it will later come from Bastet's API/database.
 
 ## How the image loading works
 
-- `/search/movie` finds a TMDB movie ID for each configured title.
-- `/movie/{id}?append_to_response=images&include_image_language=en,null` returns title metadata together with its image arrays.
+- `/{mediaType}/{id}?append_to_response=images&include_image_language=en,null` (i.e. `/movie/{id}` or `/tv/{id}`) returns title metadata together with its image arrays.
 - The hero uses `backdrop_path` for the background and the best English/neutral `images.logos` result for the transparent title art. If a logo is absent or fails to load, it falls back to the movie's title text.
 - `https://image.tmdb.org/t/p/w1280{backdrop_path}` and `.../w500{logo_path}` turn TMDB image paths into usable URLs.
-- `/trending/movie/week` provides the posters in the Trending Now shelf.
+- `/trending/all/week` provides combined movie + TV posters in the Trending Now shelf (filtered to entries with `media_type` of `movie`/`tv` and a `poster_path`).
 
 ## Important credential note
 

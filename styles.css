@@ -404,11 +404,6 @@ h1 {
     cursor: default;
 }
 
-.media-row {
-    scroll-behavior: auto;
-    overscroll-behavior-x: contain;
-}
-
 .media-row.is-dragging {
     user-select: none;
 }
