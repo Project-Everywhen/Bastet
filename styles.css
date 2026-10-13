@@ -1,7 +1,24 @@
+/* Self-hosted Google Sans variable fonts (OFL licensed, see zip). */
+@font-face {
+    font-family: "Google Sans";
+    src: url("assets/fonts/GoogleSans-Variable.ttf") format("truetype-variations");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Google Sans";
+    src: url("assets/fonts/GoogleSans-Italic-Variable.ttf") format("truetype-variations");
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+}
+
 /* Global settings */
 :root {
     color-scheme: dark;
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: "Google Sans", "Product Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* Predictable element sizing */
@@ -140,6 +157,22 @@ button {
     color: #8f8f8f;
 
     transition: color 180ms ease;
+}
+
+/* Outlined icons by default; the selected destination is filled. */
+.nav-icons .material-symbols-rounded,
+.nav-icons-bottom .material-symbols-rounded {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.nav-icons a[aria-current="page"],
+.nav-icons-bottom a[aria-current="page"] {
+    color: #f5f3ef;
+}
+
+.nav-icons a[aria-current="page"] .material-symbols-rounded,
+.nav-icons-bottom a[aria-current="page"] .material-symbols-rounded {
+    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
 /* Smooth icon scaling */
@@ -299,9 +332,13 @@ h1 {
 }
 
 .quiet-button {
-    background: rgba(255, 255, 255, 0.12);
+    /* Dark acrylic tint like the sidebar, so the blur reads clearly. */
+    background: rgba(10, 12, 14, 0.45);
     color: #f2f0f0;
-    backdrop-filter: blur(10px);
+
+    /* Frosted acrylic accent, matching the sidebar rail. */
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
 }
 
 .primary-button:hover {
@@ -309,7 +346,7 @@ h1 {
 }
 
 .quiet-button:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(10, 12, 14, 0.62);
 }
 
 .hero-logo {
@@ -356,14 +393,20 @@ h1 {
 
     border: 0;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
+
+    /* Dark acrylic tint like the sidebar, so the blur reads clearly. */
+    background: rgba(10, 12, 14, 0.45);
     color: #f5f3ef;
+
+    /* Frosted acrylic accent, matching the sidebar rail. */
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
 
     cursor: pointer;
 }
 
 .hero-arrow:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(10, 12, 14, 0.62);
 }
 
 .hero-dots {
@@ -566,6 +609,18 @@ h1 {
     margin: 0 0 2px;
     font-size: 13px;
     font-weight: 600;
+
+    /* Titles always hold a single line; JS condenses long titles
+       before the ellipsis needs to kick in. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+}
+
+.media-card-details h3 > span {
+    display: inline-block;
+    transform-origin: left center;
 }
 
 .media-card-details p {

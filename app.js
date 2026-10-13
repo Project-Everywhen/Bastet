@@ -2,6 +2,7 @@ import {
     TMDB_ACCESS_TOKEN,
     TMDB_API_KEY,
     TMDB_LANGUAGE,
+    WATCH_REGION,
     FEATURED_MOVIES,
     CONTINUE_WATCHING
 } from "./config.js";
@@ -11,6 +12,7 @@ const IMAGE_BASE = "https://image.tmdb.org/t/p/";
 
 let currentFeaturedIndex = 0;
 let isFeaturedLoading = false;
+let currentFeaturedRef = null;
 
 // Send an authenticated request to TMDB using either a bearer token or API key.
 async function tmdb(path, params = {}) {
@@ -58,8 +60,50 @@ async function tmdb(path, params = {}) {
     return response.json();
 }
 
-// Find the configured featured movie, then request its full details and images.
-async function loadFeaturedMovie(featuredConfig) {
+// Session caches: details JSON stays in memory, while images are warmed
+// into the browser HTTP cache (TMDB's CDN already serves long-lived cache
+// headers, so warmed assets are instant on revisit and across reloads).
+const featuredCache = new Map();
+const preloadedImages = new Set();
+
+function preloadImage(url) {
+    if (!url || preloadedImages.has(url)) {
+        return;
+    }
+
+    preloadedImages.add(url);
+
+    const image = new Image();
+    image.decoding = "async";
+    image.src = url;
+}
+
+function featuredImageUrls(movie) {
+    const urls = [];
+
+    if (movie.backdrop_path) {
+        urls.push(imageUrl(movie.backdrop_path, "w1280"));
+    }
+
+    const logos = movie.images?.logos || [];
+    const selectedLogo =
+        logos.find(item => item.iso_639_1 === "en") ||
+        logos.find(item => item.iso_639_1 === null) ||
+        logos[0];
+
+    if (selectedLogo?.file_path) {
+        urls.push(imageUrl(selectedLogo.file_path, "w500"));
+    }
+
+    return urls;
+}
+
+async function getFeaturedDetails(index) {
+    if (featuredCache.has(index)) {
+        return featuredCache.get(index);
+    }
+
+    const featuredConfig = FEATURED_MOVIES[index];
     const mediaType = featuredConfig.mediaType || "movie";
 
     const movie = await tmdb(`/${mediaType}/${featuredConfig.id}`, {
@@ -68,7 +112,47 @@ async function loadFeaturedMovie(featuredConfig) {
         include_image_language: "en,null"
     });
 
+    featuredCache.set(index, movie);
+
+    return movie;
+}
+
+// Fetch neighbor details and images in the background so carousel
+// turns never wait on the network twice for the same movie.
+function warmFeaturedNeighbors(activeIndex) {
+    const total = FEATURED_MOVIES.length;
+
+    [activeIndex + 1, activeIndex - 1].forEach(offset => {
+        const index = (offset + total) % total;
+
+        if (featuredCache.has(index)) {
+            featuredImageUrls(featuredCache.get(index)).forEach(preloadImage);
+            return;
+        }
+
+        getFeaturedDetails(index)
+            .then(movie => {
+                featuredImageUrls(movie).forEach(preloadImage);
+            })
+            .catch(() => {
+                // Warming is best-effort; the carousel turn itself
+                // surfaces any real error.
+            });
+    });
+}
+
+// Find the configured featured movie, then request its full details and images.
+async function loadFeaturedMovie(index) {
+    const featuredConfig = FEATURED_MOVIES[index];
+    const movie = await getFeaturedDetails(index);
+
+    currentFeaturedRef = {
+        id: featuredConfig.id,
+        mediaType: featuredConfig.mediaType || "movie"
+    };
+
     renderFeaturedMovie(movie, featuredConfig);
+    warmFeaturedNeighbors(index);
 }
 
 // Build a TMDB image URL from a path returned by the API.
@@ -107,6 +191,7 @@ function createMediaCard(media, options = {}) {
         );
         image.alt = `${title} ${isContinue ? "backdrop" : "poster"}`;
         image.loading = "lazy";
+        image.decoding = "async";
 
         artwork.append(image);
     } else {
@@ -129,7 +214,9 @@ function createMediaCard(media, options = {}) {
     details.className = "media-card-details";
 
     const heading = document.createElement("h3");
-    heading.textContent = title;
+    const label = document.createElement("span");
+    label.textContent = title;
+    heading.append(label);
 
     const metadata = document.createElement("p");
     const year = releaseDate.slice(0, 4) || "—";
@@ -142,6 +229,34 @@ function createMediaCard(media, options = {}) {
     card.append(artwork, details);
 
     return card;
+}
+
+// Condense an overflowing card title with a horizontal squeeze so it
+// fits on its single line at full font size. Squeezes down to 72%;
+// anything still too long falls back to ellipsis.
+// Must run after the card is in the DOM so measurements are valid.
+function fitCardTitle(card) {
+    const heading = card.querySelector(".media-card-details h3");
+    const label = heading?.querySelector("span");
+
+    if (!heading || !label) {
+        return;
+    }
+
+    // Reset before measuring so a re-run (e.g. after fonts load)
+    // measures the natural width, not the squeezed one.
+    label.style.transform = "";
+
+    const naturalWidth = label.offsetWidth;
+    const availableWidth = heading.clientWidth;
+
+    if (naturalWidth > availableWidth + 1) {
+        const scale = Math.max(0.72, availableWidth / naturalWidth);
+
+        if (scale < 1) {
+            label.style.transform = `scaleX(${scale})`;
+        }
+    }
 }
 
 // Format a runtime in minutes as "2h 5m" or "45m".
@@ -381,7 +496,7 @@ async function showFeaturedMovie(index) {
     }
 
     try {
-        await loadFeaturedMovie(FEATURED_MOVIES[nextIndex]);
+        await loadFeaturedMovie(nextIndex);
 
         currentFeaturedIndex = nextIndex;
         updateCarouselDots(currentFeaturedIndex);
@@ -419,6 +534,18 @@ document.querySelector("#hero-prev").addEventListener("click", () => {
 
 document.querySelector("#hero-next").addEventListener("click", () => {
     showFeaturedMovie(currentFeaturedIndex + 1);
+});
+
+document.querySelector("#hero-more-info").addEventListener("click", () => {
+    if (!currentFeaturedRef) {
+        return;
+    }
+
+    window.open(
+        `https://www.themoviedb.org/${currentFeaturedRef.mediaType}/${currentFeaturedRef.id}`,
+        "_blank",
+        "noopener"
+    );
 });
 
 const hero = document.querySelector("#featured-hero");
@@ -530,6 +657,7 @@ async function loadContinueWatching() {
 
             card.style.animationDelay = `${index * 35}ms`;
             container.append(card);
+            fitCardTitle(card);
         });
     } catch (error) {
         console.error("Could not load Continue Watching titles:", error);
@@ -568,10 +696,59 @@ async function loadTrending() {
 
             card.style.animationDelay = `${index * 35}ms`;
             container.append(card);
+            fitCardTitle(card);
         });
     } catch (error) {
         console.error("Could not load trending titles:", error);
         container.textContent = "Unable to load trending titles.";
+    }
+}
+
+// Mirrors the TMDB website's "new on streaming" discover preset:
+// latest releases available on streaming in the configured region.
+async function loadNewOnStreaming() {
+    const container = document.querySelector("#new-track");
+
+    if (!container) {
+        return;
+    }
+
+    container.replaceChildren();
+
+    try {
+        const today = new Date().toISOString().slice(0, 10);
+
+        const data = await tmdb("/discover/movie", {
+            language: TMDB_LANGUAGE,
+            sort_by: "primary_release_date.desc",
+            include_adult: "false",
+            include_video: "false",
+            page: 1,
+            "primary_release_date.lte": today,
+            watch_region: WATCH_REGION,
+            with_watch_monetization_types: "flatrate"
+        });
+
+        const newItems = (data.results || [])
+            .filter(media => media.poster_path)
+            .map(media => ({ ...media, media_type: "movie" }))
+            .slice(0, 14);
+
+        if (newItems.length === 0) {
+            container.textContent = "No new streaming titles available.";
+            return;
+        }
+
+        newItems.forEach((media, index) => {
+            const card = createMediaCard(media);
+
+            card.style.animationDelay = `${index * 35}ms`;
+            container.append(card);
+            fitCardTitle(card);
+        });
+    } catch (error) {
+        console.error("Could not load new streaming titles:", error);
+        container.textContent = "Unable to load new streaming titles.";
     }
 }
 
@@ -796,6 +973,34 @@ function enableMouseDragScroll(row) {
         }
     });
 }
+// Highlight the nav destination matching the URL hash with a filled
+// icon. Defaults to home when the URL lists no known destination.
+function syncNavSelection() {
+    const links = document.querySelectorAll(
+        ".nav-icons a[href^='#'], .nav-icons-bottom a[href^='#']"
+    );
+    const hash = window.location.hash || "#home";
+    let matched = false;
+
+    links.forEach(link => {
+        if (link.getAttribute("href") === hash) {
+            link.setAttribute("aria-current", "page");
+            matched = true;
+        } else {
+            link.removeAttribute("aria-current");
+        }
+    });
+
+    if (!matched) {
+        document
+            .querySelector(".nav-icons a[href='#home']")
+            ?.setAttribute("aria-current", "page");
+    }
+}
+
+window.addEventListener("hashchange", syncNavSelection);
+syncNavSelection();
+
 createCarouselDots();
 showFeaturedMovie(0).then(loaded => {
     if (loaded) {
@@ -811,3 +1016,14 @@ loadContinueWatching().catch(error => {
 loadTrending().catch(error => {
     console.error("Could not load trending titles:", error);
 });
+loadNewOnStreaming().catch(error => {
+    console.error("Could not load new streaming titles:", error);
+});
+
+// Re-fit titles once webfonts arrive, since the squeeze is measured
+// against rendered text metrics.
+if (document.fonts?.ready) {
+    document.fonts.ready.then(() => {
+        document.querySelectorAll(".media-card").forEach(fitCardTitle);
+    });
+}

@@ -7,7 +7,9 @@
   <meta name="description" content="Bastet — discover something worth watching.">
   <link rel="icon" type="image/x-icon" href="/assets/images/bastet-logo.svg">
   <title>Bastet — Discover something worth watching</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&icon_names=explore,favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle&display=block">
+  <link rel="preconnect" href="https://api.themoviedb.org">
+  <link rel="preconnect" href="https://image.tmdb.org">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=explore,favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle&display=block">
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="app.js"></script>
 </head>
@@ -30,7 +32,7 @@
                 <span class="material-symbols-rounded" aria-hidden="true">explore</span>
             </a>
 
-            <a href="#search" aria-label="Search" title="Search">
+            <a id="search-link" href="#search" aria-label="Search" title="Search">
                 <span class="material-symbols-rounded" aria-hidden="true">search</span>
             </a>
 
@@ -56,11 +58,13 @@
                 <p id="app-status" role="status" aria-live="polite" hidden></p>
                 
                 <h1 id="featured-title">Loading...</h1>
-                <img 
+                <img
                     id="featured-logo"
                     class="hero-logo"
                     alt=""
                     hidden
+                    fetchpriority="high"
+                    decoding="async"
                 >
                 <p class="metadata">
                     <span id="featured-year">0000</span>
@@ -78,7 +82,7 @@
                 </p>
 
                 <div class="hero-actions">
-                    <button class="primary-button" type="button">
+                    <button class="primary-button" id="hero-more-info" type="button">
                         More Info
                     </button>
                     <button class="quiet-button" type="button">
@@ -151,6 +155,30 @@
             <div id="trending-row" class="media-row">
                 <div id="trending-track" class="media-track">
                     <p>Trending movie cards will appear here.</p>
+                </div>
+            </div>
+        </section>
+        <section class="shelf" aria-labelledby="new-title">
+            <div class="shelf-heading">
+                <h2 id="new-title">New on Streaming</h2>
+                <div class="shelf-controls">
+                    <button class="shelf-arrow"
+                            data-target="new-row"
+                            data-direction="-1"
+                            aria-label="Scroll New on Streaming left">
+                        <span class="material-symbols-rounded">chevron_left</span>
+                    </button>
+                    <button class="shelf-arrow"
+                            data-target="new-row"
+                            data-direction="1"
+                            aria-label="Scroll New on Streaming right">
+                        <span class="material-symbols-rounded">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+            <div id="new-row" class="media-row">
+                <div id="new-track" class="media-track">
+                    <p>New streaming movie cards will appear here.</p>
                 </div>
             </div>
         </section>

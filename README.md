@@ -29,6 +29,7 @@ The `CONTINUE_WATCHING` array is demo data. Its progress is not real playback pr
 - The hero uses `backdrop_path` for the background and the best English/neutral `images.logos` result for the transparent title art. If a logo is absent or fails to load, it falls back to the movie's title text.
 - `https://image.tmdb.org/t/p/w1280{backdrop_path}` and `.../w500{logo_path}` turn TMDB image paths into usable URLs.
 - `/trending/all/week` provides combined movie + TV posters in the Trending Now shelf (filtered to entries with `media_type` of `movie`/`tv` and a `poster_path`).
+- `/discover/movie?sort_by=primary_release_date.desc&watch_region={WATCH_REGION}&with_watch_monetization_types=flatrate` powers the New on Streaming shelf — the API behind the website's `discover_preset=new-on-streaming` view, limited to already-released titles. Change `WATCH_REGION` in `config.js` to retarget it.
 
 ## Important credential note
 
