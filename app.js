@@ -444,8 +444,7 @@ async function loadTrending() {
     }
 }
 
-function enableMouseDragScroll(row) {
-    const track = row.querySelector(".media-track");
+function or(".media-track");
 
     if (!track) {
         console.warn("Missing .media-track inside", row);

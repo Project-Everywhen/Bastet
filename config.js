@@ -8,7 +8,8 @@ export const FEATURED_MOVIES = [
     { id: 1339713, mediaType: "movie", query: "Obsession", year: 2025 },
     { id: 969681, mediaType: "movie", query: "Spider-Man: Brand New Day", year: 2026 },
     { id: 157336,mediaType: "movie", query: "Interstellar", year: 2014 },
-    { id: 27205, mediaType: "movie", query: "Inception", year: 2010 }
+    { id: 27205, mediaType: "movie", query: "Inception", year: 2010 },
+    { id: 950387, mediaType: "movie", query: "A Minecraft Movie", year: 2025 }
 ];
 
 export const CONTINUE_WATCHING = [
