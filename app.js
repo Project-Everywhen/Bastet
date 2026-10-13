@@ -213,40 +213,55 @@ function renderFeaturedMovie(movie, searchResult) {
     heroCopy.classList.add("hero-content-enter");
 }
 
+const MAX_VISIBLE_HERO_DOTS = 5;
+
 function updateCarouselDots(activeIndex) {
-    const dots = document.querySelectorAll(".hero-dot");
-
-    dots.forEach((dot, index) => {
-        if (index === activeIndex) {
-            dot.setAttribute("aria-current", "true");
-        } else {
-            dot.removeAttribute("aria-current");
-        }
-    });
-}
-
-function createCarouselDots() {
     const dotsContainer = document.querySelector("#hero-dots");
+    const total = FEATURED_MOVIES.length;
 
-    dotsContainer.replaceChildren();
+    if (total === 0) {
+        dotsContainer.replaceChildren();
+        return;
+    }
 
-    FEATURED_MOVIES.forEach((featuredMovie, index) => {
+    // Render only a small moving window, so indicators never reach the arrows.
+    const visibleCount = Math.min(MAX_VISIBLE_HERO_DOTS, total);
+    const firstIndex = Math.max(
+        0,
+        Math.min(
+            activeIndex - Math.floor(visibleCount / 2),
+            total - visibleCount
+        )
+    );
+
+    const fragment = document.createDocumentFragment();
+
+    for (let index = firstIndex; index < firstIndex + visibleCount; index++) {
+        const featuredMovie = FEATURED_MOVIES[index];
+        const title = featuredMovie.title ||
+            featuredMovie.name ||
+            `featured item ${index + 1}`;
+
         const dot = document.createElement("button");
-
         dot.type = "button";
         dot.className = "hero-dot";
-        dot.setAttribute(
-            "aria-label",
-            `Show ${featuredMovie.title}`
-        );
+        dot.setAttribute("aria-label", `Show ${title}`);
+
+        if (index === activeIndex) {
+            dot.setAttribute("aria-current", "true");
+        }
 
         dot.addEventListener("click", () => {
             showFeaturedMovie(index);
         });
 
-        dotsContainer.append(dot);
-    });
+        fragment.append(dot);
+    }
 
+    dotsContainer.replaceChildren(fragment);
+}
+
+function createCarouselDots() {
     updateCarouselDots(currentFeaturedIndex);
 }
 
