@@ -1,14 +1,97 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <title>Bastet - Content Streaming</title>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-    </head>
-    <body>
-        <div id="root"></div>
-        <script type="module" src="/src/main.tsx"></script>
-        
-    </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909">
+  <meta name="description" content="Bastet — discover something worth watching.">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Bastet — Discover something worth watching</title>
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&icon_names=explore,favorite,home,history,search,settings,calendar_month,add_circle&display=block"
+  >
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+    <aside class="sidebar">
+        <a class="brand-mark" href="#home">b</a>
+
+        <nav class="nav-icons" aria-label="Main navigation">
+            
+            <a href="#home" aria-label="Home" title="Home" aria-current="page">
+                <span class="material-symbols-rounded" aria-hidden="true">home</span>
+            </a>
+            
+            <a href="#discover" aria-label="Discover" title="Discover">
+                <span class="material-symbols-rounded" aria-hidden="true">explore</span>
+            </a>
+
+            <a href="#search" aria-label="Search" title="Search">
+                <span class="material-symbols-rounded" aria-hidden="true">search</span>
+            </a>
+
+            <a href="#library" aria-label="Library" title="Library">
+                <span class="material-symbols-rounded" aria-hidden="true">favorite</span>
+            </a>
+        </nav>
+    </aside>
+    <main id="home" class="page-content">
+        <section class="hero" id="featured-hero">
+            <div class="hero-copy">
+                <p id="app-status" role="status" aria-live="polite" hidden></p>
+                <p class="eyebrow">Featured</p>
+                
+                <h1 id="featured-title">OBSESSION</h1>
+                <img 
+                    id="featured-logo"
+                    class="hero-logo"
+                    alt=""
+                    hidden
+                >
+                <p class="metadata">
+                    <span id="featured-year">2025</span>
+                    <span class="meta-separator">•</span>
+                    <span class="rating">
+                        ★ <span id="featured-rating">7.8</span>
+                    </span>
+                    <span class="meta-separator">•</span>
+                    <span id="featured-genres">Drama, Thriller</span>
+                    <span id="featured-runtime" class="runtime"></span>
+                </p>
+                
+                <p id="featured-synopsis" class="synopsis">
+                    After breaking the mysterious "One Wish Willow" to win his crush's heart, a hopeless romantic finds himself getting exactly what he asked for but soon discovers that some desires come at a dark, sinister price.
+                </p>
+
+                <div class="hero-actions">
+                    <button class="primary-button" type="button">
+                        More Info
+                    </button>
+                    <button class="quiet-button" type="button">
+                        <span class="material-symbols-rounded" aria-hidden="true">add_circle</span>
+                        My List
+                    </button>
+                </div>
+            </div>
+        </section>
+        <section class="shelf" aria-labelledby="continue-title">
+            <div class="shelf-heading">
+                <h2 id="continue-title">Continue Watching</h2>
+            </div>
+            <div id="continue-row" class="media-row">
+                <p>Movie cards will appear here.</p>
+            </div>
+        </section>
+        <section class="shelf" aria-labelledby="trending-title">
+            <div class="shelf-heading">
+                <h2 id="trending-title">Trending Now</h2>
+            </div>
+            <div id="trending-row" class="media-row">
+                <p>Trending movie cards will appear here.</p>
+            </div>
+        </section>
+    </main>
+</body>
 </html>

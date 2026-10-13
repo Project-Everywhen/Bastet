@@ -1,0 +1,230 @@
+/* Global settings */
+:root {
+    color-scheme: dark;
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Predictable element sizing */
+* {
+    box-sizing: border-box;
+}
+
+/* Page defaults */
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #080909;
+    color: #f5f3ef;
+}
+
+/* Links and buttons */
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    font: inherit;
+    cursor: pointer;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 72px;
+    height: 100vh;
+    z-index: 10;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 20px 0;
+    background: #080909;
+}
+
+/* Brand mark */
+.brand-mark {
+    display: grid;
+    place-items: center;
+
+    width: 36px;
+    height: 36px;
+    margin-bottom: 28px;
+
+    font-size: 24px;
+    font-weight: 700;
+}
+
+/* Navigation layout */
+.nav-icons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+
+    width: 100%;
+}
+
+/* Navigation links */
+.nav-icons a {
+    position: relative;
+    background: transparent;
+    color: #858585;
+
+    transition: color 180ms ease;
+}
+
+/* Smooth icon scaling */
+.material-symbols-rounded {
+    transition: 
+        color 180ms ease,    
+        transform 180ms ease;
+}
+
+.nav-icons a:hover .material-symbols-rounded,
+.nav-icons a:focus-visible .material-symbols-rounded {
+    color: #f5f3ef;
+    transform: rotate(-1deg) scale(1.15);
+}
+
+/* Main content */
+.page-content {
+    margin-left: 72px;
+    min-width: 0;
+}
+
+.hero {
+    min-height: 65vh;
+
+    display: flex;
+    align-items: flex-end;
+
+    padding: 0 4.5vw 42px;
+
+    /* TMDB Integration */
+    position: relative;
+    overflow: hidden;
+    
+    background-image:
+        linear-gradient(
+          90deg,
+          #080909 0%,
+          rgba(8, 9, 9, 0.90) 28%,
+          rgba(8, 9, 9, 0.35) 65%,
+          rgba(8, 9, 9, 0.10) 100%
+        ),
+     linear-gradient(
+          0deg,
+            #080909 0%,
+            transparent 60%
+        ),
+        var(--hero-backdrop, none);
+
+    background-size: cover;
+    background-position: center 30%;
+}
+
+.hero-copy {
+    width: min(700px, 65%);
+}
+
+h1 {
+    margin: 0 0 22px;
+    font-family: "Bodoni 72", "Didot", "Times New Roman", serif;
+    font-size: clamp(55px, 6.4vw, 92px);
+    font-weight: 700;
+    letter-spacing: -0.075em;
+    line-height: 0.98;
+    color: #fff8e9;
+}
+
+.metadata {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+    color: #d0d0d1;
+    font-size: 14px;
+}
+
+.meta-separator {
+    color: #77797b;
+}
+
+.rating {
+    white-space: nowrap;
+}
+
+.rating > span {
+    color: inherit;
+}
+
+.synopsis {
+    max-width: 630px;
+    margin: 0;
+    color: #e1e0e0;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.hero-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 11px;
+    margin-top: 20px;
+}
+
+.primary-button,
+.quiet-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 999px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.primary-button {
+    background: #fff;
+    color: #111;
+    font-weight: 650;
+}
+
+.quiet-button, .material-symbols-rounded {
+    margin-right: 6px;
+}
+
+.quiet-button {
+    background: rgba(255, 255, 255, 0.12);
+    color: #f2f0f0;
+    backdrop-filter: blur(10px);
+}
+
+.primary-button:hover {
+    background: #eae6ff;
+}
+
+.quiet-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.hero-logo {
+    display: block;
+    width: min(0px, 100%);
+    max-height: 150px;
+    object-fit: contain;
+    object-position: left center;
+    margin: 0 0 24px -4px;
+    filter: drop-shadow(0 3px 20px rgba(0, 0, 0, 0.3));
+}
+
+.hero-logo[hidden] {
+    display: none;
+}
