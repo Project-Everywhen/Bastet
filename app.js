@@ -281,6 +281,30 @@ function fitCardTitle(card) {
     }
 }
 
+// Condense an overflowing pill label with the same horizontal squeeze,
+// so every highlight box stays a uniform width. Skips hidden labels
+// (desktop rail, compact pill) which report no width.
+function fitNavLabels() {
+    document.querySelectorAll(".nav-label").forEach(label => {
+        label.style.transform = "";
+
+        if (label.clientWidth === 0 || label.clientHeight === 0) {
+            return;
+        }
+
+        if (label.scrollWidth > label.clientWidth + 1) {
+            const scale = Math.max(
+                0.8,
+                label.clientWidth / label.scrollWidth
+            );
+
+            if (scale < 1) {
+                label.style.transform = `scaleX(${scale})`;
+            }
+        }
+    });
+}
+
 // Format a runtime in minutes as "2h 5m" or "45m".
 function formatRuntime(minutes) {
     if (!Number.isFinite(minutes) || minutes <= 0) {
@@ -1196,8 +1220,11 @@ loadNewOnStreaming().catch(error => {
 if (document.fonts?.ready) {
     document.fonts.ready.then(() => {
         document.querySelectorAll(".media-card").forEach(fitCardTitle);
+        fitNavLabels();
     });
 }
+
+fitNavLabels();
 
 function navigateToCurrentView() {
     const requestedRoute = window.location.hash.slice(1) || "home";

@@ -1098,6 +1098,8 @@ h1 {
         letter-spacing: 0.02em;
         line-height: 1;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
 
         /* Collapsible line: fades while shrinking so no sliver stays. */
         max-height: 12px;
