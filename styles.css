@@ -999,11 +999,14 @@ h1 {
         padding: 6px 12px;
         border-radius: 28px;
 
-        /* Crisp hairline + lift so the rounded pill outline reads
-           through the backdrop blur instead of melting into it. */
+        /* Crisp hairline + tight lift so the rounded pill outline
+           reads instead of melting into the backdrop. No wide shadow
+           spread: it paints past the border box and fakes a
+           full-width square bar. */
         border: 1px solid var(--line-frost);
-        box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.45);
+        box-shadow: 0 4px 16px rgba(var(--shadow-rgb), 0.35);
         background-clip: padding-box;
+        overflow: clip;
 
         /* Same acrylic, fading upward instead of sideways. */
         background: linear-gradient(
