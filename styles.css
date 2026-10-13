@@ -228,3 +228,57 @@ h1 {
 .hero-logo[hidden] {
     display: none;
 }
+
+.hero-carousel {
+    position: absolute;
+    right: 24px;
+    bottom: 42px;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hero-arrow {
+    display: grid;
+    place-items: center;
+
+    width: 36px;
+    height: 36px;
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f5f3ef;
+
+    cursor: pointer;
+}
+
+.hero-arrow:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.hero-dots {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.hero-dot {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+
+    border: 0;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.45);
+
+    cursor: pointer;
+}
+
+.hero-dot[aria-current="true"] {
+    width: 24px;
+    background: #ffffff;
+}

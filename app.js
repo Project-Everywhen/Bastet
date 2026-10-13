@@ -8,6 +8,9 @@ import {
 const API_BASE = "https://api.themoviedb.org/3";
 const IMAGE_BASE = "https://image.tmdb.org/t/p/";
 
+let currentFeaturedIndex = 0;
+let isFeaturedLoading = false;
+
 // Send an authenticated request to TMDB using either a bearer token or API key.
 async function tmdb(path, params = {}) {
     const url = new URL(`${API_BASE}${path}`);
@@ -45,26 +48,15 @@ async function tmdb(path, params = {}) {
 
 // Find the configured featured movie, then request its full details and images.
 async function loadFeaturedMovie(featuredConfig) {
-    const search = await tmdb("/search/movie", {
-        query: featuredConfig.query,
-        year: featuredConfig.year,
-        include_adult: false,
-        language: TMDB_LANUAGE
-    });
+    const mediaType = featuredConfig.mediaType || "movie";
 
-    const result = search.results?.[0];
-
-    if (!result) {
-        throw new Error("TMDB could not fine the featured movie.");
-    }
-
-    const movie = await tmdb(`/movie/${result.id}`, {
+    const movie = await tmdb(`/${mediaType}/${featuredConfig.id}`, {
         language: TMDB_LANUAGE,
         append_to_response: "images",
         include_image_language: "en,null"
     });
 
-    renderFeaturedMovie(movie, result);
+    renderFeaturedMovie(movie, featuredConfig);
 }
 
 // Build a TMDB image URL from a path returned by the API.
@@ -81,11 +73,12 @@ function renderFeaturedMovie(movie, searchResult) {
     const logo = document.querySelector("#featured-logo");
     
     // Show the text title first in case no usable logo is available.
-    title.textContent = movie.title || searchResult.title;
+    const displayTitle = movie.title || movie.name || searchResult.title;
+    title.textContent = displayTitle;
     title.hidden = false;
     logo.hidden = true;
 
-    const backdrop = movie.backdrop_path || searchResult.backdrop_path;
+    const backdrop = movie.backdrop_path;
 
     if (backdrop) {
         hero.style.setProperty(
@@ -104,7 +97,7 @@ function renderFeaturedMovie(movie, searchResult) {
 
     if (selectedLogo?.file_path) {
         logo.src = imageUrl(selectedLogo.file_path, "w500");
-        logo.alt = `${movie.title} logo`;
+        logo.alt = `${displayTitle} logo`;
         logo.hidden = false;
         title.hidden = true;
 
@@ -116,7 +109,7 @@ function renderFeaturedMovie(movie, searchResult) {
 
     // Update the movie metadata, using friendly fallbacks for missing fields.
     document.querySelector("#featured-year").textContent =
-        movie.release_date?.slice(0, 4) || "—";
+    (movie.release_date || movie.first_air_date || "").slice(0, 4) || "—";
 
     document.querySelector("#featured-rating").textContent =
         Number(movie.vote_average || 0).toFixed(1);
@@ -131,16 +124,102 @@ function renderFeaturedMovie(movie, searchResult) {
         movie.overview || "No synopsis is available.";
 }
 
-// Surface startup or network errors in the UI so they are visible to developers
-// and users instead of failing silently.
-loadFeaturedMovie(FEATURED_MOVIES[0]).catch(error => {
-    console.error(error);
+function updateCarouselDots(activeIndex) {
+    const dots = document.querySelectorAll(".hero-dot");
 
+    dots.forEach((dot, index) => {
+        if (index === activeIndex) {
+            dot.setAttribute("aria-current", "true");
+        } else {
+            dot.removeAttribute("aria-current");
+        }
+    });
+}
+
+function createCarouselDots() {
+    const dotsContainer = document.querySelector("#hero-dots");
+
+    dotsContainer.replaceChildren();
+
+    FEATURED_MOVIES.forEach((featuredMovie, index) => {
+        const dot = document.createElement("button");
+
+        dot.type = "button";
+        dot.className = "hero-dot";
+        dot.setAttribute(
+            "aria-label",
+            `Show ${featuredMovie.title}`
+        );
+
+        dot.addEventListener("click", () => {
+            showFeaturedMovie(index);
+        });
+
+        dotsContainer.append(dot);
+    });
+
+    updateCarouselDots(currentFeaturedIndex);
+}
+
+async function showFeaturedMovie(index) {
+    if (isFeaturedLoading || FEATURED_MOVIES.length === 0) {
+        return;
+    }
+
+    const nextIndex =
+        (index + FEATURED_MOVIES.length) % FEATURED_MOVIES.length;
+
+    const previousButton = document.querySelector("#hero-prev");
+    const nextButton = document.querySelector("#hero-next");
+    const dotsContainer = document.querySelector("#hero-dots");
     const status = document.querySelector("#app-status");
 
+    isFeaturedLoading = true;
+
+    previousButton.disabled = true;
+    nextButton.disabled = true;
+
+    dotsContainer.querySelectorAll("button").forEach(dot => {
+        dot.disabled = true;
+    });
+
     if (status) {
-        status.textContent = error.message;
-        status.hidden = false;
+        status.hidden = true;
     }
+
+    try {
+        await loadFeaturedMovie(FEATURED_MOVIES[nextIndex]);
+
+        currentFeaturedIndex = nextIndex;
+        updateCarouselDots(currentFeaturedIndex);
+    } catch (error) {
+        console.error(error);
+
+        if (status) {
+            status.textContent = error.message;
+            status.hidden = false;
+        }
+    } finally {
+        isFeaturedLoading = false;
+
+        previousButton.disabled = false;
+        nextButton.disabled = false;
+
+        dotsContainer.querySelectorAll("button").forEach(dot => {
+            dot.disabled = false;
+        });
+    }
+}
+
+document.querySelector("#hero-prev").addEventListener("click", () => {
+    showFeaturedMovie(currentFeaturedIndex - 1);
 });
-    
+
+document.querySelector("#hero-next").addEventListener("click", () => {
+    showFeaturedMovie(currentFeaturedIndex + 1);
+});
+
+// Surface startup or network errors in the UI so they are visible to developers
+// and users instead of failing silently.
+createCarouselDots();
+showFeaturedMovie(0);

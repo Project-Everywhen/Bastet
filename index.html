@@ -7,10 +7,7 @@
   <meta name="description" content="Bastet — discover something worth watching.">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <title>Bastet — Discover something worth watching</title>
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&icon_names=explore,favorite,home,history,search,settings,calendar_month,add_circle&display=block"
-  >
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&icon_names=explore,favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right&display=block">
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="app.js"></script>
 </head>
@@ -73,6 +70,35 @@
                         My List
                     </button>
                 </div>
+            </div>
+            <div class="hero-carousel" aria-label="Featured movie controls">
+                <button
+                    class="hero-arrow"
+                    id="hero-prev"
+                    type="button"
+                    aria-label="Previous featured movie"
+                >
+                    <span class="material-symbols-rounded" aria-hidden="true">
+                        chevron_left
+                    </span>
+                </button>
+
+                <div
+                    class="hero-dots"
+                    id="hero-dots"
+                    aria-label="Choose featured movie"
+                ></div>
+
+                <button
+                    class="hero-arrow"
+                    id="hero-next"
+                    type="button"
+                    aria-label="Next featured movie"
+                >
+                    <span class="material-symbols-rounded" aria-hidden="true">
+                        chevron_right
+                    </span>
+                </button>
             </div>
         </section>
         <section class="shelf" aria-labelledby="continue-title">
