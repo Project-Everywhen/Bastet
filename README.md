@@ -36,6 +36,37 @@ A token used by browser JavaScript is visible to anyone who can inspect the page
 
 `config.js` is listed in `.gitignore`; `config.example.js` contains only blank placeholders and can be committed. If your existing project uses Git, make sure the real token is never committed.
 
+## How to open a pull request
+
+1. Sync your local `main`: `git checkout main; git pull origin main`.
+2. Create a feature branch: `git checkout -b feat/short-description` (this repo uses `feat/...`, `chore/...` prefixes).
+3. Make your changes, keeping commits small and focused with clear messages (e.g. `Fix hero carousel dot behavior`).
+4. Verify before pushing:
+   - `node --check app.js` passes (and `config.js` / `config.example.js` if touched).
+   - Test via Live Server over HTTP, not `file://`.
+   - `git status --short` shows only intended files — never `config.js`.
+5. Push and open the PR: `git push -u origin feat/short-description`, then open a PR on GitHub against `main`.
+6. In the PR description, state what changed, how you tested it, and any follow-ups. Keep the PR small enough to review in one sitting.
+7. After review approval, merge (or let the maintainer merge) and delete the feature branch.
+
+## Do's and Don'ts
+
+Do:
+
+- Copy `config.example.js` to `config.js` for local credentials; keep real tokens only in the ignored local file.
+- Run the app through Live Server (or any static HTTP server) since ES modules don't work over `file://`.
+- Match the existing plain HTML/CSS/JS style — no build step, no new dependencies without discussion.
+- Test the hero carousel (all dots, prev/next, autoplay), both shelves, and the `prefers-reduced-motion` path after UI changes.
+- Update this README when you change endpoints, config shape, or setup steps.
+
+Don't:
+
+- Never commit `config.js` or any real TMDB token/key. If a secret is pushed, rotate it on TMDB immediately — removing the commit alone doesn't purge history.
+- Don't add backend keys or deploy the browser-held token publicly; TMDB calls move server-side in the Rust phase.
+- Don't open HTML directly via `file://` and report module/import errors — that's expected, serve over HTTP instead.
+- Don't push directly to `main`; always go through a feature branch + PR.
+- Don't bundle unrelated changes into one PR; split them so each can be reviewed and reverted independently.
+
 ## TMDB attribution
 
 This product uses the TMDB API but is not endorsed or certified by TMDB. See TMDB's [API FAQ](https://developer.themoviedb.org/docs/faq) and [image basics](https://developer.themoviedb.org/docs/image-basics).
