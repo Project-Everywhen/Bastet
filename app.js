@@ -595,23 +595,62 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
-// Swipe the hero banner with touch or mouse drag. Starts on buttons
-// and links are ignored so CTAs and carousel controls keep working.
+// Swipe the hero banner with touch or mouse drag, with live drag-follow
+// feedback. Starts on buttons, links, inputs, and the dot controls are
+// ignored so CTAs and carousel controls keep working.
+const heroCopy = document.querySelector(".hero-copy");
+
 let heroSwipeX = null;
 let heroSwipeY = null;
+let heroSwipeStart = 0;
 let heroSwiping = false;
+let heroSnapTimer = 0;
+
+const HERO_SWIPE_COMMIT = 60;
+const HERO_SWIPE_FLICK = 0.45; // px per ms
+const HERO_SWIPE_RESISTANCE = 0.35;
+
+function resetHeroDragVisual() {
+    if (!heroCopy) {
+        return;
+    }
+
+    heroCopy.style.transition = "";
+    heroCopy.style.transform = "";
+    heroCopy.style.opacity = "";
+    heroCopy.style.willChange = "";
+}
+
+function paintHeroDrag(dx) {
+    if (!heroCopy) {
+        return;
+    }
+
+    // The entrance animation would override the drag transform.
+    heroCopy.classList.remove("hero-content-enter");
+    heroCopy.style.transition = "none";
+    heroCopy.style.willChange = "transform, opacity";
+    heroCopy.style.transform =
+        `translate3d(${(dx * HERO_SWIPE_RESISTANCE).toFixed(1)}px, 0, 0)`;
+    heroCopy.style.opacity =
+        `${Math.max(0.45, 1 - Math.abs(dx) / 700)}`;
+}
 
 hero.addEventListener("pointerdown", event => {
     if (event.pointerType === "mouse" && event.button !== 0) {
         return;
     }
 
-    if (event.target.closest("button, a, input")) {
+    if (event.target.closest("button, a, input, .hero-carousel")) {
         return;
     }
 
+    clearTimeout(heroSnapTimer);
+    resetHeroDragVisual();
+
     heroSwipeX = event.clientX;
     heroSwipeY = event.clientY;
+    heroSwipeStart = performance.now();
     heroSwiping = false;
 });
 
@@ -630,9 +669,22 @@ hero.addEventListener("pointermove", event => {
     const dx = event.clientX - heroSwipeX;
     const dy = event.clientY - heroSwipeY;
 
-    if (!heroSwiping && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
-        heroSwiping = true;
+    if (!heroSwiping) {
+        // Vertical intent: hand the gesture back to page scroll.
+        if (Math.abs(dy) > 14 && Math.abs(dy) >= Math.abs(dx)) {
+            heroSwipeX = null;
+            heroSwipeY = null;
+            return;
+        }
+
+        if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
+            heroSwiping = true;
+        } else {
+            return;
+        }
     }
+
+    paintHeroDrag(dx);
 });
 
 function endHeroSwipe(event) {
@@ -641,15 +693,52 @@ function endHeroSwipe(event) {
     }
 
     const dx = event.clientX - heroSwipeX;
+    const elapsed = Math.max(1, performance.now() - heroSwipeStart);
+    const velocity = dx / elapsed;
 
     heroSwipeX = null;
     heroSwipeY = null;
-
-    if (heroSwiping && Math.abs(dx) >= 50 && !isFeaturedLoading) {
-        showFeaturedMovie(currentFeaturedIndex + (dx < 0 ? 1 : -1));
-    }
-
     heroSwiping = false;
+    clearTimeout(heroSnapTimer);
+
+    const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+    ).matches;
+    const flick = Math.abs(velocity) >= HERO_SWIPE_FLICK && Math.abs(dx) >= 24;
+    const commit = Math.abs(dx) >= HERO_SWIPE_COMMIT || flick;
+
+    if (commit && !isFeaturedLoading) {
+        const direction = dx < 0 ? 1 : -1;
+
+        if (heroCopy && !reduceMotion) {
+            // Fly the old copy out; the fresh render flies in.
+            heroCopy.style.transition =
+                "transform 200ms ease-out, opacity 200ms ease-out";
+            heroCopy.style.transform =
+                `translate3d(${direction * 110}px, 0, 0)`;
+            heroCopy.style.opacity = "0";
+        } else {
+            resetHeroDragVisual();
+        }
+
+        showFeaturedMovie(currentFeaturedIndex + direction)
+            .finally(resetHeroDragVisual);
+    } else if (heroCopy && !reduceMotion) {
+        // Spring back to rest.
+        heroCopy.style.transition =
+            "transform 240ms ease-out, opacity 240ms ease-out";
+        heroCopy.style.transform = "";
+        heroCopy.style.opacity = "";
+
+        heroSnapTimer = setTimeout(() => {
+            if (heroCopy && !heroSwiping) {
+                heroCopy.style.transition = "";
+                heroCopy.style.willChange = "";
+            }
+        }, 260);
+    } else {
+        resetHeroDragVisual();
+    }
 }
 
 hero.addEventListener("pointerup", endHeroSwipe);
