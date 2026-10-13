@@ -298,16 +298,22 @@ h1 {
 
 .hero-dots {
     position: absolute;
-    right: 46px;
+    left: 44px;
+    right: 44px;
     top: 50%;
     transform: translateY(-50%);
 
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 7px;
+
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .hero-dot {
+    flex: 0 0 auto;
     width: 7px;
     height: 7px;
     padding: 0;
