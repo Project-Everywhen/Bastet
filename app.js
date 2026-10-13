@@ -252,31 +252,47 @@ function renderFeaturedMovie(movie, featuredConfig) {
     heroCopy.classList.add("hero-content-enter");
 }
 
-const MAX_VISIBLE_HERO_DOTS = 5;
-
 function updateCarouselDots(activeIndex) {
     const dotsContainer = document.querySelector("#hero-dots");
-    const total = FEATURED_MOVIES.length;
 
-    if (total === 0) {
-        dotsContainer.replaceChildren();
+    if (!dotsContainer) {
         return;
     }
 
-    // Render only a small moving window, so indicators never reach the arrows.
-    const visibleCount = Math.min(MAX_VISIBLE_HERO_DOTS, total);
-    const firstIndex = Math.max(
-        0,
-        Math.min(
-            activeIndex - Math.floor(visibleCount / 2),
-            total - visibleCount
-        )
-    );
+    const dots = dotsContainer.querySelectorAll(".hero-dot");
+
+    // Dots are built once so the width transition can animate.
+    // Rebuild only if the dot count drifted from the config.
+    if (dots.length !== FEATURED_MOVIES.length) {
+        createCarouselDots();
+        return;
+    }
+
+    dots.forEach((dot, index) => {
+        if (index === activeIndex) {
+            dot.setAttribute("aria-current", "true");
+        } else {
+            dot.removeAttribute("aria-current");
+        }
+    });
+}
+
+function createCarouselDots() {
+    const dotsContainer = document.querySelector("#hero-dots");
+
+    if (!dotsContainer) {
+        return;
+    }
+
+    dotsContainer.replaceChildren();
+
+    if (FEATURED_MOVIES.length === 0) {
+        return;
+    }
 
     const fragment = document.createDocumentFragment();
 
-    for (let index = firstIndex; index < firstIndex + visibleCount; index++) {
-        const featuredMovie = FEATURED_MOVIES[index];
+    FEATURED_MOVIES.forEach((featuredMovie, index) => {
         const title = featuredMovie.title ||
             featuredMovie.name ||
             featuredMovie.query ||
@@ -287,7 +303,7 @@ function updateCarouselDots(activeIndex) {
         dot.className = "hero-dot";
         dot.setAttribute("aria-label", `Show ${title}`);
 
-        if (index === activeIndex) {
+        if (index === currentFeaturedIndex) {
             dot.setAttribute("aria-current", "true");
         }
 
@@ -296,13 +312,9 @@ function updateCarouselDots(activeIndex) {
         });
 
         fragment.append(dot);
-    }
+    });
 
-    dotsContainer.replaceChildren(fragment);
-}
-
-function createCarouselDots() {
-    updateCarouselDots(currentFeaturedIndex);
+    dotsContainer.append(fragment);
 }
 
 async function showFeaturedMovie(index) {
