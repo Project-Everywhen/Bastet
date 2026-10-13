@@ -1,7 +1,24 @@
+/* Self-hosted Google Sans variable fonts (OFL licensed, see zip). */
+@font-face {
+    font-family: "Google Sans";
+    src: url("assets/fonts/GoogleSans-Variable.ttf") format("truetype-variations");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Google Sans";
+    src: url("assets/fonts/GoogleSans-Italic-Variable.ttf") format("truetype-variations");
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+}
+
 /* Global settings */
 :root {
     color-scheme: dark;
-    font-family: "Inter", system-ui, sans-serif;
+    font-family: "Google Sans", "Product Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 /* Predictable element sizing */
@@ -53,7 +70,33 @@ button {
     align-items: center;
 
     padding: 20px 0;
-    background: #080909;
+
+    /* Floating acrylic rail: hero art flows underneath with a
+       Windows-style heavy blur + saturation, fading out to no seam. */
+    background: linear-gradient(
+        90deg,
+        rgba(10, 12, 14, 0.62) 0%,
+        rgba(10, 12, 14, 0.32) 70%,
+        rgba(10, 12, 14, 0) 100%
+    );
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    backdrop-filter: blur(28px) saturate(160%);
+}
+
+/* Film-grain noise over the rail, Windows acrylic style. */
+.sidebar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.08;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.sidebar > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* Brand mark */
@@ -76,14 +119,20 @@ button {
     object-fit: contain;
 }
 
-/* Navigation layout */
+/* Navigation layout: main group takes all free space between the
+   logo and the footer icons, centering its icons exactly. (margin
+   auto alone splits free space three ways and parks the group high.) */
 .nav-icons {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 24px;
+    flex: 1 1 auto;
 
     width: 100%;
+    margin: 0;
+    min-height: 0;
 }
 
 /* Pinned footer icons at the bottom of the sidebar */
@@ -102,9 +151,28 @@ button {
 .nav-icons-bottom a {
     position: relative;
     background: transparent;
-    color: #858585;
+
+    /* Cool-neutral gray so icons read neutral on pure black
+       instead of picking up a warm/golden cast. */
+    color: #8f8f8f;
 
     transition: color 180ms ease;
+}
+
+/* Outlined icons by default; the selected destination is filled. */
+.nav-icons .material-symbols-rounded,
+.nav-icons-bottom .material-symbols-rounded {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.nav-icons a[aria-current="page"],
+.nav-icons-bottom a[aria-current="page"] {
+    color: #f5f3ef;
+}
+
+.nav-icons a[aria-current="page"] .material-symbols-rounded,
+.nav-icons-bottom a[aria-current="page"] .material-symbols-rounded {
+    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
 /* Smooth icon scaling */
@@ -121,6 +189,132 @@ button {
     color: #f5f3ef;
     transform: rotate(-1deg) scale(1.15);
 }
+#discover-link:hover .material-symbols-rounded,
+#discover-link:focus-visible .material-symbols-rounded {
+    transform: rotate(160deg) scale(1.15);
+}
+
+#settings-link:hover .material-symbols-rounded,
+#settings-link:focus-visible .material-symbols-rounded {
+    transform: rotate(160deg) scale(1.15);
+}
+
+.page-view[hidden] {
+    display: none !important;
+}
+
+.page-header {
+    padding: 48px 24px 24px;
+}
+
+.page-eyebrow {
+    margin: 0 0 10px;
+    color: #99999f;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+}
+
+.page-header h2 {
+    margin: 0 0 12px;
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 650;
+}
+
+.page-header > p:last-child {
+    color: #aaaab0;
+    line-height: 1.6;
+}
+
+/* Search view */
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin: 0 24px 8px;
+    padding: 0 18px;
+    min-height: 52px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: #141518;
+    color: #f5f3ef;
+}
+
+.search-bar:focus-within {
+    border-color: rgba(255, 255, 255, 0.32);
+}
+
+.search-bar .material-symbols-rounded {
+    color: #8e8e93;
+    flex: 0 0 auto;
+}
+
+#search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    border: 0;
+    outline: 0;
+    background: transparent;
+    padding: 14px 0;
+
+    font: inherit;
+    font-size: 16px;
+    color: inherit;
+}
+
+#search-input::placeholder {
+    color: #8e8e93;
+}
+
+#search-input::-webkit-search-cancel-button {
+    display: none;
+}
+
+.search-clear {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+
+    width: 32px;
+    height: 32px;
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f5f3ef;
+    cursor: pointer;
+}
+
+.search-clear[hidden] {
+    display: none;
+}
+
+.search-clear:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.search-status {
+    margin: 12px 24px 16px;
+    color: #8e8e93;
+    font-size: 13px;
+}
+
+.search-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 18px 12px;
+
+    padding: 0 24px 40px;
+}
+
+.search-grid .media-card {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+}
 
 /* Main content */
 .page-content {
@@ -129,44 +323,51 @@ button {
 }
 
 .hero {
-    min-height: 65vh;
+    min-height: 82vh;
 
     display: flex;
     align-items: flex-end;
 
-    padding: 0 0 42px;
+    /* Full-bleed underneath the floating sidebar rail; copy stays
+       clear of the icons via the left padding. */
+    margin-left: -72px;
+    padding: 0 24px 48px calc(72px + 24px);
 
     /* TMDB Integration */
     position: relative;
     overflow: hidden;
-    
+
+    /* Readability gradient kept light so the artwork stays vivid. */
     background-image:
         linear-gradient(
           90deg,
-          #080909 0%,
-          rgba(8, 9, 9, 0.90) 28%,
-          rgba(8, 9, 9, 0.35) 65%,
-          rgba(8, 9, 9, 0.10) 100%
+          rgba(8, 9, 9, 0.92) 0%,
+          rgba(8, 9, 9, 0.62) 30%,
+          rgba(8, 9, 9, 0.18) 60%,
+          rgba(8, 9, 9, 0) 85%
         ),
      linear-gradient(
           0deg,
             #080909 0%,
-            transparent 60%
+            transparent 32%
         ),
         var(--hero-backdrop, none);
 
     background-size: cover;
-    background-position: center 30%;
+    background-position: center 20%;
 }
 
 .hero-copy {
-    width: min(700px, 65%);
+    width: min(760px, 68%);
+
+    /* Keep text legible over brighter artwork. */
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
 }
 
 h1 {
     margin: 0 0 22px;
     font-family: "Bodoni 72", "Didot", "Times New Roman", serif;
-    font-size: clamp(55px, 6.4vw, 92px);
+    font-size: clamp(64px, 7.6vw, 112px);
     font-weight: 700;
     letter-spacing: -0.075em;
     line-height: 0.98;
@@ -179,8 +380,9 @@ h1 {
     align-items: center;
     gap: 10px;
     margin: 0 0 18px;
-    color: #d0d0d1;
-    font-size: 14px;
+    color: #e8e6e1;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .meta-separator {
@@ -196,17 +398,17 @@ h1 {
 }
 
 .synopsis {
-    max-width: 630px;
+    max-width: 640px;
     margin: 0;
-    color: #e1e0e0;
-    font-size: 14px;
+    color: #f0eeea;
+    font-size: 16px;
     line-height: 1.55;
-    max-height: 4.65em;
+    max-height: 6.2em;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
     -webkit-box-orient: vertical;
 }
 
@@ -214,8 +416,8 @@ h1 {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 11px;
-    margin-top: 20px;
+    gap: 12px;
+    margin-top: 24px;
 }
 
 .primary-button,
@@ -223,11 +425,12 @@ h1 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px;
-    padding: 0 18px;
+    min-height: 48px;
+    padding: 0 26px;
     border: 0;
     border-radius: 999px;
     font: inherit;
+    font-size: 16px;
     cursor: pointer;
 }
 
@@ -246,9 +449,13 @@ h1 {
 }
 
 .quiet-button {
-    background: rgba(255, 255, 255, 0.12);
+    /* Dark acrylic tint like the sidebar, so the blur reads clearly. */
+    background: rgba(10, 12, 14, 0.45);
     color: #f2f0f0;
-    backdrop-filter: blur(10px);
+
+    /* Frosted acrylic accent, matching the sidebar rail. */
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
 }
 
 .primary-button:hover {
@@ -256,20 +463,20 @@ h1 {
 }
 
 .quiet-button:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(10, 12, 14, 0.62);
 }
 
 .hero-logo {
     display: block;
-    width: clamp(160px, 38vw, 380px);
+    width: clamp(200px, 42vw, 460px);
     max-width: 100%;
-    max-height: clamp(64px, 16vh, 132px);
+    max-height: clamp(80px, 20vh, 168px);
 
     object-fit: contain;
     object-position: left center;
 
     margin: 0 0 24px 0px;
-    filter: drop-shadow(0 3px 20px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.45));
 }
 
 .hero-logo[hidden] {
@@ -303,14 +510,20 @@ h1 {
 
     border: 0;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
+
+    /* Dark acrylic tint like the sidebar, so the blur reads clearly. */
+    background: rgba(10, 12, 14, 0.45);
     color: #f5f3ef;
+
+    /* Frosted acrylic accent, matching the sidebar rail. */
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
 
     cursor: pointer;
 }
 
 .hero-arrow:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(10, 12, 14, 0.62);
 }
 
 .hero-dots {
@@ -354,13 +567,13 @@ h1 {
 
 /*Content shelves*/
 .shelf {
-    margin: 24px 0 36px;
+    margin: 18px 0 28px;
     padding: 0 24px;
 }
 
 .shelf-heading h2 {
-    margin: 0 0 16px;
-    font-size: 24px;
+    margin: 0 0 12px;
+    font-size: 20px;
     font-weight: 650;
 }
 
@@ -379,8 +592,8 @@ h1 {
     display: grid;
     place-items: center;
 
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     padding: 0;
 
     border: 0;
@@ -404,6 +617,11 @@ h1 {
     overflow-x: auto;
     overflow-y: hidden;
 
+    /* Bleed past the shelf padding to the viewport edge, so the
+       next card peeks in and scrolling is discoverable. */
+    margin-right: -24px;
+    padding-right: 24px;
+
     scroll-behavior: auto;
     overscroll-behavior-x: contain;
 }
@@ -411,11 +629,11 @@ h1 {
 .media-track {
     display: flex;
     align-items: flex-start;
-    gap: 16px;
+    gap: 12px;
 
     width: max-content;
     min-width: 100%;
-    padding-bottom: 12px;
+    padding-bottom: 8px;
 
     transform: translate3d(var(--rubber-band, 0px), 0, 0);
 }
@@ -450,13 +668,13 @@ h1 {
 }
 
 .media-card {
-    flex: 0 0 190px;
+    flex: 0 0 150px;
     min-width: 0;
     transition: transform 200ms ease;
 }
 
 .media-card--continue {
-    flex-basis: 320px;
+    flex-basis: 260px;
 }
 
 /* Artwork containers */
@@ -465,7 +683,7 @@ h1 {
     overflow: hidden;
 
     aspect-ratio: 2 / 3;
-    border-radius: 10px;
+    border-radius: 8px;
     background: #191919;
 }
 
@@ -478,7 +696,7 @@ h1 {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 220ms ease;
+    transition: transform 260ms ease-out;
 }
 
 .media-card:hover .media-image {
@@ -488,11 +706,11 @@ h1 {
 /* Playback progress */
 .media-progress {
     position: absolute;
-    right: 10px;
-    bottom: 10px;
-    left: 10px;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
 
-    height: 5px;
+    height: 4px;
     overflow: hidden;
     border-radius: 99px;
     background: rgba(255, 255, 255, 0.4);
@@ -506,26 +724,45 @@ h1 {
 
 /* Card text */
 .media-card-details {
-    padding: 8px 2px;
+    padding: 6px 2px;
 }
 
 .media-card-details h3 {
-    margin: 0 0 4px;
-    font-size: 15px;
+    margin: 0 0 2px;
+    font-size: 13px;
     font-weight: 600;
+
+    /* Titles always hold a single line; JS condenses long titles
+       before the ellipsis needs to kick in. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+}
+
+.media-card-details h3 > span {
+    display: inline-block;
+    transform-origin: left center;
 }
 
 .media-card-details p {
     margin: 0;
     color: #8e8e93;
-    font-size: 12px;
+    font-size: 11px;
+}
+
+/* Half-width windows and smaller: drop the synopsis to reduce clutter. */
+@media (max-width: 1024px) {
+    .synopsis {
+        display: none;
+    }
 }
 
 @media (max-width: 640px) {
     .hero {
         min-height: clamp(520px, 75svh, 680px);
         align-items: flex-end;
-        padding: 32px 18px 82px;
+        padding: 32px 18px 82px calc(72px + 18px);
         background-position: 60% center;
     }
 
@@ -565,6 +802,18 @@ h1 {
     from {
         opacity: 0;
         transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes hero-dot {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
     }
 
     to {
