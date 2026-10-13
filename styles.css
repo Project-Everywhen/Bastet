@@ -247,6 +247,53 @@ button {
     transition: color 180ms ease;
 }
 
+/* Icon labels: mobile pill bar only. */
+.nav-label {
+    display: none;
+}
+
+/* Account options list (Profile view). */
+.profile-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    max-width: 560px;
+    padding: 0 24px 40px;
+}
+
+.profile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 14px 16px;
+
+    border: 1px solid var(--line-frost);
+    border-radius: 12px;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+}
+
+.profile-menu-item:hover {
+    background: var(--surface-control);
+}
+
+.profile-menu-item .material-symbols-rounded {
+    color: var(--text-muted);
+    flex: 0 0 auto;
+}
+
+.profile-menu-label {
+    flex: 1 1 auto;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.profile-menu-chevron {
+    opacity: 0.7;
+}
+
 /* Outlined icons by default; the selected destination is filled. */
 .nav-icons .material-symbols-rounded,
 .nav-icons-bottom .material-symbols-rounded {
@@ -795,6 +842,46 @@ h1 {
     transform: scale(1.035);
 }
 
+/* Continue Watching overlay: title lives on the artwork. */
+.media-card--continue .media-card-details {
+    display: none;
+}
+
+.media-overlay {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    /* Bottom padding clears the progress bar. */
+    padding: 28px 10px 16px;
+
+    background: linear-gradient(transparent, rgba(var(--bg-rgb), 0.88));
+    text-align: left;
+}
+
+.media-overlay-title {
+    margin: 0 0 2px;
+    font-size: 14px;
+    font-weight: 650;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+}
+
+.media-overlay-title > span {
+    display: inline-block;
+    transform-origin: left center;
+}
+
+.media-overlay p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
 /* Playback progress */
 .media-progress {
     position: absolute;
@@ -850,9 +937,19 @@ h1 {
     }
 }
 
+/* Very small screens: keep only year · rating · runtime in the
+   metadata line; genres (the longest part) are hidden with the
+   separator that introduced them. */
+@media (max-width: 480px) {
+    #featured-genres,
+    .meta-separator:has(+ #featured-genres) {
+        display: none;
+    }
+}
+
 @media (max-width: 640px) {
     .hero {
-        min-height: clamp(520px, 75svh, 680px);
+        min-height: clamp(440px, 62svh, 560px);
         align-items: flex-end;
         padding: 32px 18px 82px;
         background-position: 60% center;
@@ -881,13 +978,26 @@ h1 {
     }
 
     .sidebar {
-        inset: auto 0 0 0;
-        width: 100%;
+        top: auto;
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        left: 12px;
+
+        /* Centered floating bar: capped width, auto margins do the
+           centering (no transforms involved). */
+        width: auto;
+        max-width: 430px;
+        margin-inline: auto;
         height: auto;
         flex-direction: row;
         align-items: center;
-        justify-content: space-evenly;
-        padding: 10px 8px calc(10px + env(safe-area-inset-bottom));
+
+        /* One even rhythm across both groups (space-evenly split the
+           groups apart instead of centering the icons). */
+        justify-content: center;
+        gap: 16px;
+        padding: 6px 12px;
+        border-radius: 28px;
 
         /* Same acrylic, fading upward instead of sideways. */
         background: linear-gradient(
@@ -913,17 +1023,47 @@ h1 {
         flex: none;
         width: auto;
         margin: 0;
-        gap: 4px;
+        gap: 16px;
     }
 
     .nav-icons a,
     .nav-icons-bottom a {
-        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+
+        /* Slim capsule: wide, not tall, so the selected highlight
+           reads as a pill rather than a blob. */
+        padding: 4px 12px;
+    }
+
+    /* Highlighted box around the selected icon, echoing the
+       outer pill's radius. */
+    .nav-icons a[aria-current="page"],
+    .nav-icons-bottom a[aria-current="page"] {
+        background: var(--control-frost-hover);
+        border-radius: 28px;
+    }
+
+    /* Settings lives inside Profile on mobile. */
+    #settings-link {
+        display: none;
+    }
+
+    .nav-label {
+        display: block;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        line-height: 1;
+        white-space: nowrap;
     }
 
     .nav-icons-bottom::before {
         width: 1px;
         height: 24px;
+        align-self: center;
     }
 
     /* Content reclaims the rail width; bottom pad clears the bar. */
@@ -937,13 +1077,54 @@ h1 {
         padding: 24px 18px 82px;
     }
 
+    /* Centered hero composition: copy, logo, meta, and CTA. */
+    .hero-copy {
+        text-align: center;
+        margin-inline: auto;
+    }
+
+    .hero-logo {
+        object-position: center;
+        margin-inline: auto;
+    }
+
+    .metadata {
+        justify-content: center;
+    }
+
     h1 {
         font-size: clamp(42px, 13vw, 64px);
     }
 
-    .hero-actions .primary-button,
+    /* Single centered CTA on mobile; Watchlist stays on desktop. */
+    .hero-actions {
+        justify-content: center;
+    }
+
     .hero-actions .quiet-button {
-        flex: 1 1 140px;
+        display: none;
+    }
+
+    .hero-actions .primary-button {
+        flex: none;
+        padding: 0 34px;
+    }
+
+    /* Centered dots; arrows retire with the shelf arrows. */
+    .hero-arrow {
+        display: none;
+    }
+
+    .hero-carousel {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        bottom: 14px;
+    }
+
+    .hero-dots {
+        position: static;
+        transform: none;
     }
 
     /* Compact shelves; arrows retire in favor of touch drag. */

@@ -198,6 +198,8 @@ function createMediaCard(media, options = {}) {
         artwork.textContent = "Artwork unavailable";
     }
 
+    const year = releaseDate.slice(0, 4) || "—";
+
     if (isContinue) {
         const track = document.createElement("div");
         track.className = "media-progress";
@@ -208,6 +210,27 @@ function createMediaCard(media, options = {}) {
 
         track.append(fill);
         artwork.append(track);
+
+        // Title lives on the artwork, above the progress bar.
+        const overlay = document.createElement("div");
+        overlay.className = "media-overlay";
+
+        const heading = document.createElement("h3");
+        heading.className = "media-overlay-title";
+
+        const label = document.createElement("span");
+        label.textContent = title;
+        heading.append(label);
+
+        const metadata = document.createElement("p");
+        metadata.textContent = `${year} · ${progress}% watched`;
+
+        overlay.append(heading, metadata);
+        artwork.append(overlay);
+
+        card.append(artwork);
+
+        return card;
     }
 
     const details = document.createElement("div");
@@ -219,11 +242,8 @@ function createMediaCard(media, options = {}) {
     heading.append(label);
 
     const metadata = document.createElement("p");
-    const year = releaseDate.slice(0, 4) || "—";
-
-    metadata.textContent = isContinue
-        ? `${year} · ${progress}% watched`
-        : `${year} · ★ ${Number(media.vote_average || 0).toFixed(1)}`;
+    metadata.textContent =
+        `${year} · ★ ${Number(media.vote_average || 0).toFixed(1)}`;
 
     details.append(heading, metadata);
     card.append(artwork, details);
@@ -236,7 +256,9 @@ function createMediaCard(media, options = {}) {
 // anything still too long falls back to ellipsis.
 // Must run after the card is in the DOM so measurements are valid.
 function fitCardTitle(card) {
-    const heading = card.querySelector(".media-card-details h3");
+    const heading = card.querySelector(
+        ".media-card-details h3, .media-overlay-title"
+    );
     const label = heading?.querySelector("span");
 
     if (!heading || !label) {
