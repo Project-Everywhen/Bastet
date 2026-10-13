@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909">
+  <meta name="description" content="Bastet — discover something worth watching.">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Bastet — Discover something worth watching</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&icon_names=explore,favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle&display=block">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+    <aside class="sidebar">
+        <a class="brand-mark" href="#home" aria-label="Bastet home">
+            <img
+                src="assets/images/bastet-logo.svg"
+                alt=""
+                class="brand-logo"
+            >
+        </a>
+
+        <nav class="nav-icons" aria-label="Main navigation">
+            <a href="#home" aria-label="Home" title="Home" aria-current="page">
+                <span class="material-symbols-rounded" aria-hidden="true">home</span>
+            </a>
+            
+            <a href="#discover" aria-label="Discover" title="Discover">
+                <span class="material-symbols-rounded" aria-hidden="true">explore</span>
+            </a>
+
+            <a href="#search" aria-label="Search" title="Search">
+                <span class="material-symbols-rounded" aria-hidden="true">search</span>
+            </a>
+
+            <a href="#library" aria-label="Library" title="Library">
+                <span class="material-symbols-rounded" aria-hidden="true">favorite</span>
+            </a>
+        </nav>
+
+        <div class="nav-icons-bottom">
+            
+            <a href="#setting" aria-label="Settings" title="Settings">
+                <span class="material-symbols-rounded" aria-hidden="true">settings</span>
+            </a>
+
+            <a href="#profile" aria-label="Profile" title="Profile">
+                <span class="material-symbols-rounded" aria-hidden="true">account_circle</span>
+            </a>
+        </div>
+    </aside>
+    <main id="home" class="page-content">
+        <section class="hero" id="featured-hero">
+            <div class="hero-copy">
+                <p id="app-status" role="status" aria-live="polite" hidden></p>
+                
+                <h1 id="featured-title">Loading...</h1>
+                <img 
+                    id="featured-logo"
+                    class="hero-logo"
+                    alt=""
+                    hidden
+                >
+                <p class="metadata">
+                    <span id="featured-year">0000</span>
+                    <span class="meta-separator">•</span>
+                    <span class="rating">
+                        ★ <span id="featured-rating">0.0</span>
+                    </span>
+                    <span class="meta-separator">•</span>
+                    <span id="featured-genres">Hey there :)</span>
+                    <span id="featured-runtime" class="runtime"></span>
+                </p>
+                
+                <p id="featured-synopsis" class="synopsis">
+                    Loading synopsis...
+                </p>
+
+                <div class="hero-actions">
+                    <button class="primary-button" type="button">
+                        More Info
+                    </button>
+                    <button class="quiet-button" type="button">
+                        <span class="material-symbols-rounded" aria-hidden="true">add_circle</span>
+                        Watchlist
+                    </button>
+                </div>
+            </div>
+            <div class="hero-carousel" aria-label="Featured movie controls">
+                <button class="hero-arrow" id="hero-prev" type="button" aria-label="Previous featured movie">
+                    <span class="material-symbols-rounded" aria-hidden="true">
+                        chevron_left
+                    </span>
+                </button>
+
+                <div class="hero-dots"
+                    id="hero-dots"
+                    aria-label="Choose featured movie"
+                ></div>
+
+                <button class="hero-arrow" id="hero-next" type="button" aria-label="Next featured movie">
+                    <span class="material-symbols-rounded" aria-hidden="true">
+                        chevron_right
+                    </span>
+                </button>
+            </div>
+        </section>
+        <section class="shelf" aria-labelledby="continue-title">
+            <div class="shelf-heading">
+                <h2 id="continue-title">Continue Watching</h2>
+                <div class="shelf-controls">
+                    <button class="shelf-arrow"
+                            data-target="continue-row"
+                            data-direction="-1"
+                            aria-label="Scroll Continue Watching left">
+                        <span class="material-symbols-rounded">chevron_left</span>
+                    </button>
+                    <button class="shelf-arrow"
+                            data-target="continue-row"
+                            data-direction="1"
+                            aria-label="Scroll Continue Watching right">
+                        <span class="material-symbols-rounded">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+            <div id="continue-row" class="media-row">
+                <div id="continue-track" class="media-track">
+                    <p>Movie cards will appear here.</p>
+                </div>
+            </div>
+        </section>
+        <section class="shelf" aria-labelledby="trending-title">
+            <div class="shelf-heading">
+                <h2 id="trending-title">Trending Now</h2>
+                <div class="shelf-controls">
+                    <button class="shelf-arrow"
+                            data-target="trending-row"
+                            data-direction="-1"
+                            aria-label="Scroll Trending Now left">
+                        <span class="material-symbols-rounded">chevron_left</span>
+                    </button>
+                    <button class="shelf-arrow"
+                            data-target="trending-row"
+                            data-direction="1"
+                            aria-label="Scroll Trending Now right">
+                        <span class="material-symbols-rounded">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+            <div id="trending-row" class="media-row">
+                <div id="trending-track" class="media-track">
+                    <p>Trending movie cards will appear here.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

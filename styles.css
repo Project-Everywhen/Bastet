@@ -1,0 +1,593 @@
+/* Global settings */
+:root {
+    color-scheme: dark;
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Predictable element sizing */
+* {
+    box-sizing: border-box;
+}
+
+/* Hide native scrollbars everywhere without disabling scrolling */
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* Page defaults */
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #080909;
+    color: #f5f3ef;
+}
+
+/* Links and buttons */
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    font: inherit;
+    cursor: pointer;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 72px;
+    height: 100vh;
+    z-index: 10;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 20px 0;
+    background: #080909;
+}
+
+/* Brand mark */
+.brand-mark {
+    display: grid;
+    place-items: center;
+
+    width: 36px;
+    height: 36px;
+    margin-bottom: 28px;
+
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.brand-logo {
+    display: block;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+/* Navigation layout */
+.nav-icons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+
+    width: 100%;
+}
+
+/* Pinned footer icons at the bottom of the sidebar */
+.nav-icons-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+
+    width: 100%;
+    margin-top: auto;
+}
+
+/* Navigation links */
+.nav-icons a,
+.nav-icons-bottom a {
+    position: relative;
+    background: transparent;
+    color: #858585;
+
+    transition: color 180ms ease;
+}
+
+/* Smooth icon scaling */
+.material-symbols-rounded {
+    transition: 
+        color 180ms ease,    
+        transform 180ms ease;
+}
+
+.nav-icons a:hover .material-symbols-rounded,
+.nav-icons a:focus-visible .material-symbols-rounded,
+.nav-icons-bottom a:hover .material-symbols-rounded,
+.nav-icons-bottom a:focus-visible .material-symbols-rounded {
+    color: #f5f3ef;
+    transform: rotate(-1deg) scale(1.15);
+}
+
+/* Main content */
+.page-content {
+    margin-left: 72px;
+    min-width: 0;
+}
+
+.hero {
+    min-height: 65vh;
+
+    display: flex;
+    align-items: flex-end;
+
+    padding: 0 0 42px;
+
+    /* TMDB Integration */
+    position: relative;
+    overflow: hidden;
+    
+    background-image:
+        linear-gradient(
+          90deg,
+          #080909 0%,
+          rgba(8, 9, 9, 0.90) 28%,
+          rgba(8, 9, 9, 0.35) 65%,
+          rgba(8, 9, 9, 0.10) 100%
+        ),
+     linear-gradient(
+          0deg,
+            #080909 0%,
+            transparent 60%
+        ),
+        var(--hero-backdrop, none);
+
+    background-size: cover;
+    background-position: center 30%;
+}
+
+.hero-copy {
+    width: min(700px, 65%);
+}
+
+h1 {
+    margin: 0 0 22px;
+    font-family: "Bodoni 72", "Didot", "Times New Roman", serif;
+    font-size: clamp(55px, 6.4vw, 92px);
+    font-weight: 700;
+    letter-spacing: -0.075em;
+    line-height: 0.98;
+    color: #fff8e9;
+}
+
+.metadata {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+    color: #d0d0d1;
+    font-size: 14px;
+}
+
+.meta-separator {
+    color: #77797b;
+}
+
+.rating {
+    white-space: nowrap;
+}
+
+.rating > span {
+    color: inherit;
+}
+
+.synopsis {
+    max-width: 630px;
+    margin: 0;
+    color: #e1e0e0;
+    font-size: 14px;
+    line-height: 1.55;
+    max-height: 4.65em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.hero-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 11px;
+    margin-top: 20px;
+}
+
+.primary-button,
+.quiet-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 999px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.primary-button {
+    background: #fff;
+    color: #111;
+    font-weight: 650;
+}
+
+.quiet-button .material-symbols-rounded {
+    margin-right: 6px;
+}
+
+.hero-arrow .material-symbols-rounded {
+    margin: 0;
+}
+
+.quiet-button {
+    background: rgba(255, 255, 255, 0.12);
+    color: #f2f0f0;
+    backdrop-filter: blur(10px);
+}
+
+.primary-button:hover {
+    background: #e1e0e0;
+}
+
+.quiet-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.hero-logo {
+    display: block;
+    width: clamp(160px, 38vw, 380px);
+    max-width: 100%;
+    max-height: clamp(64px, 16vh, 132px);
+
+    object-fit: contain;
+    object-position: left center;
+
+    margin: 0 0 24px 0px;
+    filter: drop-shadow(0 3px 20px rgba(0, 0, 0, 0.3));
+}
+
+.hero-logo[hidden] {
+    display: none;
+}
+
+.hero-carousel {
+    position: absolute;
+    right: 24px;
+    bottom: 42px;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    /* Shrink-to-fit, so the control grows as dots are added. */
+    width: auto;
+    max-width: min(60vw, 480px);
+    height: 36px;
+}
+
+.hero-arrow {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+
+    width: 36px;
+    height: 36px;
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f5f3ef;
+
+    cursor: pointer;
+}
+
+.hero-arrow:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.hero-dots {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 0 1 auto;
+    min-width: 0;
+
+    padding: 8px 2px;
+
+    /* Scroll internally once dots exceed the max width. */
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+}
+
+.hero-dots::-webkit-scrollbar {
+    display: none;
+}
+
+.hero-dot {
+    flex: 0 0 auto;
+    width: 7px;
+    height: 7px;
+    padding: 0;
+
+    border: 0;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.45);
+
+    cursor: pointer;
+    transition: width 180ms ease, background-color 180ms ease;
+}
+
+.hero-dot[aria-current="true"] {
+    width: 24px;
+    background: #ffffff;
+}
+
+/*Content shelves*/
+.shelf {
+    margin: 24px 0 36px;
+    padding: 0 24px;
+}
+
+.shelf-heading h2 {
+    margin: 0 0 16px;
+    font-size: 24px;
+    font-weight: 650;
+}
+
+.shelf-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.shelf-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.shelf-arrow {
+    display: grid;
+    place-items: center;
+
+    width: 34px;
+    height: 34px;
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+    background: #202023;
+    color: #f5f3ef;
+    cursor: pointer;
+}
+
+.shelf-arrow:hover {
+    background: #343438;
+}
+
+.shelf-arrow .material-symbols-rounded {
+    margin: 0;
+}
+
+/* Horizontally scrollable rows */
+.media-row {
+    display: block;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-behavior: auto;
+    overscroll-behavior-x: contain;
+}
+
+.media-track {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+
+    width: max-content;
+    min-width: 100%;
+    padding-bottom: 12px;
+
+    transform: translate3d(var(--rubber-band, 0px), 0, 0);
+}
+
+.media-row,
+.media-row * {
+    cursor: default;
+}
+
+.media-row.is-dragging {
+    user-select: none;
+}
+
+.media-row.is-dragging .media-track {
+    transition: none;
+    will-change: transform;
+}
+
+.media-row.is-springing .media-track {
+    transition: transform 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.media-row img {
+    -webkit-user-drag: none;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Hide scrollbars for WebKit browsers */
+.media-row::-webkit-scrollbar {
+    display: none;              /* Chrome, Safari, Edge */
+}
+
+.media-card {
+    flex: 0 0 190px;
+    min-width: 0;
+    transition: transform 200ms ease;
+}
+
+.media-card--continue {
+    flex-basis: 320px;
+}
+
+/* Artwork containers */
+.media-art {
+    position: relative;
+    overflow: hidden;
+
+    aspect-ratio: 2 / 3;
+    border-radius: 10px;
+    background: #191919;
+}
+
+.media-card--continue .media-art {
+    aspect-ratio: 16 / 9;
+}
+
+.media-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 220ms ease;
+}
+
+.media-card:hover .media-image {
+    transform: scale(1.035);
+}
+
+/* Playback progress */
+.media-progress {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+
+    height: 5px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.media-progress-fill {
+    height: 100%;
+    background: #ffffff;
+    border-radius: 99px;
+}
+
+/* Card text */
+.media-card-details {
+    padding: 8px 2px;
+}
+
+.media-card-details h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.media-card-details p {
+    margin: 0;
+    color: #8e8e93;
+    font-size: 12px;
+}
+
+@media (max-width: 640px) {
+    .hero {
+        min-height: clamp(520px, 75svh, 680px);
+        align-items: flex-end;
+        padding: 32px 18px 82px;
+        background-position: 60% center;
+    }
+
+    .hero-copy {
+        width: 100%;
+    }
+
+    .hero-logo {
+        width: min(280px, 100%);
+        max-height: clamp(64px, 14svh, 105px);
+        margin-bottom: 18px;
+    }
+
+    .hero-carousel {
+        right: 16px;
+        bottom: 20px;
+    }
+}
+
+@keyframes card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.media-card {
+    animation: card-enter 420ms ease both;
+}
+
+@keyframes hero-content-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-content-enter {
+    animation: hero-content-enter 350ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .media-card,
+    .media-image,
+    .hero-content-enter,
+    .hero-dot {
+        animation: none;
+        transition: none;
+    }
+
+    .media-row,
+    .hero-dots {
+        scroll-behavior: auto;
+    }
+}
