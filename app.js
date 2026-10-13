@@ -1215,6 +1215,10 @@ function navigateToCurrentView() {
         view.hidden = view.id !== activeRoute;
     });
 
+    // Fresh menu, full pill.
+    document.querySelector(".sidebar")?.classList.remove("is-compact");
+    lastScrollY = window.scrollY;
+
     if (activeRoute === "search") {
         document.querySelector("#search-input")?.focus({ preventScroll: true });
     }
@@ -1237,6 +1241,39 @@ function navigateToCurrentView() {
         window.location.hash = "home";
     }
 }
+
+// Dynamic pill: minimize the mobile nav shortly after scrolling down,
+// restore it on any scroll up. CSS scopes the effect to the ≤768px bar.
+let lastScrollY = window.scrollY;
+let navCompactRaf = 0;
+
+function updateNavCompact() {
+    navCompactRaf = 0;
+
+    const sidebar = document.querySelector(".sidebar");
+
+    if (!sidebar) {
+        return;
+    }
+
+    const y = window.scrollY;
+    const goingDown = y > lastScrollY + 2;
+    const goingUp = y < lastScrollY - 2;
+
+    if (goingDown && y > 24) {
+        sidebar.classList.add("is-compact");
+    } else if (goingUp || y <= 24) {
+        sidebar.classList.remove("is-compact");
+    }
+
+    lastScrollY = y;
+}
+
+window.addEventListener("scroll", () => {
+    if (!navCompactRaf) {
+        navCompactRaf = requestAnimationFrame(updateNavCompact);
+    }
+}, { passive: true });
 
 window.addEventListener("hashchange", navigateToCurrentView);
 
