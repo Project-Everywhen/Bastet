@@ -995,8 +995,8 @@ h1 {
         /* One even rhythm across both groups (space-evenly split the
            groups apart instead of centering the icons). */
         justify-content: center;
-        gap: 16px;
-        padding: 6px 12px;
+        gap: 8px;
+        padding: 6px 10px;
         border-radius: 28px;
 
         /* Crisp hairline + tight lift so the rounded pill outline
@@ -1032,7 +1032,7 @@ h1 {
         flex: none;
         width: auto;
         margin: 0;
-        gap: 16px;
+        gap: 8px;
     }
 
     .nav-icons a,
@@ -1040,11 +1040,14 @@ h1 {
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
         gap: 3px;
+        flex: none;
 
-        /* Slim capsule: wide, not tall, so the selected highlight
-           reads as a pill rather than a blob. */
-        padding: 4px 12px;
+        /* Fixed uniform container: identical highlight box for
+           every icon regardless of label length. */
+        width: 52px;
+        padding: 4px 0;
     }
 
     /* Highlighted box around the selected icon, echoing the
