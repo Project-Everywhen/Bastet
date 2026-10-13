@@ -595,6 +595,66 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
+// Swipe the hero banner with touch or mouse drag. Starts on buttons
+// and links are ignored so CTAs and carousel controls keep working.
+let heroSwipeX = null;
+let heroSwipeY = null;
+let heroSwiping = false;
+
+hero.addEventListener("pointerdown", event => {
+    if (event.pointerType === "mouse" && event.button !== 0) {
+        return;
+    }
+
+    if (event.target.closest("button, a, input")) {
+        return;
+    }
+
+    heroSwipeX = event.clientX;
+    heroSwipeY = event.clientY;
+    heroSwiping = false;
+});
+
+hero.addEventListener("pointermove", event => {
+    if (heroSwipeX === null) {
+        return;
+    }
+
+    // Mouse already released outside the hero: stale gesture, drop it.
+    if (event.pointerType === "mouse" && event.buttons === 0) {
+        heroSwipeX = null;
+        heroSwipeY = null;
+        return;
+    }
+
+    const dx = event.clientX - heroSwipeX;
+    const dy = event.clientY - heroSwipeY;
+
+    if (!heroSwiping && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
+        heroSwiping = true;
+    }
+});
+
+function endHeroSwipe(event) {
+    if (heroSwipeX === null) {
+        return;
+    }
+
+    const dx = event.clientX - heroSwipeX;
+
+    heroSwipeX = null;
+    heroSwipeY = null;
+
+    if (heroSwiping && Math.abs(dx) >= 50 && !isFeaturedLoading) {
+        showFeaturedMovie(currentFeaturedIndex + (dx < 0 ? 1 : -1));
+    }
+
+    heroSwiping = false;
+}
+
+hero.addEventListener("pointerup", endHeroSwipe);
+hero.addEventListener("pointercancel", endHeroSwipe);
+
 document.querySelectorAll(".shelf-arrow").forEach(button => {
     button.addEventListener("click", () => {
         const row = document.getElementById(button.dataset.target);

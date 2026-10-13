@@ -225,6 +225,15 @@ button {
     margin-top: auto;
 }
 
+/* Divider between the Library and Settings icons: horizontal
+   hairline on the desktop rail, vertical in the mobile bar. */
+.nav-icons-bottom::before {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: var(--line-frost);
+}
+
 /* Navigation links */
 .nav-icons a,
 .nav-icons-bottom a {
@@ -407,6 +416,10 @@ button {
     display: flex;
     align-items: flex-end;
 
+    /* Swipable banner: grab cursor, vertical page scroll untouched. */
+    cursor: grab;
+    touch-action: pan-y;
+
     /* Full-bleed underneath the floating sidebar rail; copy stays
        clear of the icons via the left padding. */
     margin-left: -72px;
@@ -504,12 +517,12 @@ h1 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 48px;
-    padding: 0 26px;
+    min-height: 40px;
+    padding: 0 20px;
     border: 0;
     border-radius: 999px;
     font: inherit;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
 }
 
@@ -906,6 +919,11 @@ h1 {
     .nav-icons a,
     .nav-icons-bottom a {
         padding: 10px 12px;
+    }
+
+    .nav-icons-bottom::before {
+        width: 1px;
+        height: 24px;
     }
 
     /* Content reclaims the rail width; bottom pad clears the bar. */
