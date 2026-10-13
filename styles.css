@@ -1180,6 +1180,7 @@ h1 {
     .hero-dots {
         position: static;
         transform: none;
+        padding: 2px;
     }
 
     /* Compact shelves; arrows retire in favor of touch drag. */
