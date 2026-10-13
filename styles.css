@@ -984,10 +984,10 @@ h1 {
         left: 12px;
 
         /* Centered floating bar: capped just past content width so
-           no dead space sits inside the pill. Content is ~320px
+           no dead space sits inside the pill. Content is ~313px
            (5 fixed 52px links + gaps + divider + padding). */
         width: auto;
-        max-width: 340px;
+        max-width: 320px;
         margin-inline: auto;
         height: auto;
         flex-direction: row;
@@ -997,7 +997,7 @@ h1 {
            groups apart instead of centering the icons). */
         justify-content: center;
         gap: 8px;
-        padding: 6px 10px;
+        padding: 6px;
         border-radius: 28px;
 
         /* Crisp hairline + tight lift so the rounded pill outline
