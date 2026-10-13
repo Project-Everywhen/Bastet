@@ -368,7 +368,7 @@ document.querySelectorAll(".shelf-arrow").forEach(button => {
 });
 
 async function loadContinueWatching() {
-    const container = document.querySelector("#continue-row");
+    const container = document.querySelector("#continue-track");
     container.replaceChildren();
 
     const results = await Promise.all(
@@ -412,7 +412,7 @@ async function loadContinueWatching() {
 
 async function loadTrending() {
 
-    const container = document.querySelector("#trending-row");
+    const container = document.querySelector("#trending-track");
     container.replaceChildren();
 
     try {
@@ -445,105 +445,142 @@ async function loadTrending() {
 }
 
 function enableMouseDragScroll(row) {
-    let pointerDown = false;
-    let dragged = false;
-    let suppressClick = false;
+    const track = row.querySelector(".media-track");
 
+    if (!track) {
+        console.warn("Missing .media-track inside", row);
+        return;
+    }
+
+    let pointerId = null;
     let startX = 0;
+    let latestX = 0;
     let startScrollLeft = 0;
+    let maxScrollAtStart = 0;
 
-    const setRubberBand = value => {
-        row.style.setProperty("--rubber-band", `${value}px`);
-    };
+    let dragging = false;
+    let frameId = 0;
+    let suppressClickUntil = 0;
+
+    function updateDragPosition() {
+        frameId = 0;
+
+        if (!dragging) return;
+
+        const deltaX = latestX - startX;
+        const desiredScroll = startScrollLeft - deltaX;
+
+        if (desiredScroll < 0) {
+            row.scrollLeft = 0;
+
+            const resistance = Math.min(
+                28,
+                -desiredScroll * 0.18
+            );
+
+            track.style.setProperty(
+                "--rubber-band",
+                `${resistance}px`
+            );
+        } else if (desiredScroll > maxScrollAtStart) {
+            row.scrollLeft = maxScrollAtStart;
+
+            const resistance = Math.min(
+                28,
+                (desiredScroll - maxScrollAtStart) * 0.18
+            );
+
+            track.style.setProperty(
+                "--rubber-band",
+                `${-resistance}px`
+            );
+        } else {
+            row.scrollLeft = desiredScroll;
+            track.style.setProperty("--rubber-band", "0px");
+        }
+    }
 
     row.addEventListener("pointerdown", event => {
-        // Only handle the left mouse button.
-        // Touchscreens retain their native scrolling behavior.
         if (event.pointerType !== "mouse" || event.button !== 0) {
             return;
         }
 
-        // Don't hijack future buttons or links inside a shelf.
-        if (event.target.closest("button, a, input, select, textarea")) {
+        if (
+            event.target.closest(
+                "button, a, input, select, textarea, [role='button']"
+            )
+        ) {
             return;
         }
 
-        pointerDown = true;
-        dragged = false;
-        suppressClick = false;
-
-        startX = event.clientX;
+        pointerId = event.pointerId;
+        startX = latestX = event.clientX;
         startScrollLeft = row.scrollLeft;
 
-        row.classList.remove("is-springing");
-        row.classList.add("is-dragging");
-
-        setRubberBand(0);
-        row.setPointerCapture(event.pointerId);
-    });
-
-    row.addEventListener("pointermove", event => {
-        if (!pointerDown) {
-            return;
-        }
-
-        const deltaX = event.clientX - startX;
-
-        // Ignore tiny movements so normal clicks still work.
-        if (!dragged && Math.abs(deltaX) < 5) {
-            return;
-        }
-
-        dragged = true;
-        event.preventDefault();
-
-        const maxScroll = Math.max(
+        // Measure once, before any rubber-band transform is applied.
+        maxScrollAtStart = Math.max(
             0,
             row.scrollWidth - row.clientWidth
         );
 
-        // No overflow means there is nothing to drag.
-        if (maxScroll === 0) {
-            row.scrollLeft = 0;
-            setRubberBand(0);
+        dragging = false;
+
+        row.classList.remove("is-springing");
+        track.style.setProperty("--rubber-band", "0px");
+    });
+
+    row.addEventListener("pointermove", event => {
+        if (event.pointerId !== pointerId) return;
+
+        latestX = event.clientX;
+
+        // Ignore tiny mouse movements so ordinary clicks still work.
+        if (!dragging && Math.abs(latestX - startX) < 4) {
             return;
         }
 
-        const desiredScroll = startScrollLeft - deltaX;
+        if (!dragging) {
+            dragging = true;
+            row.classList.add("is-dragging");
 
-        if (desiredScroll < 0) {
-            // Pulled beyond the left edge.
-            row.scrollLeft = 0;
-            setRubberBand(
-                Math.min(30, -desiredScroll * 0.22)
-            );
-        } else if (desiredScroll > maxScroll) {
-            // Pulled beyond the right edge.
-            row.scrollLeft = maxScroll;
-            setRubberBand(
-                -Math.min(30, (desiredScroll - maxScroll) * 0.22)
-            );
-        } else {
-            // Normal movement inside the scrollable range.
-            row.scrollLeft = desiredScroll;
-            setRubberBand(0);
+            row.setPointerCapture(event.pointerId);
+        }
+
+        event.preventDefault();
+
+        // Coalesce frequent pointer events into one visual update per frame.
+        if (!frameId) {
+            frameId = requestAnimationFrame(updateDragPosition);
         }
     });
 
     function finishDrag(event) {
-        if (!pointerDown) {
-            return;
+        if (event.pointerId !== pointerId) return;
+
+        // Apply the final pointer position before releasing.
+        if (dragging) {
+            latestX = event.clientX;
+
+            if (frameId) {
+                cancelAnimationFrame(frameId);
+                frameId = 0;
+            }
+
+            updateDragPosition();
         }
 
-        pointerDown = false;
+        const wasDragging = dragging;
+
+        pointerId = null;
+        dragging = false;
+
         row.classList.remove("is-dragging");
 
-        if (dragged) {
-            suppressClick = true;
+        if (wasDragging) {
+            suppressClickUntil = performance.now() + 250;
 
-            // Animate the rubber-band displacement back to zero.
             row.classList.add("is-springing");
-            setRubberBand(0);
+            track.style.setProperty("--rubber-band", "0px");
         }
 
         if (row.hasPointerCapture(event.pointerId)) {
@@ -554,25 +591,20 @@ function enableMouseDragScroll(row) {
     row.addEventListener("pointerup", finishDrag);
     row.addEventListener("pointercancel", finishDrag);
 
-    // Prevent a drag from accidentally triggering a card click.
     row.addEventListener("click", event => {
-        if (suppressClick) {
+        if (performance.now() < suppressClickUntil) {
             event.preventDefault();
             event.stopPropagation();
-            suppressClick = false;
+            suppressClickUntil = 0;
         }
-    });
+    }, true);
 
-    // Prevent the browser's native image-drag ghost.
     row.addEventListener("dragstart", event => {
         event.preventDefault();
     });
 
-    row.addEventListener("transitionend", event => {
-        if (
-            event.propertyName === "transform" &&
-            !pointerDown
-        ) {
+    track.addEventListener("transitionend", event => {
+        if (event.propertyName === "transform" && !dragging) {
             row.classList.remove("is-springing");
         }
     });
