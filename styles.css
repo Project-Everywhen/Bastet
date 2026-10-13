@@ -69,6 +69,13 @@ button {
     font-weight: 700;
 }
 
+.brand-logo {
+    display: block;
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
 /* Navigation layout */
 .nav-icons {
     display: flex;
@@ -79,8 +86,20 @@ button {
     width: 100%;
 }
 
+/* Pinned footer icons at the bottom of the sidebar */
+.nav-icons-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+
+    width: 100%;
+    margin-top: auto;
+}
+
 /* Navigation links */
-.nav-icons a {
+.nav-icons a,
+.nav-icons-bottom a {
     position: relative;
     background: transparent;
     color: #858585;
@@ -96,7 +115,9 @@ button {
 }
 
 .nav-icons a:hover .material-symbols-rounded,
-.nav-icons a:focus-visible .material-symbols-rounded {
+.nav-icons a:focus-visible .material-symbols-rounded,
+.nav-icons-bottom a:hover .material-symbols-rounded,
+.nav-icons-bottom a:focus-visible .material-symbols-rounded {
     color: #f5f3ef;
     transform: rotate(-1deg) scale(1.15);
 }

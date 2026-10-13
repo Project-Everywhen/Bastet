@@ -7,16 +7,21 @@
   <meta name="description" content="Bastet — discover something worth watching.">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <title>Bastet — Discover something worth watching</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&icon_names=explore,favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right&display=block">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&icon_names=explore,favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle&display=block">
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="app.js"></script>
 </head>
 <body>
     <aside class="sidebar">
-        <a class="brand-mark" href="#home">b</a>
+        <a class="brand-mark" href="#home" aria-label="Bastet home">
+            <img
+                src="assets/images/bastet-logo.svg"
+                alt=""
+                class="brand-logo"
+            >
+        </a>
 
         <nav class="nav-icons" aria-label="Main navigation">
-            
             <a href="#home" aria-label="Home" title="Home" aria-current="page">
                 <span class="material-symbols-rounded" aria-hidden="true">home</span>
             </a>
@@ -32,11 +37,18 @@
             <a href="#library" aria-label="Library" title="Library">
                 <span class="material-symbols-rounded" aria-hidden="true">favorite</span>
             </a>
+        </nav>
+
+        <div class="nav-icons-bottom">
             
             <a href="#setting" aria-label="Settings" title="Settings">
                 <span class="material-symbols-rounded" aria-hidden="true">settings</span>
             </a>
-        </nav>
+
+            <a href="#profile" aria-label="Profile" title="Profile">
+                <span class="material-symbols-rounded" aria-hidden="true">account_circle</span>
+            </a>
+        </div>
     </aside>
     <main id="home" class="page-content">
         <section class="hero" id="featured-hero">
