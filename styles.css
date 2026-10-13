@@ -168,6 +168,13 @@ h1 {
     color: #e1e0e0;
     font-size: 14px;
     line-height: 1.55;
+    max-height: 4.65em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 .hero-actions {
@@ -235,18 +242,18 @@ h1 {
     bottom: 42px;
     z-index: 2;
 
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    width: 172px;
+    height: 36px;
 }
 
 .hero-arrow {
     display: grid;
     place-items: center;
+    place-content: center;
 
     width: 36px;
     height: 36px;
-    padding: 0;
+    padding: 1px;
 
     border: 0;
     border-radius: 50%;
@@ -254,6 +261,17 @@ h1 {
     color: #f5f3ef;
 
     cursor: pointer;
+
+    position: absolute;
+    top: 0;
+}
+
+#hero-prev {
+    left: 0;
+}
+
+#hero-next {
+    right: 0;
 }
 
 .hero-arrow:hover {
@@ -261,6 +279,11 @@ h1 {
 }
 
 .hero-dots {
+    position: absolute;
+    right: 46px;
+    top: 50%;
+    transform: translateY(-50%);
+
     display: flex;
     align-items: center;
     gap: 7px;
@@ -276,6 +299,7 @@ h1 {
     background: rgba(255, 255, 255, 0.45);
 
     cursor: pointer;
+    transition: width 180ms ease, background-color 180ms ease;
 }
 
 .hero-dot[aria-current="true"] {

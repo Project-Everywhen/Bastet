@@ -40,8 +40,21 @@ async function tmdb(path, params = {}) {
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
-        throw new Error(`TMDB request failed: ${response.status}`);
-    }
+    const details = await response.json().catch(() => null);
+
+    console.error("TMDB request failed:", {
+        url: url.pathname,
+        status: response.status,
+        details
+    });
+
+    throw new Error(
+        details?.status_message ||
+        `TMDB request failed: ${response.status}`
+    );
+}
+
+return response.json();
 
     return response.json();
 }
