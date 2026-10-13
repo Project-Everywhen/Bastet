@@ -1020,6 +1020,19 @@ h1 {
         /* Lighter blur for mobile GPUs. */
         -webkit-backdrop-filter: blur(18px) saturate(140%);
         backdrop-filter: blur(18px) saturate(140%);
+
+        /* Staged shrink: shell tightens after the labels clear.
+           (max-width animates smoothly; width: fit-content would
+           snap because auto isn't interpolable.) */
+        transition: padding 260ms ease 90ms, max-width 260ms ease 90ms;
+    }
+
+    .sidebar.is-compact {
+        padding: 2px 4px;
+
+        /* Tight cap matched to content (~249px: 5×44px links +
+           gaps + divider + padding) so no dead air stays inside. */
+        max-width: 252px;
     }
 
     .brand-mark {
@@ -1034,6 +1047,7 @@ h1 {
         width: auto;
         margin: 0;
         gap: 8px;
+        transition: gap 200ms ease 90ms;
     }
 
     .nav-icons a,
@@ -1049,6 +1063,19 @@ h1 {
            every icon regardless of label length. */
         width: 52px;
         padding: 4px 0;
+        transition: padding 260ms ease 90ms, gap 200ms ease 90ms, width 200ms ease 90ms;
+    }
+
+    .sidebar.is-compact .nav-icons,
+    .sidebar.is-compact .nav-icons-bottom {
+        gap: 4px;
+    }
+
+    .sidebar.is-compact .nav-icons a,
+    .sidebar.is-compact .nav-icons-bottom a {
+        padding: 2px 0;
+        gap: 0;
+        width: 44px;
     }
 
     /* Highlighted box around the selected icon, echoing the
@@ -1071,6 +1098,17 @@ h1 {
         letter-spacing: 0.02em;
         line-height: 1;
         white-space: nowrap;
+
+        /* Collapsible line: fades while shrinking so no sliver stays. */
+        max-height: 12px;
+        opacity: 1;
+        overflow: hidden;
+        transition: opacity 140ms ease, max-height 180ms ease;
+    }
+
+    .sidebar.is-compact .nav-label {
+        opacity: 0;
+        max-height: 0;
     }
 
     .nav-icons-bottom::before {
@@ -1087,7 +1125,7 @@ h1 {
 
     .hero {
         margin-left: 0;
-        padding: 24px 18px 82px;
+        padding: 16px 18px 64px;
     }
 
     /* Centered hero composition: copy, logo, meta, and CTA. */
@@ -1099,19 +1137,23 @@ h1 {
     .hero-logo {
         object-position: center;
         margin-inline: auto;
+        margin-bottom: 10px;
     }
 
     .metadata {
         justify-content: center;
+        margin-bottom: 10px;
     }
 
     h1 {
         font-size: clamp(42px, 13vw, 64px);
+        margin-bottom: 12px;
     }
 
     /* Single centered CTA on mobile; Watchlist stays on desktop. */
     .hero-actions {
         justify-content: center;
+        margin-top: 14px;
     }
 
     .hero-actions .quiet-button {
@@ -1228,7 +1270,13 @@ h1 {
     .media-card,
     .media-image,
     .hero-content-enter,
-    .hero-dot {
+    .hero-dot,
+    .sidebar,
+    .sidebar .nav-icons,
+    .sidebar .nav-icons-bottom,
+    .sidebar .nav-icons a,
+    .sidebar .nav-icons-bottom a,
+    .sidebar .nav-label {
         animation: none;
         transition: none;
     }
