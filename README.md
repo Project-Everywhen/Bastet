@@ -30,6 +30,7 @@ The `CONTINUE_WATCHING` array is demo data. Its progress is not real playback pr
 - `https://image.tmdb.org/t/p/w1280{backdrop_path}` and `.../w500{logo_path}` turn TMDB image paths into usable URLs.
 - `/trending/all/week` provides combined movie + TV posters in the Trending Now shelf (filtered to entries with `media_type` of `movie`/`tv` and a `poster_path`).
 - `/discover/movie?sort_by=primary_release_date.desc&watch_region={WATCH_REGION}&with_watch_monetization_types=flatrate` powers the New on Streaming shelf — the API behind the website's `discover_preset=new-on-streaming` view, limited to already-released titles. Change `WATCH_REGION` in `config.js` to retarget it.
+- `/search/multi` powers the `#search` view: debounced live search across movies and TV, reusing the shelf cards (posters only, top 18).
 
 ## Important credential note
 

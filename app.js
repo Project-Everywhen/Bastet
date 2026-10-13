@@ -1027,3 +1027,152 @@ if (document.fonts?.ready) {
         document.querySelectorAll(".media-card").forEach(fitCardTitle);
     });
 }
+
+function navigateToCurrentView() {
+    const requestedRoute = window.location.hash.slice(1) || "home";
+
+    const views = document.querySelectorAll(".page-view");
+
+    const matchingView = [...views].find(
+        view => view.id === requestedRoute
+    );
+
+    const activeRoute = matchingView ? requestedRoute : "home";
+
+    // Display the selected page and hide the rest.
+    views.forEach(view => {
+        view.hidden = view.id !== activeRoute;
+    });
+
+    if (activeRoute === "search") {
+        document.querySelector("#search-input")?.focus({ preventScroll: true });
+    }
+
+    // Update the active navigation link for accessibility.
+    const navigationLinks = document.querySelectorAll(
+        ".nav-icons a[href^='#'], .nav-icons-bottom a[href^='#']"
+    );
+
+    navigationLinks.forEach(link => {
+        if (link.getAttribute("href") === `#${activeRoute}`) {
+            link.setAttribute("aria-current", "page");
+        } else {
+            link.removeAttribute("aria-current");
+        }
+    });
+
+    // Correct invalid routes instead of leaving a dead fragment.
+    if (!matchingView && requestedRoute !== "home") {
+        window.location.hash = "home";
+    }
+}
+
+window.addEventListener("hashchange", navigateToCurrentView);
+
+navigateToCurrentView();
+
+// Live TMDB search for the #search view, reusing the shelf cards.
+const searchInput = document.querySelector("#search-input");
+const searchResults = document.querySelector("#search-results");
+const searchStatus = document.querySelector("#search-status");
+const searchClear = document.querySelector("#search-clear");
+
+let searchRequestId = 0;
+let searchDebounceTimer;
+
+async function runSearch(query) {
+    const trimmed = query.trim();
+
+    if (!searchResults || !searchStatus) {
+        return;
+    }
+
+    if (!trimmed) {
+        searchResults.replaceChildren();
+        searchStatus.textContent = "Type above to search TMDB.";
+        return;
+    }
+
+    const requestId = ++searchRequestId;
+
+    searchResults.replaceChildren();
+    searchStatus.textContent = `Searching for “${trimmed}”…`;
+
+    try {
+        const data = await tmdb("/search/multi", {
+            query: trimmed,
+            language: TMDB_LANGUAGE,
+            page: 1,
+            include_adult: "false"
+        });
+
+        // Drop stale responses when typing fast.
+        if (requestId !== searchRequestId) {
+            return;
+        }
+
+        const matches = (data.results || [])
+            .filter(media =>
+                ["movie", "tv"].includes(media.media_type) &&
+                media.poster_path
+            )
+            .slice(0, 18);
+
+        if (matches.length === 0) {
+            searchStatus.textContent = `No results for “${trimmed}”.`;
+            return;
+        }
+
+        const total = Number(data.total_results) || matches.length;
+
+        searchStatus.textContent =
+            `Showing ${matches.length} of ${total} result${total === 1 ? "" : "s"} for “${trimmed}”.`;
+
+        matches.forEach(media => {
+            const card = createMediaCard(media);
+
+            searchResults.append(card);
+            fitCardTitle(card);
+        });
+    } catch (error) {
+        if (requestId !== searchRequestId) {
+            return;
+        }
+
+        console.error("Search failed:", error);
+        searchStatus.textContent = "Unable to search right now. Try again.";
+    }
+}
+
+if (searchInput) {
+    searchInput.addEventListener("input", () => {
+        clearTimeout(searchDebounceTimer);
+
+        if (searchClear) {
+            searchClear.hidden = searchInput.value.length === 0;
+        }
+
+        searchDebounceTimer = setTimeout(() => {
+            runSearch(searchInput.value);
+        }, 350);
+    });
+
+    searchInput.addEventListener("keydown", event => {
+        if (event.key === "Escape" && searchInput.value) {
+            searchInput.value = "";
+            searchInput.dispatchEvent(new Event("input"));
+        }
+    });
+}
+
+if (searchClear) {
+    searchClear.addEventListener("click", () => {
+        if (!searchInput) {
+            return;
+        }
+
+        searchInput.value = "";
+        searchInput.dispatchEvent(new Event("input"));
+        searchInput.focus();
+    });
+}

@@ -199,6 +199,123 @@ button {
     transform: rotate(160deg) scale(1.15);
 }
 
+.page-view[hidden] {
+    display: none !important;
+}
+
+.page-header {
+    padding: 48px 24px 24px;
+}
+
+.page-eyebrow {
+    margin: 0 0 10px;
+    color: #99999f;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+}
+
+.page-header h2 {
+    margin: 0 0 12px;
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 650;
+}
+
+.page-header > p:last-child {
+    color: #aaaab0;
+    line-height: 1.6;
+}
+
+/* Search view */
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin: 0 24px 8px;
+    padding: 0 18px;
+    min-height: 52px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: #141518;
+    color: #f5f3ef;
+}
+
+.search-bar:focus-within {
+    border-color: rgba(255, 255, 255, 0.32);
+}
+
+.search-bar .material-symbols-rounded {
+    color: #8e8e93;
+    flex: 0 0 auto;
+}
+
+#search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    border: 0;
+    outline: 0;
+    background: transparent;
+    padding: 14px 0;
+
+    font: inherit;
+    font-size: 16px;
+    color: inherit;
+}
+
+#search-input::placeholder {
+    color: #8e8e93;
+}
+
+#search-input::-webkit-search-cancel-button {
+    display: none;
+}
+
+.search-clear {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+
+    width: 32px;
+    height: 32px;
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    color: #f5f3ef;
+    cursor: pointer;
+}
+
+.search-clear[hidden] {
+    display: none;
+}
+
+.search-clear:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.search-status {
+    margin: 12px 24px 16px;
+    color: #8e8e93;
+    font-size: 13px;
+}
+
+.search-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 18px 12px;
+
+    padding: 0 24px 40px;
+}
+
+.search-grid .media-card {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+}
+
 /* Main content */
 .page-content {
     margin-left: 72px;
