@@ -261,13 +261,20 @@ h1 {
     bottom: 42px;
     z-index: 2;
 
-    width: 192px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    /* Shrink-to-fit, so the control grows as dots are added. */
+    width: auto;
+    max-width: min(60vw, 480px);
     height: 36px;
 }
 
 .hero-arrow {
     display: grid;
     place-items: center;
+    flex: 0 0 auto;
 
     width: 36px;
     height: 36px;
@@ -279,17 +286,6 @@ h1 {
     color: #f5f3ef;
 
     cursor: pointer;
-
-    position: absolute;
-    top: 0;
-}
-
-#hero-prev {
-    left: 0;
-}
-
-#hero-next {
-    right: 0;
 }
 
 .hero-arrow:hover {
@@ -297,19 +293,23 @@ h1 {
 }
 
 .hero-dots {
-    position: absolute;
-    left: 44px;
-    right: 44px;
-    top: 50%;
-    transform: translateY(-50%);
-
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 7px;
+    flex: 0 1 auto;
+    min-width: 0;
 
-    overflow: hidden;
-    white-space: nowrap;
+    padding: 8px 2px;
+
+    /* Scroll internally once dots exceed the max width. */
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+}
+
+.hero-dots::-webkit-scrollbar {
+    display: none;
 }
 
 .hero-dot {
@@ -559,12 +559,14 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
     .media-card,
     .media-image,
-    .hero-content-enter {
+    .hero-content-enter,
+    .hero-dot {
         animation: none;
         transition: none;
     }
 
-    .media-row {
+    .media-row,
+    .hero-dots {
         scroll-behavior: auto;
     }
 }

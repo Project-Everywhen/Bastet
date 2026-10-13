@@ -275,6 +275,35 @@ function updateCarouselDots(activeIndex) {
             dot.removeAttribute("aria-current");
         }
     });
+
+    scrollActiveDotIntoView(dotsContainer, activeIndex);
+}
+
+// Center the active dot within the scrollable dots strip.
+// Uses manual scroll math (instead of scrollIntoView) so the page
+// itself never scrolls as a side effect.
+function scrollActiveDotIntoView(dotsContainer, activeIndex, behavior) {
+    const dots = dotsContainer.querySelectorAll(".hero-dot");
+    const dot = dots[activeIndex];
+
+    if (!dot) {
+        return;
+    }
+
+    const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+    ).matches;
+    const scrollBehavior = behavior || (reduceMotion ? "auto" : "smooth");
+
+    const containerRect = dotsContainer.getBoundingClientRect();
+    const dotRect = dot.getBoundingClientRect();
+    const targetLeft =
+        dotsContainer.scrollLeft +
+        (dotRect.left - containerRect.left) -
+        dotsContainer.clientWidth / 2 +
+        dotRect.width / 2;
+
+    dotsContainer.scrollTo({ left: targetLeft, top: 0, behavior: scrollBehavior });
 }
 
 function createCarouselDots(activeIndex = currentFeaturedIndex) {
@@ -315,6 +344,9 @@ function createCarouselDots(activeIndex = currentFeaturedIndex) {
     });
 
     dotsContainer.append(fragment);
+
+    // Snap the initial active dot into view without animating.
+    scrollActiveDotIntoView(dotsContainer, activeIndex, "auto");
 }
 
 async function showFeaturedMovie(index) {
