@@ -617,6 +617,11 @@ h1 {
     overflow-x: auto;
     overflow-y: hidden;
 
+    /* Bleed past the shelf padding to the viewport edge, so the
+       next card peeks in and scrolling is discoverable. */
+    margin-right: -24px;
+    padding-right: 24px;
+
     scroll-behavior: auto;
     overscroll-behavior-x: contain;
 }
