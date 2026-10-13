@@ -398,13 +398,18 @@ h1 {
     cursor: default;
 }
 
-.media-row.is-dragging {
+.media-row {
     scroll-behavior: auto;
+    overscroll-behavior-x: contain;
+}
+
+.media-row.is-dragging {
     user-select: none;
 }
 
 .media-row.is-dragging .media-track {
     transition: none;
+    will-change: transform;
 }
 
 .media-row.is-springing .media-track {
@@ -414,6 +419,7 @@ h1 {
 .media-row img {
     -webkit-user-drag: none;
     user-select: none;
+    pointer-events: none;
 }
 
 /* Hide scrollbars for WebKit browsers */
