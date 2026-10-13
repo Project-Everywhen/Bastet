@@ -44,10 +44,10 @@ async function tmdb(path, params = {}) {
 }
 
 // Find the configured featured movie, then request its full details and images.
-async function loadFeaturedMovie() {
+async function loadFeaturedMovie(featuredConfig) {
     const search = await tmdb("/search/movie", {
-        query: FEATURED_MOVIES.query,
-        year: FEATURED_MOVIES.year,
+        query: featuredConfig.query,
+        year: featuredConfig.year,
         include_adult: false,
         language: TMDB_LANUAGE
     });
@@ -133,7 +133,7 @@ function renderFeaturedMovie(movie, searchResult) {
 
 // Surface startup or network errors in the UI so they are visible to developers
 // and users instead of failing silently.
-loadFeaturedMovie().catch(error => {
+loadFeaturedMovie(FEATURED_MOVIES[0]).catch(error => {
     console.error(error);
 
     const status = document.querySelector("#app-status");
