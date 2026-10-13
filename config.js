@@ -10,3 +10,9 @@ export const FEATURED_MOVIES = [
     { id: 157336,mediaType: "movie", query: "Interstellar", year: 2014 },
     { id: 27205, mediaType: "movie", query: "Inception", year: 2010 }
 ];
+
+export const CONTINUE_WATCHING = [
+    { id: 157336, mediaType: "movie", progress: 64 },
+    { id: 27205, mediaType: "movie", progress: 37 },
+    { id: 155, mediaType: "movie", progress: 81 }
+];

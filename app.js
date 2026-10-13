@@ -2,7 +2,8 @@ import {
     TMDB_ACCESS_TOKEN,
     TMDB_API_KEY,
     TMDB_LANUAGE,
-    FEATURED_MOVIES
+    FEATURED_MOVIES,
+    CONTINUE_WATCHING
 } from "./config.js";
 
 const API_BASE = "https://api.themoviedb.org/3";
@@ -79,6 +80,72 @@ function imageUrl(path, size) {
         : "";
 }
 
+function createMediaCard(media, options = {}) {
+    const { progress } = options;
+    const isContinue = Number.isFinite(progress);
+
+    const title = media.title || media.name || "Untitled";
+    const releaseDate = media.release_date || media.first_air_date || "";
+
+    const card = document.createElement("article");
+    card.className = `media-card ${
+        isContinue ? "media-card--continue" : "media-card--poster"
+    }`;
+
+    const artwork = document.createElement("div");
+    artwork.className = "media-art";
+
+    const posterPath = isContinue
+        ? media.backdrop_path || media.poster_path
+        : media.poster_path || media.backdrop_path;
+
+    if (posterPath) {
+        const image = document.createElement("img");
+
+        image.className = "media-image";
+        image.src = imageUrl(
+            posterPath,
+            isContinue ? "w780" : "w342"
+        );
+        image.alt = `${title} ${isContinue ? "backdrop" : "poster"}`;
+        image.loading = "lazy";
+
+        artwork.append(image);
+    } else {
+        artwork.textContent = "Artwork unavailable";
+    }
+
+    if (isContinue) {
+        const track = document.createElement("div");
+        track.className = "media-progress";
+
+        const fill = document.createElement("div");
+        fill.className = "media-progress-fill";
+        fill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+
+        track.append(fill);
+        artwork.append(track);
+    }
+
+    const details = document.createElement("div");
+    details.className = "media-card-details";
+
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+
+    const metadata = document.createElement("p");
+    const year = releaseDate.slice(0, 4) || "—";
+
+    metadata.textContent = isContinue
+        ? `${year} · ${progress}% watched`
+        : `${year} · ★ ${Number(media.vote_average || 0).toFixed(1)}`;
+
+    details.append(heading, metadata);
+    card.append(artwork, details);
+
+    return card;
+}
+
 // Populate the hero section with the movie's title, artwork, and metadata.
 function renderFeaturedMovie(movie, searchResult) {
     const hero = document.querySelector("#featured-hero");
@@ -135,6 +202,15 @@ function renderFeaturedMovie(movie, searchResult) {
 
     document.querySelector("#featured-synopsis").textContent =
         movie.overview || "No synopsis is available.";
+
+    const heroCopy = document.querySelector(".hero-copy");
+
+    heroCopy.classList.remove("hero-content-enter");
+
+    // Restart the animation for each newly rendered movie.
+    void heroCopy.offsetWidth;
+
+    heroCopy.classList.add("hero-content-enter");
 }
 
 function updateCarouselDots(activeIndex) {
@@ -232,7 +308,280 @@ document.querySelector("#hero-next").addEventListener("click", () => {
     showFeaturedMovie(currentFeaturedIndex + 1);
 });
 
-// Surface startup or network errors in the UI so they are visible to developers
-// and users instead of failing silently.
+const hero = document.querySelector("#featured-hero");
+let heroAutoplayTimer;
+
+function startHeroAutoplay() {
+    clearInterval(heroAutoplayTimer);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return;
+    }
+
+    heroAutoplayTimer = setInterval(() => {
+        if (
+            document.hidden ||
+            hero.matches(":hover") ||
+            hero.contains(document.activeElement) ||
+            isFeaturedLoading
+        ) {
+            return;
+        }
+
+        showFeaturedMovie(currentFeaturedIndex + 1);
+    }, 8000);
+}
+
+function stopHeroAutoplay() {
+    clearInterval(heroAutoplayTimer);
+}
+
+hero.addEventListener("mouseenter", stopHeroAutoplay);
+hero.addEventListener("mouseleave", startHeroAutoplay);
+
+hero.addEventListener("focusin", stopHeroAutoplay);
+
+hero.addEventListener("focusout", event => {
+    if (!hero.contains(event.relatedTarget)) {
+        startHeroAutoplay();
+    }
+});
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        stopHeroAutoplay();
+    } else {
+        startHeroAutoplay();
+    }
+});
+
+document.querySelectorAll(".shelf-arrow").forEach(button => {
+    button.addEventListener("click", () => {
+        const row = document.getElementById(button.dataset.target);
+        const direction = Number(button.dataset.direction);
+
+        row.scrollBy({
+            left: direction * row.clientWidth * 0.8,
+            behavior: "smooth"
+        });
+    });
+});
+
+async function loadContinueWatching() {
+    const container = document.querySelector("#continue-row");
+    container.replaceChildren();
+
+    const results = await Promise.all(
+        CONTINUE_WATCHING.map(async entry => {
+            try {
+                const type = entry.mediaType === "tv" ? "tv" : "movie";
+
+                const media = await tmdb(`/${type}/${entry.id}`, {
+                    language: TMDB_LANUAGE
+                });
+
+                return {
+                    media: { ...media, media_type: type },
+                    progress: entry.progress
+                };
+            } catch (error) {
+                console.warn(
+                    `Could not load Continue Watching item ${entry.id}:`,
+                    error
+                );
+
+                return null;
+            }
+        })
+    );
+
+    const validItems = results.filter(Boolean);
+
+    if (validItems.length === 0) {
+        container.textContent = "No Continue Watching titles available.";
+        return;
+    }
+
+    validItems.forEach(({ media, progress }, index) => {
+        const card = createMediaCard(media, { progress });
+
+        card.style.animationDelay = `${index * 35}ms`;
+        container.append(card);
+    });
+}
+
+async function loadTrending() {
+
+    const container = document.querySelector("#trending-row");
+    container.replaceChildren();
+
+    try {
+        const data = await tmdb("/trending/all/week", {
+            language: TMDB_LANUAGE
+        });
+
+        const trendingItems = (data.results || [])
+            .filter(media =>
+                ["movie", "tv"].includes(media.media_type) &&
+                media.poster_path
+            )
+            .slice(0, 14);
+
+        if (trendingItems.length === 0) {
+            container.textContent = "No trending titles available.";
+            return;
+        }
+
+        trendingItems.forEach((media, index) => {
+            const card = createMediaCard(media);
+
+            card.style.animationDelay = `${index * 35}ms`;
+            container.append(card);
+        });
+    } catch (error) {
+        console.error("Could not load trending titles:", error);
+        container.textContent = "Unable to load trending titles.";
+    }
+}
+
+function enableMouseDragScroll(row) {
+    let pointerDown = false;
+    let dragged = false;
+    let suppressClick = false;
+
+    let startX = 0;
+    let startScrollLeft = 0;
+
+    const setRubberBand = value => {
+        row.style.setProperty("--rubber-band", `${value}px`);
+    };
+
+    row.addEventListener("pointerdown", event => {
+        // Only handle the left mouse button.
+        // Touchscreens retain their native scrolling behavior.
+        if (event.pointerType !== "mouse" || event.button !== 0) {
+            return;
+        }
+
+        // Don't hijack future buttons or links inside a shelf.
+        if (event.target.closest("button, a, input, select, textarea")) {
+            return;
+        }
+
+        pointerDown = true;
+        dragged = false;
+        suppressClick = false;
+
+        startX = event.clientX;
+        startScrollLeft = row.scrollLeft;
+
+        row.classList.remove("is-springing");
+        row.classList.add("is-dragging");
+
+        setRubberBand(0);
+        row.setPointerCapture(event.pointerId);
+    });
+
+    row.addEventListener("pointermove", event => {
+        if (!pointerDown) {
+            return;
+        }
+
+        const deltaX = event.clientX - startX;
+
+        // Ignore tiny movements so normal clicks still work.
+        if (!dragged && Math.abs(deltaX) < 5) {
+            return;
+        }
+
+        dragged = true;
+        event.preventDefault();
+
+        const maxScroll = Math.max(
+            0,
+            row.scrollWidth - row.clientWidth
+        );
+
+        // No overflow means there is nothing to drag.
+        if (maxScroll === 0) {
+            row.scrollLeft = 0;
+            setRubberBand(0);
+            return;
+        }
+
+        const desiredScroll = startScrollLeft - deltaX;
+
+        if (desiredScroll < 0) {
+            // Pulled beyond the left edge.
+            row.scrollLeft = 0;
+            setRubberBand(
+                Math.min(30, -desiredScroll * 0.22)
+            );
+        } else if (desiredScroll > maxScroll) {
+            // Pulled beyond the right edge.
+            row.scrollLeft = maxScroll;
+            setRubberBand(
+                -Math.min(30, (desiredScroll - maxScroll) * 0.22)
+            );
+        } else {
+            // Normal movement inside the scrollable range.
+            row.scrollLeft = desiredScroll;
+            setRubberBand(0);
+        }
+    });
+
+    function finishDrag(event) {
+        if (!pointerDown) {
+            return;
+        }
+
+        pointerDown = false;
+        row.classList.remove("is-dragging");
+
+        if (dragged) {
+            suppressClick = true;
+
+            // Animate the rubber-band displacement back to zero.
+            row.classList.add("is-springing");
+            setRubberBand(0);
+        }
+
+        if (row.hasPointerCapture(event.pointerId)) {
+            row.releasePointerCapture(event.pointerId);
+        }
+    }
+
+    row.addEventListener("pointerup", finishDrag);
+    row.addEventListener("pointercancel", finishDrag);
+
+    // Prevent a drag from accidentally triggering a card click.
+    row.addEventListener("click", event => {
+        if (suppressClick) {
+            event.preventDefault();
+            event.stopPropagation();
+            suppressClick = false;
+        }
+    });
+
+    // Prevent the browser's native image-drag ghost.
+    row.addEventListener("dragstart", event => {
+        event.preventDefault();
+    });
+
+    row.addEventListener("transitionend", event => {
+        if (
+            event.propertyName === "transform" &&
+            !pointerDown
+        ) {
+            row.classList.remove("is-springing");
+        }
+    });
+}
+
 createCarouselDots();
-showFeaturedMovie(0);
+showFeaturedMovie(0).then(startHeroAutoplay);
+
+document.querySelectorAll(".media-row").forEach(enableMouseDragScroll);
+
+loadContinueWatching();
+loadTrending();
