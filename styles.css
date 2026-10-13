@@ -999,6 +999,12 @@ h1 {
         padding: 6px 12px;
         border-radius: 28px;
 
+        /* Crisp hairline + lift so the rounded pill outline reads
+           through the backdrop blur instead of melting into it. */
+        border: 1px solid var(--line-frost);
+        box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.45);
+        background-clip: padding-box;
+
         /* Same acrylic, fading upward instead of sideways. */
         background: linear-gradient(
             0deg,
