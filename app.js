@@ -213,59 +213,40 @@ function renderFeaturedMovie(movie, searchResult) {
     heroCopy.classList.add("hero-content-enter");
 }
 
-const MAX_VISIBLE_HERO_DOTS = 5;
-
 function updateCarouselDots(activeIndex) {
-    const dotsContainer = document.querySelector("#hero-dots");
-    const total = FEATURED_MOVIES.length;
+    const dots = document.querySelectorAll(".hero-dot");
 
-    if (total === 0) {
-        dotsContainer.replaceChildren();
-        return;
-    }
-
-    // Only render as many indicators as can fit between the arrows.
-    const visibleCount = Math.min(MAX_VISIBLE_HERO_DOTS, total);
-    const firstIndex = Math.max(
-        0,
-        Math.min(
-            activeIndex - Math.floor(visibleCount / 2),
-            total - visibleCount
-        )
-    );
-
-    const fragment = document.createDocumentFragment();
-
-    for (
-        let index = firstIndex;
-        index < firstIndex + visibleCount;
-        index++
-    ) {
-        const featuredMovie = FEATURED_MOVIES[index];
-        const title = featuredMovie.title ||
-            featuredMovie.name ||
-            `featured item ${index + 1}`;
-
-        const dot = document.createElement("button");
-        dot.type = "button";
-        dot.className = "hero-dot";
-        dot.setAttribute("aria-label", `Show ${title}`);
-
+    dots.forEach((dot, index) => {
         if (index === activeIndex) {
             dot.setAttribute("aria-current", "true");
+        } else {
+            dot.removeAttribute("aria-current");
         }
+    });
+}
+
+function createCarouselDots() {
+    const dotsContainer = document.querySelector("#hero-dots");
+
+    dotsContainer.replaceChildren();
+
+    FEATURED_MOVIES.forEach((featuredMovie, index) => {
+        const dot = document.createElement("button");
+
+        dot.type = "button";
+        dot.className = "hero-dot";
+        dot.setAttribute(
+            "aria-label",
+            `Show ${featuredMovie.title}`
+        );
 
         dot.addEventListener("click", () => {
             showFeaturedMovie(index);
         });
 
-        fragment.append(dot);
-    }
+        dotsContainer.append(dot);
+    });
 
-    dotsContainer.replaceChildren(fragment);
-}
-
-function createCarouselDots() {
     updateCarouselDots(currentFeaturedIndex);
 }
 
@@ -463,7 +444,8 @@ async function loadTrending() {
     }
 }
 
-function or(".media-track");
+function enableMouseDragScroll(row) {
+    const track = row.querySelector(".media-track");
 
     if (!track) {
         console.warn("Missing .media-track inside", row);
