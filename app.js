@@ -456,135 +456,176 @@ function enableMouseDragScroll(row) {
     let startX = 0;
     let latestX = 0;
     let startScrollLeft = 0;
-    let maxScrollAtStart = 0;
-
+    let maxScroll = 0;
     let dragging = false;
     let frameId = 0;
+    let momentumFrame = 0;
     let suppressClickUntil = 0;
+    let lastSamples = [];
+    let lastFrameTime = 0;
+    let velocity = 0;
+
+    const MAX_RUBBER_BAND = 28;
+    const RUBBER_RESISTANCE = 0.18;
+    const FRICTION = 0.92;
+    const EDGE_FRICTION = 0.72;
+    const MIN_VELOCITY = 0.035; // px/ms
+    const MAX_VELOCITY = 2.2;   // px/ms
+
+    function setRubberBand(value) {
+        track.style.setProperty("--rubber-band", `${value}px`);
+    }
+
+    function measureScrollRange() {
+        maxScroll = Math.max(0, row.scrollWidth - row.clientWidth);
+    }
+
+    function samplePointer(x, time) {
+        lastSamples.push({ x, time });
+        // Use recent samples only, so release velocity reflects the final flick.
+        lastSamples = lastSamples.filter(sample => time - sample.time <= 100);
+        if (lastSamples.length > 6) lastSamples.shift();
+    }
+
+    function estimateVelocity() {
+        if (lastSamples.length < 2) return 0;
+
+        const first = lastSamples[0];
+        const last = lastSamples[lastSamples.length - 1];
+        const elapsed = last.time - first.time;
+        if (elapsed <= 0) return 0;
+
+        // Scroll direction is opposite to the pointer's horizontal direction.
+        const estimate = -(last.x - first.x) / elapsed;
+        return Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, estimate));
+    }
 
     function updateDragPosition() {
         frameId = 0;
-
         if (!dragging) return;
 
-        const deltaX = latestX - startX;
-        const desiredScroll = startScrollLeft - deltaX;
+        const desiredScroll = startScrollLeft - (latestX - startX);
 
         if (desiredScroll < 0) {
             row.scrollLeft = 0;
-
-            const resistance = Math.min(
-                28,
-                -desiredScroll * 0.18
-            );
-
-            track.style.setProperty(
-                "--rubber-band",
-                `${resistance}px`
-            );
-        } else if (desiredScroll > maxScrollAtStart) {
-            row.scrollLeft = maxScrollAtStart;
-
-            const resistance = Math.min(
-                28,
-                (desiredScroll - maxScrollAtStart) * 0.18
-            );
-
-            track.style.setProperty(
-                "--rubber-band",
-                `${-resistance}px`
-            );
+            setRubberBand(Math.min(MAX_RUBBER_BAND, -desiredScroll * RUBBER_RESISTANCE));
+        } else if (desiredScroll > maxScroll) {
+            row.scrollLeft = maxScroll;
+            setRubberBand(-Math.min(MAX_RUBBER_BAND, (desiredScroll - maxScroll) * RUBBER_RESISTANCE));
         } else {
             row.scrollLeft = desiredScroll;
-            track.style.setProperty("--rubber-band", "0px");
+            setRubberBand(0);
+        }
+    }
+
+    function stopMomentum() {
+        if (momentumFrame) cancelAnimationFrame(momentumFrame);
+        momentumFrame = 0;
+        lastFrameTime = 0;
+        velocity = 0;
+    }
+
+    function animateMomentum(now) {
+        momentumFrame = 0;
+
+        if (!lastFrameTime) lastFrameTime = now;
+        const deltaTime = Math.min(32, now - lastFrameTime);
+        lastFrameTime = now;
+
+        const max = Math.max(0, row.scrollWidth - row.clientWidth);
+        const next = row.scrollLeft + velocity * deltaTime;
+
+        if (next <= 0 || next >= max) {
+            row.scrollLeft = Math.max(0, Math.min(max, next));
+            velocity *= Math.pow(EDGE_FRICTION, deltaTime / 16.667);
+        } else {
+            row.scrollLeft = next;
+            velocity *= Math.pow(FRICTION, deltaTime / 16.667);
+        }
+
+        if (Math.abs(velocity) >= MIN_VELOCITY) {
+            momentumFrame = requestAnimationFrame(animateMomentum);
+        } else {
+            stopMomentum();
         }
     }
 
     row.addEventListener("pointerdown", event => {
-        if (event.pointerType !== "mouse" || event.button !== 0) {
+        if (event.pointerType !== "mouse" || event.button !== 0) return;
+
+        if (event.target.closest("button, a, input, select, textarea, [role='button']")) {
             return;
         }
 
-        if (
-            event.target.closest(
-                "button, a, input, select, textarea, [role='button']"
-            )
-        ) {
-            return;
-        }
+        stopMomentum();
+        measureScrollRange();
 
         pointerId = event.pointerId;
         startX = latestX = event.clientX;
         startScrollLeft = row.scrollLeft;
-
-        // Measure once, before any rubber-band transform is applied.
-        maxScrollAtStart = Math.max(
-            0,
-            row.scrollWidth - row.clientWidth
-        );
-
+        lastSamples = [];
+        samplePointer(startX, performance.now());
         dragging = false;
 
         row.classList.remove("is-springing");
-        track.style.setProperty("--rubber-band", "0px");
+        setRubberBand(0);
     });
 
     row.addEventListener("pointermove", event => {
         if (event.pointerId !== pointerId) return;
 
         latestX = event.clientX;
+        samplePointer(latestX, performance.now());
 
-        // Ignore tiny mouse movements so ordinary clicks still work.
-        if (!dragging && Math.abs(latestX - startX) < 4) {
-            return;
-        }
+        if (!dragging && Math.abs(latestX - startX) < 4) return;
 
         if (!dragging) {
             dragging = true;
             row.classList.add("is-dragging");
-
             row.setPointerCapture(event.pointerId);
         }
 
         event.preventDefault();
 
-        // Coalesce frequent pointer events into one visual update per frame.
-        if (!frameId) {
-            frameId = requestAnimationFrame(updateDragPosition);
-        }
+        // At most one scroll update per rendered frame.
+        if (!frameId) frameId = requestAnimationFrame(updateDragPosition);
     });
 
     function finishDrag(event) {
         if (event.pointerId !== pointerId) return;
 
-        // Apply the final pointer position before releasing.
         if (dragging) {
             latestX = event.clientX;
+            samplePointer(latestX, performance.now());
 
-            if (frameId) {
-                cancelAnimationFrame(frameId);
-                frameId = 0;
-            }
-
+            if (frameId) cancelAnimationFrame(frameId);
+            frameId = 0;
             updateDragPosition();
         }
 
         const wasDragging = dragging;
+        const releaseVelocity = wasDragging ? estimateVelocity() : 0;
 
         pointerId = null;
         dragging = false;
-
         row.classList.remove("is-dragging");
 
         if (wasDragging) {
             suppressClickUntil = performance.now() + 250;
 
+            // Animate the visual edge offset back to zero.
             row.classList.add("is-springing");
-            track.style.setProperty("--rubber-band", "0px");
+            setRubberBand(0);
         }
 
         if (row.hasPointerCapture(event.pointerId)) {
             row.releasePointerCapture(event.pointerId);
+        }
+
+        if (wasDragging && Math.abs(releaseVelocity) >= MIN_VELOCITY) {
+            velocity = releaseVelocity;
+            lastFrameTime = 0;
+            momentumFrame = requestAnimationFrame(animateMomentum);
         }
     }
 
@@ -599,9 +640,7 @@ function enableMouseDragScroll(row) {
         }
     }, true);
 
-    row.addEventListener("dragstart", event => {
-        event.preventDefault();
-    });
+    row.addEventListener("dragstart", event => event.preventDefault());
 
     track.addEventListener("transitionend", event => {
         if (event.propertyName === "transform" && !dragging) {
@@ -609,7 +648,6 @@ function enableMouseDragScroll(row) {
         }
     });
 }
-
 createCarouselDots();
 showFeaturedMovie(0).then(startHeroAutoplay);
 
