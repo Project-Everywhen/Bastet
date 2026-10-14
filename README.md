@@ -1,4 +1,4 @@
-# Bastet — Phase 1.5: TMDB artwork
+# Bastet — Phase 2.5
 
 This version keeps the project in plain HTML, CSS and JavaScript modules. It loads featured movie/TV details, transparent title logos, backdrops, Continue Watching cards, and trending posters from TMDB.
 

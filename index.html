@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://api.themoviedb.org">
   <link rel="preconnect" href="https://image.tmdb.org">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=explore,favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle,close&display=block">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=2">
   <script type="module" src="app.js"></script>
 </head>
 <body>
@@ -26,28 +26,34 @@
         <nav class="nav-icons" aria-label="Main navigation">
             <a href="#home" aria-label="Home" title="Home" aria-current="page">
                 <span class="material-symbols-rounded" aria-hidden="true">home</span>
+                <span class="nav-label" aria-hidden="true">Home</span>
             </a>
 
             <a id="discover-link" href="#discover" aria-label="Discover" title="Discover">
                 <span class="material-symbols-rounded" aria-hidden="true">explore</span>
+                <span class="nav-label" aria-hidden="true">Discover</span>
             </a>
 
             <a id="search-link" href="#search" aria-label="Search" title="Search">
                 <span class="material-symbols-rounded" aria-hidden="true">search</span>
+                <span class="nav-label" aria-hidden="true">Search</span>
             </a>
 
             <a href="#library" aria-label="Library" title="Library">
                 <span class="material-symbols-rounded" aria-hidden="true">favorite</span>
+                <span class="nav-label" aria-hidden="true">Library</span>
             </a>
         </nav>
 
         <div class="nav-icons-bottom">
-            <a id="settings-link" href="#setting" aria-label="Settings" title="Settings">
+            <a id="settings-link" href="/settings.html" aria-label="Settings" title="Settings">
                 <span class="material-symbols-rounded" aria-hidden="true">settings</span>
+                <span class="nav-label" aria-hidden="true">Settings</span>
             </a>
 
             <a href="#profile" aria-label="Profile" title="Profile">
                 <span class="material-symbols-rounded" aria-hidden="true">account_circle</span>
+                <span class="nav-label" aria-hidden="true">Profile</span>
             </a>
         </div>
     </aside>
@@ -248,6 +254,18 @@
             <h2>Profile</h2>
             <p>Profile and account options will appear here.</p>
         </header>
+        <nav class="profile-menu" aria-label="Account options">
+            <a class="profile-menu-item" href="/settings.html">
+                <span class="material-symbols-rounded" aria-hidden="true">settings</span>
+                <span class="profile-menu-label">Settings</span>
+                <span class="material-symbols-rounded profile-menu-chevron" aria-hidden="true">chevron_right</span>
+            </a>
+            <a class="profile-menu-item" href="/login.html">
+                <span class="material-symbols-rounded" aria-hidden="true">account_circle</span>
+                <span class="profile-menu-label">Log In</span>
+                <span class="material-symbols-rounded profile-menu-chevron" aria-hidden="true">chevron_right</span>
+            </a>
+        </nav>
     </section>
     </main>
 </body>

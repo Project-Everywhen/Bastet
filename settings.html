@@ -1,0 +1,664 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings | Bastet</title>
+
+<style>
+:root {
+  --bg: #0b0b0f;
+  --panel: #15151c;
+  --panel2: #1e1e27;
+  --text: #f5f5f7;
+  --muted: #a1a1b0;
+  --border: #30303b;
+  --accent: #a78bfa;
+  --danger: #ff7373;
+}
+
+body.light {
+  --bg: #f5f5fa;
+  --panel: #ffffff;
+  --panel2: #eeeef5;
+  --text: #191923;
+  --muted: #666678;
+  --border: #ddddE8;
+  --accent: #7554dc;
+  --danger: #d93045;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, sans-serif;
+  transition: background .2s, color .2s;
+}
+
+header {
+  height: 72px;
+  padding: 0 7%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: 850;
+  letter-spacing: -1px;
+  color: var(--accent);
+}
+
+header a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 45px auto;
+  padding: 0 22px;
+}
+
+h1 {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+.subtitle, .muted {
+  color: var(--muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 25px;
+  margin-top: 32px;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+nav button {
+  text-align: left;
+  background: transparent;
+  color: var(--muted);
+  border: 0;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+nav button.active,
+nav button:hover {
+  background: var(--panel2);
+  color: var(--text);
+}
+
+section {
+  display: none;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 25px;
+}
+
+section.active {
+  display: block;
+}
+
+section h2 {
+  margin-top: 0;
+  font-size: 22px;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 19px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.setting:last-child {
+  border-bottom: none;
+}
+
+.setting h3 {
+  font-size: 15px;
+  margin: 0 0 5px;
+}
+
+.setting p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0;
+}
+
+input, select {
+  accent-color: var(--accent);
+}
+
+select, .action {
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  border-radius: 9px;
+  max-width: 170px;
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 25px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  background: #555563;
+  cursor: pointer;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 19px;
+  width: 19px;
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background: white;
+  transition: .2s;
+}
+
+.switch input:checked + .slider {
+  background: var(--accent);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(19px);
+}
+
+.genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  padding-top: 14px;
+}
+
+.genre {
+  padding: 9px 13px;
+  border-radius: 25px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.genre input {
+  margin-right: 5px;
+}
+
+.primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 11px 16px;
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 9px;
+  padding: 11px 16px;
+  cursor: pointer;
+}
+
+.status {
+  color: var(--accent);
+  font-size: 13px;
+  min-height: 20px;
+  margin-top: 16px;
+}
+
+footer {
+  text-align: center;
+  padding: 28px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media(max-width: 650px) {
+  header { padding: 0 20px; }
+  .container { margin-top: 28px; padding: 0 14px; }
+  .layout { grid-template-columns: 1fr; }
+  nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  nav button { white-space: nowrap; }
+  section { padding: 18px; }
+  .setting { gap: 12px; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="logo">BASTET</div>
+  <a href="index.html">← Back to home</a>
+</header>
+
+<main class="container">
+  <h1>Settings</h1>
+  <p class="subtitle">Customize your Bastet experience.</p>
+
+  <div class="layout">
+    <nav aria-label="Settings categories">
+      <button class="active" data-tab="appearance">🎨 Appearance</button>
+      <button data-tab="content">🎬 Content</button>
+      <button data-tab="notifications">🔔 Notifications</button>
+      <button data-tab="privacy">🔒 Privacy</button>
+      <button data-tab="playback">▶ Playback</button>
+      <button data-tab="account">⚙ Data & Account</button>
+    </nav>
+
+    <div>
+      <section id="appearance" class="active">
+        <h2>Appearance</h2>
+        <p class="muted">Make Bastet look the way you like.</p>
+
+        <div class="setting">
+          <div>
+            <h3>Theme</h3>
+            <p>Choose a light or dark interface.</p>
+          </div>
+          <select data-setting="theme" id="theme">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+          </select>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Compact layout</h3>
+            <p>Reduce spacing between settings.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" data-setting="compact">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Language</h3>
+            <p>Select your preferred language.</p>
+          </div>
+          <select data-setting="language">
+            <option value="en">English</option>
+            <option value="ml">Malayalam</option>
+            <option value="hi">Hindi</option>
+            <option value="ta">Tamil</option>
+          </select>
+        </div>
+      </section>
+
+      <section id="content">
+        <h2>Content preferences</h2>
+        <p class="muted">Choose the content you enjoy.</p>
+
+        <h3>Favorite genres</h3>
+        <div class="genres">
+          <label class="genre"><input type="checkbox" data-genre="Action">Action</label>
+          <label class="genre"><input type="checkbox" data-genre="Comedy">Comedy</label>
+          <label class="genre"><input type="checkbox" data-genre="Drama">Drama</label>
+          <label class="genre"><input type="checkbox" data-genre="Horror">Horror</label>
+          <label class="genre"><input type="checkbox" data-genre="Thriller">Thriller</label>
+          <label class="genre"><input type="checkbox" data-genre="Romance">Romance</label>
+          <label class="genre"><input type="checkbox" data-genre="Sci-Fi">Sci-Fi</label>
+          <label class="genre"><input type="checkbox" data-genre="Animation">Animation</label>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Preferred content</h3>
+            <p>Choose which titles to explore.</p>
+          </div>
+          <select data-setting="contentType">
+            <option value="all">Movies & TV</option>
+            <option value="movies">Movies only</option>
+            <option value="tv">TV shows only</option>
+          </select>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Hide adult-rated titles</h3>
+            <p>Filter mature-rated content where supported.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" data-setting="hideMature">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <section id="notifications">
+        <h2>Notifications</h2>
+        <p class="muted">Control your notification preferences.</p>
+
+        <div class="setting">
+          <div>
+            <h3>New releases</h3>
+            <p>Updates about new movie and TV releases.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" data-setting="newReleases">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Watchlist reminders</h3>
+            <p>Reminders about titles on your watchlist.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" data-setting="watchlistReminders">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Product updates</h3>
+            <p>News about new Bastet features.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" data-setting="productUpdates">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="muted">These options store your preferences; actual alerts need a notification service.</p>
+      </section>
+
+      <section id="privacy">
+        <h2>Privacy</h2>
+        <p class="muted">Manage your local privacy preferences.</p>
+
+        <div class="setting">
+          <div>
+            <h3>Private watchlist</h3>
+            <p>Preference for keeping your watchlist private.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" data-setting="privateWatchlist" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Save search history</h3>
+            <p>Allow the app to remember your searches.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" data-setting="searchHistory">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <section id="playback">
+        <h2>Playback & streaming</h2>
+        <p class="muted">Set your viewing preferences.</p>
+
+        <div class="setting">
+          <div>
+            <h3>Autoplay previews</h3>
+            <p>Allow previews to play automatically where supported.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" data-setting="autoplay">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Video quality</h3>
+            <p>Preferred quality when the player supports it.</p>
+          </div>
+          <select data-setting="quality">
+            <option value="auto">Auto</option>
+            <option value="720p">720p</option>
+            <option value="1080p">1080p</option>
+            <option value="4k">4K</option>
+          </select>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Preferred streaming service</h3>
+            <p>Choose a service to prioritize in supported listings.</p>
+          </div>
+          <select data-setting="streaming">
+            <option value="none">No preference</option>
+            <option value="netflix">Netflix</option>
+            <option value="prime">Prime Video</option>
+            <option value="disney">Disney+</option>
+            <option value="youtube">YouTube</option>
+          </select>
+        </div>
+      </section>
+
+      <section id="account">
+        <h2>Data & account</h2>
+        <p class="muted">Export or reset settings stored in this browser.</p>
+
+        <div class="setting">
+          <div>
+            <h3>Export preferences</h3>
+            <p>Download a JSON copy of your settings.</p>
+          </div>
+          <button class="action" id="export">Export</button>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Reset preferences</h3>
+            <p>Restore the default settings on this device.</p>
+          </div>
+          <button class="danger" id="reset">Reset</button>
+        </div>
+
+        <div class="setting">
+          <div>
+            <h3>Application</h3>
+            <p>Bastet Settings UI · Version 1.0</p>
+          </div>
+        </div>
+      </section>
+
+      <button class="primary" id="save" style="margin-top:22px">
+        Save settings
+      </button>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+</main>
+
+<footer>BASTET · Your personal entertainment space</footer>
+
+<script>
+const STORAGE_KEY = "bastet-settings-v1";
+
+const defaults = {
+  theme: "dark",
+  compact: false,
+  language: "en",
+  genres: [],
+  contentType: "all",
+  hideMature: false,
+  newReleases: true,
+  watchlistReminders: true,
+  productUpdates: false,
+  privateWatchlist: true,
+  searchHistory: false,
+  autoplay: false,
+  quality: "auto",
+  streaming: "none"
+};
+
+function loadSettings() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return {
+      ...defaults,
+      ...(stored && typeof stored === "object" &&
+        !Array.isArray(stored) ? stored : {})
+    };
+  } catch {
+    return { ...defaults };
+  }
+}
+
+let settings = loadSettings();
+
+function applySettings() {
+  document.body.classList.toggle(
+    "light", settings.theme === "light"
+  );
+
+  document.body.classList.toggle(
+    "compact", settings.compact
+  );
+
+  document.querySelectorAll("[data-setting]").forEach(el => {
+    const key = el.dataset.setting;
+    if (el.type === "checkbox") {
+      el.checked = Boolean(settings[key]);
+    } else {
+      el.value = settings[key] ?? defaults[key];
+    }
+  });
+
+  document.querySelectorAll("[data-genre]").forEach(el => {
+    el.checked = settings.genres.includes(el.dataset.genre);
+  });
+}
+
+function readForm() {
+  const next = { ...settings };
+
+  document.querySelectorAll("[data-setting]").forEach(el => {
+    const key = el.dataset.setting;
+    next[key] = el.type === "checkbox" ? el.checked : el.value;
+  });
+
+  next.genres = [...document.querySelectorAll("[data-genre]:checked")]
+    .map(el => el.dataset.genre);
+
+  return next;
+}
+
+function showStatus(message) {
+  document.getElementById("status").textContent = message;
+}
+
+document.querySelectorAll("nav button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("nav button").forEach(b =>
+      b.classList.toggle("active", b === button)
+    );
+
+    document.querySelectorAll("section").forEach(section =>
+      section.classList.toggle(
+        "active", section.id === button.dataset.tab
+      )
+    );
+
+    showStatus("");
+  });
+});
+
+document.getElementById("theme").addEventListener("change", event => {
+  document.body.classList.toggle("light", event.target.value === "light");
+});
+
+document.getElementById("save").addEventListener("click", () => {
+  settings = readForm();
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    applySettings();
+    showStatus("✓ Settings saved on this device.");
+  } catch {
+    showStatus("Could not save settings. Check browser storage permissions.");
+  }
+});
+
+document.getElementById("export").addEventListener("click", () => {
+  const data = new Blob(
+    [JSON.stringify(readForm(), null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(data);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "bastet-settings.json";
+  link.click();
+  URL.revokeObjectURL(url);
+
+  showStatus("Settings export requested.");
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  if (!confirm("Reset all Bastet preferences on this device?")) return;
+
+  settings = { ...defaults };
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    applySettings();
+    showStatus("Preferences restored to defaults.");
+  } catch {
+    showStatus("Could not save the reset preferences.");
+  }
+});
+
+applySettings();
+</script>
+</body>
+</html>
