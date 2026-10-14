@@ -984,10 +984,10 @@ h1 {
         left: 12px;
 
         /* Centered floating bar: capped just past content width so
-           no dead space sits inside the pill. Content is ~309px
-           (5 fixed 52px links + gaps + divider + padding). */
+           no dead space sits inside the pill. Content is ~389px
+           (5×68px links + gaps + divider + padding). */
         width: auto;
-        max-width: 312px;
+        max-width: 392px;
         margin-inline: auto;
         height: auto;
         flex-direction: row;
@@ -1060,10 +1060,12 @@ h1 {
         flex: none;
 
         /* Fixed uniform container: identical highlight box for
-           every icon regardless of label length. */
-        width: 52px;
-        padding: 4px 0;
-        transition: padding 260ms ease 90ms, gap 200ms ease 90ms, width 200ms ease 90ms;
+           every icon regardless of label length. Horizontal padding
+           widens the highlight without touching icon size
+           (box-sizing is border-box globally). */
+        min-width: 68px;
+        padding: 4px 8px;
+        transition: padding 260ms ease 90ms, gap 200ms ease 90ms, width 200ms ease 90ms, min-width 200ms ease 90ms;
     }
 
     .sidebar.is-compact .nav-icons,
@@ -1076,6 +1078,7 @@ h1 {
         padding: 2px 0;
         gap: 0;
         width: 44px;
+        min-width: 0;
     }
 
     /* Highlighted box around the selected icon, echoing the
