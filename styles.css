@@ -1127,7 +1127,7 @@ h1 {
 
     .hero {
         margin-left: 0;
-        padding: 16px 18px 64px;
+        padding: 16px 18px 48px;
     }
 
     /* Centered hero composition: copy, logo, meta, and CTA. */
@@ -1139,7 +1139,7 @@ h1 {
     .hero-logo {
         object-position: center;
         margin-inline: auto;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
     }
 
     .metadata {
@@ -1155,7 +1155,7 @@ h1 {
     /* Single centered CTA on mobile; Watchlist stays on desktop. */
     .hero-actions {
         justify-content: center;
-        margin-top: 14px;
+        margin-top: 4px;
     }
 
     .hero-actions .quiet-button {
