@@ -1228,6 +1228,20 @@ h1 {
     }
 }
 
+/* Small phones: 68px boxes overflow below ~415px viewports, so step
+   down to narrower uniform boxes with a matching tighter cap.
+   Content is ~329px (5×56px links + gaps + divider + padding). */
+@media (max-width: 430px) {
+    .sidebar {
+        max-width: 332px;
+    }
+
+    .nav-icons a,
+    .nav-icons-bottom a {
+        min-width: 56px;
+    }
+}
+
 @keyframes card-enter {
     from {
         opacity: 0;
