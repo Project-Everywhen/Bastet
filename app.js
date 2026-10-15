@@ -694,6 +694,14 @@ hero.addEventListener("pointerdown", event => {
     clearTimeout(heroSnapTimer);
     resetHeroDragVisual();
 
+    // Capture the pointer so move/up/cancel keep reaching the hero
+    // even when the cursor leaves it or the screen.
+    try {
+        hero.setPointerCapture(event.pointerId);
+    } catch {
+        // Already released; the stale-gesture guards below cover it.
+    }
+
     heroSwipeX = event.clientX;
     heroSwipeY = event.clientY;
     heroSwipeStart = performance.now();
@@ -746,6 +754,14 @@ function endHeroSwipe(event) {
     heroSwipeY = null;
     heroSwiping = false;
     clearTimeout(heroSnapTimer);
+
+    try {
+        if (hero.hasPointerCapture(event.pointerId)) {
+            hero.releasePointerCapture(event.pointerId);
+        }
+    } catch {
+        // Pointer was already released; nothing to clean up.
+    }
 
     const reduceMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"

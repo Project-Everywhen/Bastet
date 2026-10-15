@@ -324,11 +324,6 @@ button {
     color: var(--text-primary);
     transform: rotate(-1deg) scale(1.15);
 }
-#discover-link:hover .material-symbols-rounded,
-#discover-link:focus-visible .material-symbols-rounded {
-    transform: rotate(160deg) scale(1.15);
-}
-
 #settings-link:hover .material-symbols-rounded,
 #settings-link:focus-visible .material-symbols-rounded {
     transform: rotate(160deg) scale(1.15);
@@ -984,10 +979,10 @@ h1 {
         left: 12px;
 
         /* Centered floating bar: capped just past content width so
-           no dead space sits inside the pill. Content is ~389px
-           (5×68px links + gaps + divider + padding). */
+           no dead space sits inside the pill. Content is ~313px
+           (4×68px links + gaps + divider + padding). */
         width: auto;
-        max-width: 392px;
+        max-width: 316px;
         margin-inline: auto;
         height: auto;
         flex-direction: row;
@@ -1028,11 +1023,12 @@ h1 {
     }
 
     .sidebar.is-compact {
-        padding: 2px 4px;
+        padding: 2px;
+        gap: 4px;
 
-        /* Tight cap matched to content (~249px: 5×44px links +
-           gaps + divider + padding) so no dead air stays inside. */
-        max-width: 252px;
+        /* Tight cap matched to content (~191px: 4×44px links +
+           tighter gaps + divider + padding). */
+        max-width: 194px;
     }
 
     .brand-mark {
@@ -1070,7 +1066,7 @@ h1 {
 
     .sidebar.is-compact .nav-icons,
     .sidebar.is-compact .nav-icons-bottom {
-        gap: 4px;
+        gap: 2px;
     }
 
     .sidebar.is-compact .nav-icons a,
@@ -1230,10 +1226,10 @@ h1 {
 
 /* Small phones: 68px boxes overflow below ~415px viewports, so step
    down to narrower uniform boxes with a matching tighter cap.
-   Content is ~329px (5×56px links + gaps + divider + padding). */
+   Content is ~265px (4×56px links + gaps + divider + padding). */
 @media (max-width: 430px) {
     .sidebar {
-        max-width: 332px;
+        max-width: 268px;
     }
 
     .nav-icons a,

@@ -9,8 +9,8 @@
   <title>Bastet — Discover something worth watching</title>
   <link rel="preconnect" href="https://api.themoviedb.org">
   <link rel="preconnect" href="https://image.tmdb.org">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=explore,favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle,close,switch_account&display=block">
-  <link rel="stylesheet" href="styles.css?v=2">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle,close&display=block">
+  <link rel="stylesheet" href="styles.css?v=2.0">
   <script type="module" src="app.js"></script>
 </head>
 <body>
@@ -29,11 +29,6 @@
                 <span class="nav-label" aria-hidden="true">Home</span>
             </a>
 
-            <a id="discover-link" href="#discover" aria-label="Discover" title="Discover">
-                <span class="material-symbols-rounded" aria-hidden="true">explore</span>
-                <span class="nav-label" aria-hidden="true">Discover</span>
-            </a>
-
             <a id="search-link" href="#search" aria-label="Search" title="Search">
                 <span class="material-symbols-rounded" aria-hidden="true">search</span>
                 <span class="nav-label" aria-hidden="true">Search</span>
@@ -46,7 +41,7 @@
         </nav>
 
         <div class="nav-icons-bottom">
-            <a id="settings-link" href="/settings.html" aria-label="Settings" title="Settings">
+            <a id="settings-link" href="#settings" aria-label="Settings" title="Settings">
                 <span class="material-symbols-rounded" aria-hidden="true">settings</span>
                 <span class="nav-label" aria-hidden="true">Settings</span>
             </a>
@@ -190,19 +185,6 @@
         </section>
     </section>
 
-    <section id="discover" class="page-view" hidden>
-        <header class="page-header">
-            <p class="page-eyebrow">EXPLORE</p>
-            <h2>Discover</h2>
-            <p>Find your next favourite movie or series.</p>
-        </header>
-
-        <section class="shelf">
-            <h2>Explore titles</h2>
-            <p>Your Discover feed will appear here.</p>
-        </section>
-    </section>
-
     <section id="search" class="page-view" hidden>
         <header class="page-header">
             <p class="page-eyebrow">FIND SOMETHING TO WATCH</p>
@@ -255,19 +237,9 @@
             <p>Profile and account options will appear here.</p>
         </header>
         <nav class="profile-menu" aria-label="Account options">
-            <a class="profile-menu-item" href="/settings.html">
+            <a class="profile-menu-item" href="#settings">
                 <span class="material-symbols-rounded" aria-hidden="true">settings</span>
                 <span class="profile-menu-label">Settings</span>
-                <span class="material-symbols-rounded profile-menu-chevron" aria-hidden="true">chevron_right</span>
-            </a>
-            <a class="profile-menu-item" href="/login.html">
-                <span class="material-symbols-rounded" aria-hidden="true">account_circle</span>
-                <span class="profile-menu-label">Log In</span>
-                <span class="material-symbols-rounded profile-menu-chevron" aria-hidden="true">chevron_right</span>
-            </a>
-            <a class="profile-menu-item" href="/switcher.html">
-                <span class="material-symbols-rounded" aria-hidden="true">switch_account</span>
-                <span class="profile-menu-label">Switch Account</span>
                 <span class="material-symbols-rounded profile-menu-chevron" aria-hidden="true">chevron_right</span>
             </a>
         </nav>
