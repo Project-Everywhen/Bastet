@@ -67,6 +67,8 @@
 .discover-prototype .spotlight-meta { margin: 23px 0 10px; color: var(--text-soft); font-size: 10px; letter-spacing: .14em; font-weight: 700; }
 .discover-prototype .spotlight-meta span { margin: 0 8px; color: var(--discover-coral); }
 .discover-prototype .spotlight-content h2 { margin: 0; font-size: clamp(42px, 6vw, 68px); line-height: .99; letter-spacing: -.07em; font-weight: 720; }
+.discover-prototype .spotlight-logo { display: block; width: min(320px, 100%); max-height: 110px; object-fit: contain; object-position: left center; margin: 0 0 8px; filter: drop-shadow(0 4px 24px var(--shadow-logo)); }
+.discover-prototype .spotlight-logo[hidden] { display: none; }
 .discover-prototype .spotlight-content h2 em { color: var(--discover-lilac); font-style: normal; }
 .discover-prototype .spotlight-description { color: var(--text-body); max-width: 350px; margin: 16px 0 22px; line-height: 1.65; font-size: 13px; }
 .discover-prototype .spotlight-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
@@ -186,6 +188,7 @@
   .discover-prototype .spotlight-image { object-position: 61% center; }
   .discover-prototype .spotlight-content { padding: 24px 21px 32px; }
   .discover-prototype .spotlight-content h2 { font-size: 48px; }
+  .discover-prototype .spotlight-logo { width: min(240px, 100%); max-height: 84px; }
   .discover-prototype .spotlight-meta { font-size: 8px; margin-top: 21px; }
   .discover-prototype .spotlight-description { max-width: 285px; font-size: 12px; }
   .discover-prototype .primary-action { font-size: 12px; min-height: 43px; padding: 0 15px; }

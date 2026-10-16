@@ -1664,6 +1664,7 @@ async function loadDiscoverCatalog() {
 async function loadDiscoverSpotlight() {
     const image = discoverRoot.querySelector("#spotlight-image");
     const meta = discoverRoot.querySelector("#spotlight-meta");
+    const logo = discoverRoot.querySelector("#spotlight-logo");
     const title = discoverRoot.querySelector("#spotlight-title");
     const description = discoverRoot.querySelector("#spotlight-description");
     const rating = discoverRoot.querySelector("#spotlight-rating");
@@ -1694,7 +1695,46 @@ async function loadDiscoverSpotlight() {
         image.src = imageUrl(pick.backdrop_path, "w1280");
         image.alt = "";
         meta.textContent = `FEATURED PICK • ${year} • ${mood}`;
+
+        // Text title first so there is always a fallback, then swap in
+        // the TMDB-served logo when one is available.
         title.textContent = pickTitle;
+        title.hidden = false;
+
+        if (logo) {
+            logo.hidden = true;
+            logo.removeAttribute("src");
+            logo.alt = "";
+            logo.onerror = null;
+        }
+
+        const mediaType = pick.media_type === "tv" ? "tv" : "movie";
+
+        tmdb(`/${mediaType}/${pick.id}`, {
+            language: TMDB_LANGUAGE,
+            append_to_response: "images",
+            include_image_language: "en,null"
+        }).then(details => {
+            const logos = details?.images?.logos || [];
+            const selectedLogo =
+                logos.find(item => item.iso_639_1 === "en") ||
+                logos.find(item => item.iso_639_1 === null) ||
+                logos[0];
+
+            if (selectedLogo?.file_path && logo) {
+                logo.src = imageUrl(selectedLogo.file_path, "w500");
+                logo.alt = `${pickTitle} logo`;
+                logo.hidden = false;
+                title.hidden = true;
+
+                logo.onerror = () => {
+                    logo.hidden = true;
+                    title.hidden = false;
+                };
+            }
+        }).catch(() => {
+            // Logo is progressive enhancement; the text title stays.
+        });
 
         const overview = (pick.overview || "").trim();
         description.textContent = overview.length > 160
