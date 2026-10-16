@@ -981,11 +981,11 @@ h1 {
         bottom: calc(12px + env(safe-area-inset-bottom));
         left: 12px;
 
-        /* Centered floating bar: capped just past content width so
-           no dead space sits inside the pill. Content is ~313px
+        /* Centered floating bar: hug content so side gaps equal
+           the 4px top/bottom padding. Content is ~313px
            (4×68px links + gaps + divider + padding). */
-        width: auto;
-        max-width: 316px;
+        width: fit-content;
+        max-width: calc(100vw - 24px);
         margin-inline: auto;
         height: auto;
         flex-direction: row;
