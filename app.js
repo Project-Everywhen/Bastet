@@ -201,17 +201,9 @@ function createMediaCard(media, options = {}) {
     const year = releaseDate.slice(0, 4) || "—";
 
     if (isContinue) {
-        const track = document.createElement("div");
-        track.className = "media-progress";
-
-        const fill = document.createElement("div");
-        fill.className = "media-progress-fill";
-        fill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
-
-        track.append(fill);
-        artwork.append(track);
-
-        // Title lives on the artwork, above the progress bar.
+        // Title lives on the artwork, above the progress bar. The
+        // overlay goes in first so its dark gradient never dims the
+        // white progress fill painted after it.
         const overlay = document.createElement("div");
         overlay.className = "media-overlay";
 
@@ -227,6 +219,16 @@ function createMediaCard(media, options = {}) {
 
         overlay.append(heading, metadata);
         artwork.append(overlay);
+
+        const track = document.createElement("div");
+        track.className = "media-progress";
+
+        const fill = document.createElement("div");
+        fill.className = "media-progress-fill";
+        fill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+
+        track.append(fill);
+        artwork.append(track);
 
         card.append(artwork);
 
@@ -992,7 +994,9 @@ function enableMouseDragScroll(row) {
     const MAX_VELOCITY = 2.2;   // px/ms
 
     function setRubberBand(value) {
-        track.style.setProperty("--rubber-band", `${value}px`);
+        track.style.transform = value
+            ? `translate3d(${value}px, 0, 0)`
+            : "";
     }
 
     function measureScrollRange() {
@@ -1425,5 +1429,39 @@ if (searchClear) {
         searchInput.value = "";
         searchInput.dispatchEvent(new Event("input"));
         searchInput.focus();
+    });
+}
+
+// Settings & Profile views: prototype-only feedback announcer.
+// Future localStorage persistence hooks in here.
+const spFeedback = document.querySelector("#sp-feedback");
+
+function announceSettingsFeedback(message) {
+    if (!spFeedback) {
+        return;
+    }
+
+    spFeedback.textContent = message;
+    spFeedback.hidden = false;
+}
+
+document.querySelectorAll("[data-demo-message]").forEach(button => {
+    button.addEventListener("click", () => {
+        announceSettingsFeedback(button.dataset.demoMessage);
+    });
+});
+
+const spSettingsForm = document.querySelector("#sp-settings-form");
+
+if (spSettingsForm) {
+    spSettingsForm.addEventListener("submit", event => {
+        event.preventDefault();
+        announceSettingsFeedback("Preview only — your changes have not been saved.");
+    });
+
+    spSettingsForm.addEventListener("reset", () => {
+        window.setTimeout(() => {
+            announceSettingsFeedback("Preferences reset to the prototype defaults.");
+        }, 0);
     });
 }
