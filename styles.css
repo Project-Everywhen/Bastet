@@ -458,8 +458,7 @@ button {
     display: flex;
     align-items: flex-end;
 
-    /* Swipable banner: grab cursor, vertical page scroll untouched. */
-    cursor: grab;
+    /* Swipable banner (no grab cursor); vertical page scroll untouched. */
     touch-action: pan-y;
 
     /* Full-bleed underneath the floating sidebar rail; copy stays
@@ -646,8 +645,10 @@ h1 {
     height: 36px;
     padding: 0;
 
-    border: 0;
+    /* Light acrylic hairline, like the mobile nav pill. */
+    border: 1px solid var(--line-frost);
     border-radius: 50%;
+    background-clip: padding-box;
 
     /* Dark acrylic tint like the sidebar, so the blur reads clearly. */
     background: var(--tint-control);
@@ -756,13 +757,9 @@ h1 {
     overflow-y: hidden;
 
     /* Bleed past the shelf padding to the viewport edge, so the
-       next card peeks in and scrolling is discoverable. The left
-       side drops its padding instead, starting the first card flush
-       at the sidebar edge and flowing underneath it when scrolled. */
+       next card peeks in and scrolling is discoverable. */
     margin-right: -24px;
     padding-right: 24px;
-    margin-left: -24px;
-    padding-left: 0;
 
     scroll-behavior: auto;
     overscroll-behavior-x: contain;
@@ -775,15 +772,9 @@ h1 {
 
     width: max-content;
     min-width: 100%;
-
-    /* Left air lives on the scrollable track (not the row) so it
-       scrolls off and travelling posters still reach the edge. */
     padding-bottom: 8px;
-    padding-left: 8px;
 
-    /* No resting transform: a permanent compositing layer blinds the
-       sidebar's backdrop-filter over scrolled cards. JS applies the
-       rubber-band translate inline only while it is nonzero. */
+    transform: translate3d(var(--rubber-band, 0px), 0, 0);
 }
 
 .media-row,
@@ -1214,8 +1205,6 @@ h1 {
     .media-row {
         margin-right: -16px;
         padding-right: 16px;
-        margin-left: -16px;
-        padding-left: 0;
     }
 
     .media-card {
