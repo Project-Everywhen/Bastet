@@ -992,7 +992,9 @@ function enableMouseDragScroll(row) {
     const MAX_VELOCITY = 2.2;   // px/ms
 
     function setRubberBand(value) {
-        track.style.setProperty("--rubber-band", `${value}px`);
+        track.style.transform = value
+            ? `translate3d(${value}px, 0, 0)`
+            : "";
     }
 
     function measureScrollRange() {
