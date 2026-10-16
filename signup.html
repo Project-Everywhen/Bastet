@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in | CineMatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="text/javascript" src="validation.js" defer></script>
+</head>
+<body>
+  <main class="card">
+    <aside class="side">
+      <p class="brand">CineMatch<small>by Bastet</small></p>
+      <div>
+        <p class="pitch">Your next favourite film is waiting.</p>
+        <div class="perf" aria-hidden="true"></div>
+      </div>
+    </aside>
+
+    <section class="form-wrap">
+      <h1>New Here? Sign up</h1>
+      <p class="sub">Sign up and enter the world of Movies.</p>
+
+      <form id="loginForm" novalidate>
+        <div class="field" id="nameField">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="Firstname" required>
+          
+        </div>
+
+        <div class="field" id="emailField">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="field" id="passField">
+          <label for="password">Password</label>
+          <div class="input-row">
+            <input type="password" id="password" name="password" required>
+          </div>
+        </div>
+
+        <div class="field" id="repeatpassField">
+          <label for="repeatPassword">Repeat Password</label>
+          <div class="input-row">
+            <input type="password" id="repeatPassword" name="Repeatpassword" required>
+          </div>
+        </div>
+
+
+        <button type="submit" class="btn" id="submitBtn">Sign up</button>
+        <p class="form-msg" id="formMsg" role="status" aria-live="polite"></p>
+      </form>
+
+      <p class="alt">Already have an account? <a href="login.html">Login to your account</a></p>
+    </section>
+  </main>
+</body>
+</html>
