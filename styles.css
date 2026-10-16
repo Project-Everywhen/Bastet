@@ -458,8 +458,7 @@ button {
     display: flex;
     align-items: flex-end;
 
-    /* Swipable banner: grab cursor, vertical page scroll untouched. */
-    cursor: grab;
+    /* Swipable banner (no grab cursor); vertical page scroll untouched. */
     touch-action: pan-y;
 
     /* Full-bleed underneath the floating sidebar rail; copy stays
@@ -646,8 +645,10 @@ h1 {
     height: 36px;
     padding: 0;
 
-    border: 0;
+    /* Light acrylic hairline, like the mobile nav pill. */
+    border: 1px solid var(--line-frost);
     border-radius: 50%;
+    background-clip: padding-box;
 
     /* Dark acrylic tint like the sidebar, so the blur reads clearly. */
     background: var(--tint-control);
