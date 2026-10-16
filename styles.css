@@ -496,11 +496,24 @@ h1 {
 }
 
 .rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     white-space: nowrap;
 }
 
 .rating > span {
     color: inherit;
+}
+
+.rating-star,
+.rating .material-symbols-rounded {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15em;
+    line-height: 1;
+    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 20;
 }
 
 .synopsis {
@@ -898,9 +911,21 @@ h1 {
 }
 
 .media-card-details p {
+    display: flex;
+    align-items: center;
+    gap: 3px;
     margin: 0;
     color: var(--text-muted);
     font-size: 11px;
+}
+
+.media-card-details p .material-symbols-rounded {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 20;
 }
 
 /* Half-width windows and smaller: drop the synopsis to reduce clutter. */

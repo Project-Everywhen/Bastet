@@ -9,7 +9,7 @@
   <title>Bastet — Discover something worth watching</title>
   <link rel="preconnect" href="https://api.themoviedb.org">
   <link rel="preconnect" href="https://image.tmdb.org">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle,close,tune,verified_user,devices,edit,arrow_forward,workspace_premium,help,logout,palette,play_circle,translate,shield,notifications,info,check,explore,arrow_drop_down&display=block">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle,close,tune,verified_user,devices,edit,arrow_forward,workspace_premium,help,logout,palette,play_circle,translate,shield,notifications,info,check,explore,arrow_drop_down,star&display=block">
   <link rel="stylesheet" href="styles.css?v=2.0">
   <link rel="stylesheet" href="settings.css">
   <link rel="stylesheet" href="discover.css">
@@ -73,7 +73,7 @@
                     <span id="featured-year">0000</span>
                     <span class="meta-separator">•</span>
                     <span class="rating">
-                        ★ <span id="featured-rating">0.0</span>
+                        <span class="material-symbols-rounded rating-star" aria-hidden="true">star</span> <span id="featured-rating">0.0</span>
                     </span>
                     <span class="meta-separator">•</span>
                     <span id="featured-genres">Hey there :)</span>
@@ -224,7 +224,7 @@
                         <p class="spotlight-meta" id="spotlight-meta">FEATURED PICK</p>
                         <h2 id="spotlight-title">Loading spotlight…</h2>
                         <p class="spotlight-description" id="spotlight-description">Fetching this week's pick from TMDB.</p>
-                        <div class="spotlight-actions"><button type="button" class="primary-action" id="spotlight-browse"><span aria-hidden="true">▶</span> Explore the collection</button><span class="spotlight-rating" id="spotlight-rating"></span></div>
+                        <div class="spotlight-actions"><button type="button" class="primary-action" id="spotlight-browse"><span class="material-symbols-rounded" aria-hidden="true">play_circle</span> Explore the collection</button><span class="spotlight-rating" id="spotlight-rating"></span></div>
                     </div>
                 </div>
             </section>
@@ -243,7 +243,6 @@
                     <div class="genre-dropdown" data-genre-dropdown>
                         <span class="sr-only" id="genre-dropdown-caption">Choose genre</span>
                         <button type="button" class="genre-dropdown-button" id="genre-dropdown-button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="genre-dropdown-caption genre-dropdown-label">
-                            <span class="select-icon" aria-hidden="true">☷</span>
                             <span class="genre-dropdown-label" id="genre-dropdown-label">All genres</span>
                             <span class="material-symbols-rounded genre-dropdown-chevron" aria-hidden="true">arrow_drop_down</span>
                         </button>
@@ -263,7 +262,7 @@
                 </div>
                 <div class="catalog-grid" id="catalog-grid" aria-live="polite"></div>
                 <div class="empty-state" id="empty-state" hidden>
-                    <div class="empty-icon" aria-hidden="true">✳</div><h3>No titles in this orbit. Yet.</h3><p>Try another genre or switch your filters to discover something new.</p><button type="button" class="reset-filters" id="reset-filters">Reset filters <span aria-hidden="true">↗</span></button>
+                    <h3>No titles in this orbit. Yet.</h3><p>Try another genre or switch your filters to discover something new.</p><button type="button" class="reset-filters" id="reset-filters">Reset filters</button>
                 </div>
             </section>
         </div>

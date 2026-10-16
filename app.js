@@ -162,6 +162,15 @@ function imageUrl(path, size) {
         : "";
 }
 
+// Filled rating star with standard grade, weight and optical size.
+function createStarIcon(extraClass = "") {
+    const icon = document.createElement("span");
+    icon.className = `material-symbols-rounded rating-star${extraClass ? ` ${extraClass}` : ""}`;
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = "star";
+    return icon;
+}
+
 function createMediaCard(media, options = {}) {
     const { progress } = options;
     const isContinue = Number.isFinite(progress);
@@ -244,8 +253,11 @@ function createMediaCard(media, options = {}) {
     heading.append(label);
 
     const metadata = document.createElement("p");
-    metadata.textContent =
-        `${year} · ★ ${Number(media.vote_average || 0).toFixed(1)}`;
+    metadata.append(
+        `${year} · `,
+        createStarIcon(),
+        ` ${Number(media.vote_average || 0).toFixed(1)}`
+    );
 
     details.append(heading, metadata);
     card.append(artwork, details);
@@ -1555,7 +1567,7 @@ function createDiscoverCard(media) {
 
     const ratingBadge = document.createElement("span");
     ratingBadge.className = "rating";
-    ratingBadge.textContent = `★ ${rating}`;
+    ratingBadge.append(createStarIcon(), ` ${rating}`);
 
     const metadata = document.createElement("p");
     metadata.textContent = `${year} • ${typeLabel} `;
@@ -1691,7 +1703,7 @@ async function loadDiscoverSpotlight() {
 
         const score = Number(pick.vote_average || 0).toFixed(1);
         rating.textContent = "";
-        rating.append("★ ", Object.assign(document.createElement("b"), { textContent: score }), " / 10");
+        rating.append(createStarIcon(), " ", Object.assign(document.createElement("b"), { textContent: score }), " / 10");
     } catch (error) {
         console.error("Could not load the discover spotlight:", error);
         title.textContent = "Spotlight unavailable";
