@@ -307,21 +307,22 @@ button {
 }
 
 .page-eyebrow {
-    margin: 0 0 10px;
+    margin: 0 0 6px;
     color: var(--text-faint);
     font-size: 12px;
     letter-spacing: 0.14em;
 }
 
 .page-header h2 {
-    margin: 0 0 12px;
+    margin: 0 0 6px;
     font-size: clamp(28px, 3vw, 40px);
     font-weight: 650;
 }
 
 .page-header > p:last-child {
+    margin: 0;
     color: var(--text-soft);
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* Search view */
