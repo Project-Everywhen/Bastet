@@ -586,6 +586,10 @@ h1 {
     background: var(--tint-control);
     color: var(--text-quiet);
 
+    /* Light acrylic hairline, like the mobile nav pill. */
+    border: 1px solid var(--line-frost);
+    background-clip: padding-box;
+
     /* Frosted acrylic accent, matching the sidebar rail. */
     -webkit-backdrop-filter: blur(16px) saturate(140%);
     backdrop-filter: blur(16px) saturate(140%);
@@ -641,8 +645,10 @@ h1 {
     height: 36px;
     padding: 0;
 
-    border: 0;
+    /* Light acrylic hairline, like the mobile nav pill. */
+    border: 1px solid var(--line-frost);
     border-radius: 50%;
+    background-clip: padding-box;
 
     /* Dark acrylic tint like the sidebar, so the blur reads clearly. */
     background: var(--tint-control);
@@ -766,7 +772,11 @@ h1 {
 
     width: max-content;
     min-width: 100%;
+
+    /* Left air lives on the scrollable track (not the row) so it
+       scrolls off and travelling posters still reach the edge. */
     padding-bottom: 8px;
+    padding-left: 8px;
 
     transform: translate3d(var(--rubber-band, 0px), 0, 0);
 }
