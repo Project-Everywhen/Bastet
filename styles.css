@@ -587,6 +587,10 @@ h1 {
     background: var(--tint-control);
     color: var(--text-quiet);
 
+    /* Light acrylic hairline, like the mobile nav pill. */
+    border: 1px solid var(--line-frost);
+    background-clip: padding-box;
+
     /* Frosted acrylic accent, matching the sidebar rail. */
     -webkit-backdrop-filter: blur(16px) saturate(140%);
     backdrop-filter: blur(16px) saturate(140%);
@@ -752,9 +756,13 @@ h1 {
     overflow-y: hidden;
 
     /* Bleed past the shelf padding to the viewport edge, so the
-       next card peeks in and scrolling is discoverable. */
+       next card peeks in and scrolling is discoverable. The left
+       side drops its padding instead, starting the first card flush
+       at the sidebar edge and flowing underneath it when scrolled. */
     margin-right: -24px;
     padding-right: 24px;
+    margin-left: -24px;
+    padding-left: 0;
 
     scroll-behavior: auto;
     overscroll-behavior-x: contain;
@@ -767,9 +775,15 @@ h1 {
 
     width: max-content;
     min-width: 100%;
-    padding-bottom: 8px;
 
-    transform: translate3d(var(--rubber-band, 0px), 0, 0);
+    /* Left air lives on the scrollable track (not the row) so it
+       scrolls off and travelling posters still reach the edge. */
+    padding-bottom: 8px;
+    padding-left: 8px;
+
+    /* No resting transform: a permanent compositing layer blinds the
+       sidebar's backdrop-filter over scrolled cards. JS applies the
+       rubber-band translate inline only while it is nonzero. */
 }
 
 .media-row,
@@ -1200,6 +1214,8 @@ h1 {
     .media-row {
         margin-right: -16px;
         padding-right: 16px;
+        margin-left: -16px;
+        padding-left: 0;
     }
 
     .media-card {
