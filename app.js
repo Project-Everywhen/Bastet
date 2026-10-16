@@ -201,17 +201,9 @@ function createMediaCard(media, options = {}) {
     const year = releaseDate.slice(0, 4) || "—";
 
     if (isContinue) {
-        const track = document.createElement("div");
-        track.className = "media-progress";
-
-        const fill = document.createElement("div");
-        fill.className = "media-progress-fill";
-        fill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
-
-        track.append(fill);
-        artwork.append(track);
-
-        // Title lives on the artwork, above the progress bar.
+        // Title lives on the artwork, above the progress bar. The
+        // overlay goes in first so its dark gradient never dims the
+        // white progress fill painted after it.
         const overlay = document.createElement("div");
         overlay.className = "media-overlay";
 
@@ -227,6 +219,16 @@ function createMediaCard(media, options = {}) {
 
         overlay.append(heading, metadata);
         artwork.append(overlay);
+
+        const track = document.createElement("div");
+        track.className = "media-progress";
+
+        const fill = document.createElement("div");
+        fill.className = "media-progress-fill";
+        fill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+
+        track.append(fill);
+        artwork.append(track);
 
         card.append(artwork);
 
