@@ -415,6 +415,10 @@ button {
     padding: 0 24px 40px;
 }
 
+.search-grid:empty {
+    display: none;
+}
+
 .search-grid .media-card {
     flex: none;
     width: 100%;
