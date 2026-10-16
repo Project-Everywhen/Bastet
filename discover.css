@@ -162,11 +162,12 @@
   .discover-prototype .catalog-grid { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 24px 14px; }
   .discover-prototype .movie-title-row { display: block; }
   .discover-prototype .rating { display: inline-block; margin-top: 4px; }
-  .discover-prototype .filter-bar { align-items: stretch; flex-direction: column; }
-  .discover-prototype .type-tabs { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
-  .discover-prototype .type-tab { padding: 10px 6px; font-size: 12px; }
-  .discover-prototype .genre-dropdown { width: 100%; }
-  .discover-prototype .genre-dropdown-list { left: 0; right: 0; }
+  .discover-prototype .filter-bar { flex-direction: row; align-items: center; gap: 8px; padding: 8px; }
+  .discover-prototype .type-tabs { display: flex; flex: 1 1 auto; min-width: 0; gap: 4px; overflow-x: auto; }
+  .discover-prototype .type-tab { flex: 1 0 auto; padding: 9px 10px; font-size: 12px; white-space: nowrap; }
+  .discover-prototype .genre-dropdown { width: auto; flex: 0 0 auto; }
+  .discover-prototype .genre-dropdown-button { min-height: 38px; padding: 0 10px; gap: 6px; font-size: 12px; white-space: nowrap; }
+  .discover-prototype .genre-dropdown-list { left: auto; right: 0; }
   .discover-prototype .popular-strip { gap: 10px; }
   .discover-prototype .popular-tile { min-height: 145px; padding: 15px; border-radius: 17px; }
   .discover-prototype .popular-tile h3 { font-size: 18px; }
@@ -194,6 +195,11 @@
   .discover-prototype .catalog-count { padding-top: 8px; font-size: 10px; }
   .discover-prototype .section-subtitle { max-width: 240px; line-height: 1.5; }
   .discover-prototype .catalog-grid { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 20px 10px; }
+  .discover-prototype .filter-bar { gap: 6px; padding: 6px; }
+  .discover-prototype .type-tab { padding: 8px 8px; font-size: 11px; }
+  .discover-prototype .genre-dropdown-button { min-height: 36px; padding: 0 8px; font-size: 11px; }
+  .discover-prototype .select-icon { display: none; }
+  .discover-prototype .genre-dropdown-label { max-width: 72px; overflow: hidden; text-overflow: ellipsis; }
   .discover-prototype .movie-title-row h3 { font-size: 13px; }
   .discover-prototype .movie-info > p { font-size: 10px; }
   .discover-prototype .popular-section { margin-top: 42px; }
