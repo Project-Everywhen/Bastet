@@ -757,9 +757,13 @@ h1 {
     overflow-y: hidden;
 
     /* Bleed past the shelf padding to the viewport edge, so the
-       next card peeks in and scrolling is discoverable. */
+       next card peeks in and scrolling is discoverable. The left
+       side reaches the viewport edge itself (under the sidebar
+       rail) while the track keeps its own 8px air. */
     margin-right: -24px;
     padding-right: 24px;
+    margin-left: calc(-72px - 24px);
+    padding-left: 0;
 
     scroll-behavior: auto;
     overscroll-behavior-x: contain;
@@ -773,10 +777,11 @@ h1 {
     width: max-content;
     min-width: 100%;
 
-    /* Left air lives on the scrollable track (not the row) so it
-       scrolls off and travelling posters still reach the edge. */
+    /* Rest air lives on the scrollable track (not the row): first
+       poster starts beside the rail with 8px air, and the padding
+       scrolls off so travelling posters still reach the edge. */
     padding-bottom: 8px;
-    padding-left: 8px;
+    padding-left: calc(72px + 8px);
 
     transform: translate3d(var(--rubber-band, 0px), 0, 0);
 }
@@ -1209,6 +1214,11 @@ h1 {
     .media-row {
         margin-right: -16px;
         padding-right: 16px;
+    }
+
+    /* No side rail on mobile: gutter plus the same 8px air. */
+    .media-track {
+        padding-left: 8px;
     }
 
     .media-card {
