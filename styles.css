@@ -1049,7 +1049,7 @@ h1 {
         width: auto;
         margin: 0;
         gap: 8px;
-        transition: gap 220ms ease;
+        transition: gap 220ms ease 40ms;
     }
 
     .nav-icons a,
@@ -1070,7 +1070,7 @@ h1 {
         width: 68px;
         min-width: 68px;
         padding: 4px 8px;
-        transition: padding 220ms ease, gap 220ms ease, width 220ms ease;
+        transition: padding 220ms ease 40ms, gap 220ms ease 40ms, width 220ms ease 40ms;
     }
 
     .sidebar.is-compact .nav-icons,
@@ -1111,15 +1111,15 @@ h1 {
         overflow: hidden;
         text-overflow: ellipsis;
 
-        /* Expand path: wait for the shell to start opening, then
-           swipe back up — mirrors the collapse order so both
-           directions take ~300ms total. (Collapse uses the
-           delay-free transition on .is-compact below.) */
+        /* Expand path: shell (no delay) opens first, icon boxes
+           follow at 40ms, text lands last at 140ms — the reverse
+           of the collapse order. (Collapse uses the delay-free
+           transition on .is-compact below.) */
         max-height: 12px;
         opacity: 1;
         transform: translateY(0);
         overflow: hidden;
-        transition: opacity 140ms ease 60ms, max-height 180ms ease 60ms, transform 180ms ease 60ms;
+        transition: opacity 140ms ease 140ms, max-height 180ms ease 140ms, transform 180ms ease 140ms;
     }
 
     .sidebar.is-compact .nav-label {
