@@ -9,9 +9,10 @@
   <title>Bastet — Discover something worth watching</title>
   <link rel="preconnect" href="https://api.themoviedb.org">
   <link rel="preconnect" href="https://image.tmdb.org">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle,close,tune,verified_user,devices,edit,arrow_forward,workspace_premium,help,logout,palette,play_circle,translate,shield,notifications,info,check&display=block">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle,close,tune,verified_user,devices,edit,arrow_forward,workspace_premium,help,logout,palette,play_circle,translate,shield,notifications,info,check,explore&display=block">
   <link rel="stylesheet" href="styles.css?v=2.0">
   <link rel="stylesheet" href="settings.css">
+  <link rel="stylesheet" href="discover.css">
   <script type="module" src="app.js"></script>
 </head>
 <body>
@@ -38,6 +39,11 @@
             <a href="#library" aria-label="Library" title="Library">
                 <span class="material-symbols-rounded" aria-hidden="true">favorite</span>
                 <span class="nav-label" aria-hidden="true">Library</span>
+            </a>
+
+            <a href="#discover" aria-label="Discover" title="Discover">
+                <span class="material-symbols-rounded" aria-hidden="true">explore</span>
+                <span class="nav-label" aria-hidden="true">Discover</span>
             </a>
         </nav>
 
@@ -221,6 +227,85 @@
             <h2>My Library</h2>
             <p>Your saved titles will appear here.</p>
         </header>
+    </section>
+
+    <section id="discover" class="page-view discover-prototype" hidden>
+      <div class="discover-page">
+        <header class="discover-header">
+          <div class="discover-heading-copy">
+            <p class="discover-eyebrow"><span class="eyebrow-spark" aria-hidden="true">✦</span> YOUR NEXT OBSESSION STARTS HERE</p>
+            <h1>Discover<span class="heading-period">.</span></h1>
+            <p class="discover-intro">Big stories, hidden gems, and the titles everyone will be talking about. Find your next favourite.</p>
+          </div>
+          <div class="discover-header-art" aria-hidden="true">
+            <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
+            <span class="art-star star-one">✳</span><span class="art-star star-two">✦</span>
+            <div class="art-disc"><span>PLAY<br>YOUR<br>WORLD</span></div>
+          </div>
+        </header>
+
+        <section class="genre-section" aria-labelledby="genre-heading">
+          <div class="section-heading compact-heading">
+            <div><p class="section-kicker">A LITTLE OF EVERYTHING</p><h2 id="genre-heading">Browse by mood</h2></div>
+            <span class="section-aside">Pick your vibe <span aria-hidden="true">↗</span></span>
+          </div>
+          <div class="genre-list" role="group" aria-label="Filter by genre">
+            <button class="genre-chip genre-all is-active" type="button" data-genre="All" aria-pressed="true"><span>✦</span> For you</button>
+            <button class="genre-chip genre-action" type="button" data-genre="Action" aria-pressed="false"><span>↗</span> Action</button>
+            <button class="genre-chip genre-drama" type="button" data-genre="Drama" aria-pressed="false"><span>◒</span> Drama</button>
+            <button class="genre-chip genre-scifi" type="button" data-genre="Sci-Fi" aria-pressed="false"><span>✳</span> Sci-Fi</button>
+            <button class="genre-chip genre-comedy" type="button" data-genre="Comedy" aria-pressed="false"><span>☻</span> Comedy</button>
+            <button class="genre-chip genre-thriller" type="button" data-genre="Thriller" aria-pressed="false"><span>◈</span> Thriller</button>
+            <button class="genre-chip genre-animation" type="button" data-genre="Animation" aria-pressed="false"><span>✿</span> Animation</button>
+          </div>
+        </section>
+
+        <section class="spotlight-section" aria-labelledby="spotlight-title">
+          <div class="spotlight-card">
+            <img class="spotlight-image" id="spotlight-image" alt="" loading="eager">
+            <div class="spotlight-overlay"></div>
+            <div class="spotlight-content">
+              <span class="spotlight-badge"><span class="live-dot"></span> THE WEEK'S SPOTLIGHT</span>
+              <p class="spotlight-meta" id="spotlight-meta">FEATURED PICK</p>
+              <h2 id="spotlight-title">Loading spotlight…</h2>
+              <p class="spotlight-description" id="spotlight-description">Fetching this week's pick from TMDB.</p>
+              <div class="spotlight-actions"><button type="button" class="primary-action" id="spotlight-browse"><span aria-hidden="true">▶</span> Explore the collection</button><span class="spotlight-rating" id="spotlight-rating"></span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="catalog-section" aria-labelledby="catalog-heading">
+          <div class="section-heading catalog-top">
+            <div><p class="section-kicker">THE GOOD STUFF</p><h2 id="catalog-heading">Find your next watch</h2><p class="section-subtitle">A hand-picked universe of films and series.</p></div>
+            <div class="catalog-count"><span class="count-spark">✳</span><span id="result-count" role="status">Loading…</span></div>
+          </div>
+          <div class="filter-bar" aria-label="Title filters">
+            <div class="type-tabs" role="group" aria-label="Content type">
+              <button type="button" class="type-tab is-active" data-type="All" aria-pressed="true">Everything</button>
+              <button type="button" class="type-tab" data-type="Movie" aria-pressed="false">Movies</button>
+              <button type="button" class="type-tab" data-type="TV Show" aria-pressed="false">TV shows</button>
+            </div>
+            <label class="genre-select-wrap"><span class="sr-only">Choose genre</span><span class="select-icon" aria-hidden="true">☷</span>
+              <select id="genre-filter"><option value="All">All genres</option><option>Action</option><option>Adventure</option><option>Animation</option><option>Comedy</option><option>Drama</option><option>Fantasy</option><option>Mystery</option><option>Sci-Fi</option><option>Thriller</option></select>
+              <span class="select-chevron" aria-hidden="true">⌄</span>
+            </label>
+          </div>
+          <div class="catalog-grid" id="catalog-grid" aria-live="polite"></div>
+          <div class="empty-state" id="empty-state" hidden>
+            <div class="empty-icon" aria-hidden="true">✳</div><h3>No titles in this orbit. Yet.</h3><p>Try another genre or switch your filters to discover something new.</p><button type="button" class="reset-filters" id="reset-filters">Reset filters <span aria-hidden="true">↗</span></button>
+          </div>
+        </section>
+
+        <section class="popular-section" aria-labelledby="popular-heading">
+          <div class="section-heading compact-heading"><div><p class="section-kicker">CAN'T-MISS PICKS</p><h2 id="popular-heading">Popular right now</h2></div><span class="section-aside">Curated for you <span aria-hidden="true">✦</span></span></div>
+          <div class="popular-strip">
+            <article class="popular-tile tile-one"><span class="popular-number">01</span><div><p>THE CULT CLASSIC</p><h3>Stories that stay<br>with you.</h3></div></article>
+            <article class="popular-tile tile-two"><span class="popular-number">02</span><div><p>EDGE-OF-YOUR-SEAT</p><h3>One more episode.<br>Promise.</h3></div></article>
+            <article class="popular-tile tile-three"><span class="popular-number">03</span><div><p>FEEL-GOOD FAVOURITES</p><h3>Good vibes.<br>Great stories.</h3></div></article>
+          </div>
+        </section>
+        <footer class="discover-footer"><span class="footer-mark">b.</span><span>Made for your next movie night.</span><span class="footer-spark">✳</span></footer>
+      </div>
     </section>
 
     <section id="settings" class="page-view" hidden>
