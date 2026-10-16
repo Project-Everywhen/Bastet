@@ -1216,11 +1216,6 @@ h1 {
         padding-right: 16px;
     }
 
-    /* No side rail on mobile: gutter plus the same 8px air. */
-    .media-track {
-        padding-left: 8px;
-    }
-
     .media-card {
         flex-basis: 128px;
     }
