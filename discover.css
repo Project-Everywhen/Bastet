@@ -199,7 +199,7 @@
   .discover-prototype .genre-dropdown-button { min-height: 36px; padding: 0 8px; font-size: 11px; }
   .discover-prototype .genre-dropdown-label { max-width: 72px; overflow: hidden; text-overflow: ellipsis; }
   .discover-prototype .movie-title-row h3 { font-size: 13px; }
-  .discover-prototype .movie-info > p { font-size: 10px; }
+  .discover-prototype .movie-info > p { display: none; }
   .discover-prototype .popular-section { margin-top: 42px; }
   .discover-prototype .popular-strip { grid-template-columns: 1fr; }
   .discover-prototype .popular-tile { min-height: 150px; padding: 20px; }
