@@ -7,7 +7,7 @@
 .sp-scope {
   width: min(100%, 1120px);
   margin-inline: auto;
-  padding: 8px clamp(18px, 4vw, 48px) 56px;
+  padding: 0 24px 56px;
   color: var(--text-primary);
   font-family: "Google Sans", "Product Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 1.5;
@@ -405,6 +405,7 @@
 }
 
 @media (max-width: 760px) {
+  .sp-scope { padding: 0 16px 40px; }
   .sp-scope .sp-page-heading { align-items: flex-start; flex-direction: column; gap: 20px; }
   .sp-scope .sp-profile-hero { flex-wrap: wrap; }
   .sp-scope .sp-profile-intro { flex-basis: calc(100% - 110px); }
@@ -415,7 +416,7 @@
 }
 
 @media (max-width: 520px) {
-  .sp-scope { padding: 8px 16px 40px; }
+  .sp-scope { padding: 0 16px 40px; }
   .sp-scope .sp-profile-hero { gap: 16px; padding: 19px; }
   .sp-scope .sp-avatar { width: 68px; height: 68px; flex-basis: 68px; border-radius: 22px; font-size: 23px; }
   .sp-scope .sp-profile-intro { flex-basis: calc(100% - 84px); }

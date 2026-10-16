@@ -303,13 +303,7 @@ button {
 }
 
 .page-header {
-    padding: 48px 24px 24px;
-}
-
-/* Tighter headers where transplanted settings content follows. */
-#settings .page-header,
-#profile .page-header {
-    padding: 28px 24px 16px;
+    padding: 24px 24px 16px;
 }
 
 .page-eyebrow {
@@ -1195,6 +1189,10 @@ h1 {
 
     .search-bar {
         margin: 0 16px 8px;
+    }
+
+    .page-header {
+        padding: 20px 16px 16px;
     }
 
     .search-status {
