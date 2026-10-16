@@ -1268,11 +1268,9 @@ function navigateToCurrentView() {
 
     if (activeRoute === "search") {
         document.querySelector("#search-input")?.focus({ preventScroll: true });
-    }
 
-    if (activeRoute === "discover") {
-        // Deferred past module evaluation so the discover section below
-        // is initialized before first use; init itself runs only once.
+        // Discover catalog lives inside the search view now; boot it
+        // lazily on first visit. Init itself runs only once.
         queueMicrotask(() => initDiscoverView());
     }
 
@@ -1343,6 +1341,7 @@ let searchDebounceTimer;
 
 async function runSearch(query) {
     const trimmed = query.trim();
+    const browseSection = document.querySelector("#discover-browse");
 
     if (!searchResults || !searchStatus) {
         return;
@@ -1351,7 +1350,18 @@ async function runSearch(query) {
     if (!trimmed) {
         searchResults.replaceChildren();
         searchStatus.textContent = "Type above to search TMDB.";
+
+        // Query cleared: bring the browse catalog back.
+        if (browseSection) {
+            browseSection.hidden = false;
+        }
+
         return;
+    }
+
+    // Query present: hide the browse catalog to make room for results.
+    if (browseSection) {
+        browseSection.hidden = true;
     }
 
     const requestId = ++searchRequestId;
@@ -1438,9 +1448,10 @@ if (searchClear) {
     });
 }
 
-// Discover view: live TMDB catalog with mood/genre filters plus a weekly
-// spotlight. Boots lazily on first visit so home loads cost nothing extra.
-const discoverRoot = document.querySelector("#discover");
+// Discover catalog (lives inside the search view): live TMDB catalog with
+// mood/genre filters plus a weekly spotlight. Boots lazily on first
+// visit so home loads cost nothing extra.
+const discoverRoot = document.querySelector("#discover-browse");
 const discoverGrid = document.querySelector("#catalog-grid");
 
 const DISCOVER_MOVIE_GENRES = {
@@ -1533,12 +1544,6 @@ function createDiscoverCard(media) {
         posterWrap.append(image);
     }
 
-    const play = document.createElement("span");
-    play.className = "poster-play";
-    play.setAttribute("aria-hidden", "true");
-    play.textContent = "▶";
-    posterWrap.append(play);
-
     const info = document.createElement("div");
     info.className = "movie-info";
 
@@ -1626,7 +1631,11 @@ async function loadDiscoverCatalog() {
             .filter(media => media.poster_path)
             .slice(0, 18);
 
-        cards.forEach(media => discoverGrid.append(createDiscoverCard(media)));
+        cards.forEach((media, index) => {
+            const card = createDiscoverCard(media);
+            card.style.animationDelay = `${index * 35}ms`;
+            discoverGrid.append(card);
+        });
 
         count.textContent = `${cards.length} ${cards.length === 1 ? "title" : "titles"}`;
         empty.hidden = cards.length !== 0;
@@ -1690,20 +1699,31 @@ async function loadDiscoverSpotlight() {
     }
 }
 
+function syncGenreDropdown(genre) {
+    const radios = discoverRoot.querySelectorAll(
+        '#genre-dropdown-list input[type="radio"]'
+    );
+    const match = [...radios].find(radio => radio.value === genre);
+
+    if (!match) {
+        return;
+    }
+
+    radios.forEach(radio => {
+        radio.checked = radio === match;
+    });
+
+    const label = discoverRoot.querySelector("#genre-dropdown-label");
+
+    if (label) {
+        label.textContent = match.dataset.label || match.value;
+    }
+}
+
 function setDiscoverGenre(genre) {
     discoverGenre = genre;
 
-    discoverRoot.querySelectorAll(".genre-chip").forEach(button => {
-        const selected = button.dataset.genre === genre;
-        button.classList.toggle("is-active", selected);
-        button.setAttribute("aria-pressed", String(selected));
-    });
-
-    const select = discoverRoot.querySelector("#genre-filter");
-
-    if (select && [...select.options].some(option => option.value === genre)) {
-        select.value = genre;
-    }
+    syncGenreDropdown(genre);
 
     loadDiscoverCatalog();
 
@@ -1737,13 +1757,44 @@ function initDiscoverView() {
         });
     });
 
-    discoverRoot.querySelectorAll(".genre-chip").forEach(button => {
-        button.addEventListener("click", () => setDiscoverGenre(button.dataset.genre));
+    const genreDropdown = discoverRoot.querySelector("[data-genre-dropdown]");
+    const genreButton = discoverRoot.querySelector("#genre-dropdown-button");
+    const genreList = discoverRoot.querySelector("#genre-dropdown-list");
+
+    const setGenreDropdownOpen = open => {
+        if (!genreButton || !genreList) {
+            return;
+        }
+
+        genreButton.setAttribute("aria-expanded", String(open));
+        genreList.hidden = !open;
+        genreDropdown?.classList.toggle("open", open);
+    };
+
+    genreButton?.addEventListener("click", () => {
+        setGenreDropdownOpen(genreList.hidden);
     });
 
-    discoverRoot.querySelector("#genre-filter")?.addEventListener("change", event => {
+    genreList?.addEventListener("change", event => {
         setDiscoverGenre(event.target.value);
+        setGenreDropdownOpen(false);
+        genreButton?.focus();
     });
+
+    genreDropdown?.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            setGenreDropdownOpen(false);
+            genreButton?.focus();
+        }
+    });
+
+    document.addEventListener("pointerdown", event => {
+        if (genreList && !genreList.hidden && !genreDropdown?.contains(event.target)) {
+            setGenreDropdownOpen(false);
+        }
+    });
+
+    syncGenreDropdown(discoverGenre);
 
     discoverRoot.querySelector("#reset-filters")?.addEventListener("click", () => {
         discoverType = "All";
