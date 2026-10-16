@@ -9,9 +9,10 @@
   <title>Bastet — Discover something worth watching</title>
   <link rel="preconnect" href="https://api.themoviedb.org">
   <link rel="preconnect" href="https://image.tmdb.org">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle,close,tune,verified_user,devices,edit,arrow_forward,workspace_premium,help,logout,palette,play_circle,translate,shield,notifications,info,check&display=block">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite,home,history,search,settings,calendar_month,add_circle,chevron_left,chevron_right,account_circle,close,tune,verified_user,devices,edit,arrow_forward,workspace_premium,help,logout,palette,play_circle,translate,shield,notifications,info,check,explore&display=block">
   <link rel="stylesheet" href="styles.css?v=2.0">
   <link rel="stylesheet" href="settings.css">
+  <link rel="stylesheet" href="discover.css">
   <script type="module" src="app.js"></script>
 </head>
 <body>
@@ -213,6 +214,59 @@
         </div>
         <p id="search-status" class="search-status" role="status" aria-live="polite">Type above to search TMDB.</p>
         <div id="search-results" class="search-grid"></div>
+        <div id="discover-browse" class="discover-prototype">
+            <section class="spotlight-section" aria-labelledby="spotlight-title">
+                <div class="spotlight-card">
+                    <img class="spotlight-image" id="spotlight-image" alt="" loading="eager">
+                    <div class="spotlight-overlay"></div>
+                    <div class="spotlight-content">
+                        <span class="spotlight-badge"><span class="live-dot"></span> THE WEEK'S SPOTLIGHT</span>
+                        <p class="spotlight-meta" id="spotlight-meta">FEATURED PICK</p>
+                        <h2 id="spotlight-title">Loading spotlight…</h2>
+                        <p class="spotlight-description" id="spotlight-description">Fetching this week's pick from TMDB.</p>
+                        <div class="spotlight-actions"><button type="button" class="primary-action" id="spotlight-browse"><span aria-hidden="true">▶</span> Explore the collection</button><span class="spotlight-rating" id="spotlight-rating"></span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="catalog-section" aria-labelledby="catalog-heading">
+                <div class="section-heading catalog-top">
+                    <div><p class="section-kicker">THE GOOD STUFF</p><h2 id="catalog-heading">Find your next watch</h2><p class="section-subtitle">A hand-picked universe of films and series.</p></div>
+                    <div class="catalog-count"><span id="result-count" role="status">Loading…</span></div>
+                </div>
+                <div class="filter-bar" aria-label="Title filters">
+                    <div class="type-tabs" role="group" aria-label="Content type">
+                        <button type="button" class="type-tab is-active" data-type="All" aria-pressed="true">Everything</button>
+                        <button type="button" class="type-tab" data-type="Movie" aria-pressed="false">Movies</button>
+                        <button type="button" class="type-tab" data-type="TV Show" aria-pressed="false">TV shows</button>
+                    </div>
+                    <div class="genre-dropdown" data-genre-dropdown>
+                        <span class="sr-only" id="genre-dropdown-caption">Choose genre</span>
+                        <button type="button" class="genre-dropdown-button" id="genre-dropdown-button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="genre-dropdown-caption genre-dropdown-label">
+                            <span class="select-icon" aria-hidden="true">☷</span>
+                            <span class="genre-dropdown-label" id="genre-dropdown-label">All genres</span>
+                            <span class="genre-dropdown-chevron" aria-hidden="true">⌄</span>
+                        </button>
+                        <div class="genre-dropdown-list" id="genre-dropdown-list" role="radiogroup" aria-label="Choose genre" hidden>
+                            <label class="genre-option"><input type="radio" name="genre-pick" value="All" data-label="All genres" checked><span>All genres</span></label>
+                            <label class="genre-option"><input type="radio" name="genre-pick" value="Action" data-label="Action"><span>Action</span></label>
+                            <label class="genre-option"><input type="radio" name="genre-pick" value="Adventure" data-label="Adventure"><span>Adventure</span></label>
+                            <label class="genre-option"><input type="radio" name="genre-pick" value="Animation" data-label="Animation"><span>Animation</span></label>
+                            <label class="genre-option"><input type="radio" name="genre-pick" value="Comedy" data-label="Comedy"><span>Comedy</span></label>
+                            <label class="genre-option"><input type="radio" name="genre-pick" value="Drama" data-label="Drama"><span>Drama</span></label>
+                            <label class="genre-option"><input type="radio" name="genre-pick" value="Fantasy" data-label="Fantasy"><span>Fantasy</span></label>
+                            <label class="genre-option"><input type="radio" name="genre-pick" value="Mystery" data-label="Mystery"><span>Mystery</span></label>
+                            <label class="genre-option"><input type="radio" name="genre-pick" value="Sci-Fi" data-label="Sci-Fi"><span>Sci-Fi</span></label>
+                            <label class="genre-option"><input type="radio" name="genre-pick" value="Thriller" data-label="Thriller"><span>Thriller</span></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="catalog-grid" id="catalog-grid" aria-live="polite"></div>
+                <div class="empty-state" id="empty-state" hidden>
+                    <div class="empty-icon" aria-hidden="true">✳</div><h3>No titles in this orbit. Yet.</h3><p>Try another genre or switch your filters to discover something new.</p><button type="button" class="reset-filters" id="reset-filters">Reset filters <span aria-hidden="true">↗</span></button>
+                </div>
+            </section>
+        </div>
     </section>
 
     <section id="library" class="page-view" hidden>
@@ -410,7 +464,7 @@
                     <p class="sp-eyebrow">QUICK LINKS</p>
                     <a class="sp-menu-item" href="#settings">
                         <span class="sp-menu-icon material-symbols-rounded" aria-hidden="true">tune</span>
-                        <span class="sp-menu-copy"><strong>Preferences</strong><small>Appearance, language and playback</small></span>
+                        <span class="sp-menu-copy"><strong>Settings</strong><small>Appearance, language and playback</small></span>
                         <span class="material-symbols-rounded sp-menu-arrow" aria-hidden="true">chevron_right</span>
                     </a>
                     <button class="sp-menu-item" type="button" data-demo-message="Subscription details are a visual prototype only.">
