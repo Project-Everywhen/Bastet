@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080909">
+  <meta name="description" content="Bastet Settings and Profile prototype.">
+  <title>Settings &amp; Profile — Bastet</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="settings-profile.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block">
+</head>
+<body>
+  <main class="settings-profile-prototype">
+    <header class="sp-page-heading">
+      <div>
+        <p class="sp-eyebrow">YOUR BASTET</p>
+        <h1>Settings &amp; Profile</h1>
+        <p class="sp-subtitle">Make your space feel like yours.</p>
+      </div>
+      <div class="sp-view-switch" role="group" aria-label="Choose prototype view">
+        <button class="sp-view-button is-active" type="button" data-view="profile" aria-pressed="true">
+          <span class="material-symbols-rounded" aria-hidden="true">account_circle</span>
+          Profile
+        </button>
+        <button class="sp-view-button" type="button" data-view="settings" aria-pressed="false">
+          <span class="material-symbols-rounded" aria-hidden="true">tune</span>
+          Settings
+        </button>
+      </div>
+    </header>
+
+    <section class="sp-view" id="sp-profile" aria-labelledby="sp-profile-title">
+      <div class="sp-profile-hero sp-panel">
+        <div class="sp-avatar" aria-label="Profile initials: AM">AM</div>
+        <div class="sp-profile-intro">
+          <p class="sp-eyebrow">YOUR PROFILE</p>
+          <h2 id="sp-profile-title">Alex Morgan</h2>
+          <p class="sp-muted">A little mystery, a lot of good stories.</p>
+          <div class="sp-inline-meta">
+            <span><span class="material-symbols-rounded" aria-hidden="true">verified_user</span> Member since 2023</span>
+            <span><span class="material-symbols-rounded" aria-hidden="true">devices</span> 3 devices</span>
+          </div>
+        </div>
+        <button class="sp-button sp-button-primary" type="button" data-demo-message="Edit profile is a visual prototype only.">
+          <span class="material-symbols-rounded" aria-hidden="true">edit</span>
+          Edit profile
+        </button>
+      </div>
+
+      <div class="sp-profile-grid">
+        <section class="sp-panel sp-account-card" aria-labelledby="sp-account-title">
+          <div class="sp-section-heading">
+            <div>
+              <p class="sp-eyebrow">ACCOUNT OVERVIEW</p>
+              <h3 id="sp-account-title">Your account</h3>
+            </div>
+            <span class="sp-status-pill"><span aria-hidden="true"></span> Active</span>
+          </div>
+          <dl class="sp-account-details">
+            <div><dt>Email address</dt><dd>alex.morgan@example.com</dd></div>
+            <div><dt>Plan</dt><dd>Bastet Standard <span class="sp-detail-note">· Monthly</span></dd></div>
+            <div><dt>Next billing date</dt><dd>November 12, 2026</dd></div>
+          </dl>
+          <a class="sp-text-link" href="#sp-settings" data-open-settings>
+            Manage account preferences <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
+          </a>
+        </section>
+
+        <nav class="sp-panel sp-account-menu" aria-label="Account menu">
+          <p class="sp-eyebrow">QUICK LINKS</p>
+          <a class="sp-menu-item" href="#sp-settings" data-open-settings>
+            <span class="sp-menu-icon material-symbols-rounded" aria-hidden="true">tune</span>
+            <span class="sp-menu-copy"><strong>Preferences</strong><small>Appearance, language and playback</small></span>
+            <span class="material-symbols-rounded sp-menu-arrow" aria-hidden="true">chevron_right</span>
+          </a>
+          <button class="sp-menu-item" type="button" data-demo-message="Subscription details are a visual prototype only.">
+            <span class="sp-menu-icon material-symbols-rounded" aria-hidden="true">workspace_premium</span>
+            <span class="sp-menu-copy"><strong>Membership</strong><small>Standard plan · Monthly</small></span>
+            <span class="material-symbols-rounded sp-menu-arrow" aria-hidden="true">chevron_right</span>
+          </button>
+          <button class="sp-menu-item" type="button" data-demo-message="Device management is a visual prototype only.">
+            <span class="sp-menu-icon material-symbols-rounded" aria-hidden="true">devices</span>
+            <span class="sp-menu-copy"><strong>Devices</strong><small>Manage your signed-in devices</small></span>
+            <span class="material-symbols-rounded sp-menu-arrow" aria-hidden="true">chevron_right</span>
+          </button>
+          <button class="sp-menu-item" type="button" data-demo-message="Help and support is a visual prototype only.">
+            <span class="sp-menu-icon material-symbols-rounded" aria-hidden="true">help</span>
+            <span class="sp-menu-copy"><strong>Help &amp; support</strong><small>Answers when you need them</small></span>
+            <span class="material-symbols-rounded sp-menu-arrow" aria-hidden="true">chevron_right</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="sp-profile-footer">
+        <div>
+          <strong>Signing out?</strong>
+          <p class="sp-muted">This button is a visual placeholder. No account action will occur.</p>
+        </div>
+        <button class="sp-button sp-button-danger" type="button" data-demo-message="Sign out is disabled in this prototype.">
+          <span class="material-symbols-rounded" aria-hidden="true">logout</span>
+          Sign out
+        </button>
+      </div>
+    </section>
+
+    <section class="sp-view" id="sp-settings" aria-labelledby="sp-settings-title" hidden>
+      <div class="sp-settings-intro">
+        <p class="sp-eyebrow">MAKE IT YOURS</p>
+        <h2 id="sp-settings-title">Preferences</h2>
+        <p class="sp-muted">Fine-tune the way Bastet looks and feels. Changes here are for preview only.</p>
+      </div>
+
+      <form id="sp-settings-form">
+        <section class="sp-panel sp-settings-panel" aria-labelledby="sp-appearance-title">
+          <div class="sp-section-heading">
+            <div class="sp-heading-icon"><span class="material-symbols-rounded" aria-hidden="true">palette</span></div>
+            <div class="sp-heading-copy"><h3 id="sp-appearance-title">Appearance</h3><p>Choose the look that feels right.</p></div>
+          </div>
+          <fieldset class="sp-appearance-options">
+            <legend class="sp-sr-only">Appearance preference</legend>
+            <label class="sp-theme-option">
+              <input type="radio" name="appearance" value="light">
+              <span class="sp-theme-preview sp-theme-preview-light"><i></i><i></i><i></i></span>
+              <span class="sp-theme-label"><strong>Light</strong><small>Bright and clear</small></span>
+              <span class="sp-radio-mark" aria-hidden="true"></span>
+            </label>
+            <label class="sp-theme-option">
+              <input type="radio" name="appearance" value="dark" checked>
+              <span class="sp-theme-preview sp-theme-preview-dark"><i></i><i></i><i></i></span>
+              <span class="sp-theme-label"><strong>Dark</strong><small>Easy on the eyes</small></span>
+              <span class="sp-radio-mark" aria-hidden="true"></span>
+            </label>
+            <label class="sp-theme-option">
+              <input type="radio" name="appearance" value="system">
+              <span class="sp-theme-preview sp-theme-preview-system"><i></i><i></i><i></i></span>
+              <span class="sp-theme-label"><strong>System</strong><small>Match your device</small></span>
+              <span class="sp-radio-mark" aria-hidden="true"></span>
+            </label>
+          </fieldset>
+        </section>
+
+        <section class="sp-panel sp-settings-panel" aria-labelledby="sp-playback-title">
+          <div class="sp-section-heading">
+            <div class="sp-heading-icon"><span class="material-symbols-rounded" aria-hidden="true">play_circle</span></div>
+            <div class="sp-heading-copy"><h3 id="sp-playback-title">Playback</h3><p>Your viewing, your rules.</p></div>
+          </div>
+          <div class="sp-preference-list">
+            <label class="sp-preference-row">
+              <span class="sp-preference-copy"><strong>Autoplay next episode</strong><small>Continue to the next episode automatically.</small></span>
+              <input class="sp-switch" type="checkbox" name="autoplay" role="switch" checked>
+            </label>
+            <label class="sp-preference-row">
+              <span class="sp-preference-copy"><strong>Autoplay previews</strong><small>Play previews while browsing titles.</small></span>
+              <input class="sp-switch" type="checkbox" name="previews" role="switch">
+            </label>
+            <label class="sp-preference-row">
+              <span class="sp-preference-copy"><strong>Remember playback position</strong><small>Pick up where you left off on any device.</small></span>
+              <input class="sp-switch" type="checkbox" name="rememberPosition" role="switch" checked>
+            </label>
+            <label class="sp-preference-row">
+              <span class="sp-preference-copy"><strong>Reduce motion</strong><small>Keep interface transitions subtle.</small></span>
+              <input class="sp-switch" type="checkbox" name="reduceMotion" role="switch">
+            </label>
+          </div>
+        </section>
+
+        <section class="sp-panel sp-settings-panel" aria-labelledby="sp-language-title">
+          <div class="sp-section-heading">
+            <div class="sp-heading-icon"><span class="material-symbols-rounded" aria-hidden="true">translate</span></div>
+            <div class="sp-heading-copy"><h3 id="sp-language-title">Language &amp; subtitles</h3><p>Set your default language options.</p></div>
+          </div>
+          <div class="sp-field-grid">
+            <div class="sp-field">
+              <label for="sp-language">Display language</label>
+              <select id="sp-language" name="language">
+                <option value="en">English</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option><option value="hi">हिन्दी</option><option value="ml">മലയാളം</option>
+              </select>
+            </div>
+            <div class="sp-field">
+              <label for="sp-audio">Preferred audio</label>
+              <select id="sp-audio" name="audio">
+                <option value="original">Original language</option><option value="en">English</option><option value="hi">Hindi</option><option value="ml">Malayalam</option><option value="es">Spanish</option>
+              </select>
+            </div>
+            <div class="sp-field">
+              <label for="sp-subtitles">Subtitles</label>
+              <select id="sp-subtitles" name="subtitles">
+                <option value="off">Off by default</option><option value="same">Match audio language</option><option value="en" selected>English</option><option value="hi">Hindi</option><option value="ml">Malayalam</option><option value="es">Spanish</option>
+              </select>
+            </div>
+            <div class="sp-field">
+              <label for="sp-caption-style">Caption style</label>
+              <select id="sp-caption-style" name="captionStyle">
+                <option value="default" selected>Default</option><option value="large">Large text</option><option value="high-contrast">High contrast</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="sp-panel sp-settings-panel" aria-labelledby="sp-privacy-title">
+          <div class="sp-section-heading">
+            <div class="sp-heading-icon"><span class="material-symbols-rounded" aria-hidden="true">shield</span></div>
+            <div class="sp-heading-copy"><h3 id="sp-privacy-title">Privacy</h3><p>Choose what works best for you.</p></div>
+          </div>
+          <div class="sp-preference-list">
+            <label class="sp-preference-row">
+              <span class="sp-preference-copy"><strong>Personalized recommendations</strong><small>Use viewing activity to improve suggestions.</small></span>
+              <input class="sp-switch" type="checkbox" name="recommendations" role="switch" checked>
+            </label>
+            <label class="sp-preference-row">
+              <span class="sp-preference-copy"><strong>Viewing activity</strong><small>Keep watched titles in your viewing history.</small></span>
+              <input class="sp-switch" type="checkbox" name="viewingHistory" role="switch" checked>
+            </label>
+          </div>
+        </section>
+
+        <section class="sp-panel sp-settings-panel" aria-labelledby="sp-account-preferences-title">
+          <div class="sp-section-heading">
+            <div class="sp-heading-icon"><span class="material-symbols-rounded" aria-hidden="true">notifications</span></div>
+            <div class="sp-heading-copy"><h3 id="sp-account-preferences-title">Account preferences</h3><p>Decide what updates reach you.</p></div>
+          </div>
+          <div class="sp-preference-list">
+            <label class="sp-preference-row">
+              <span class="sp-preference-copy"><strong>Product updates</strong><small>Occasional news about Bastet features.</small></span>
+              <input class="sp-switch" type="checkbox" name="productUpdates">
+            </label>
+            <label class="sp-preference-row">
+              <span class="sp-preference-copy"><strong>Email recommendations</strong><small>Get a curated selection of titles by email.</small></span>
+              <input class="sp-switch" type="checkbox" name="emailRecommendations" role="switch" checked>
+            </label>
+          </div>
+        </section>
+
+        <div class="sp-form-actions">
+          <p class="sp-form-note"><span class="material-symbols-rounded" aria-hidden="true">info</span> Prototype only — preferences are not saved.</p>
+          <div class="sp-action-buttons">
+            <button class="sp-button sp-button-quiet" type="reset">Reset</button>
+            <button class="sp-button sp-button-primary" type="submit"><span class="material-symbols-rounded" aria-hidden="true">check</span> Save changes</button>
+          </div>
+        </div>
+      </form>
+    </section>
+    <p class="sp-feedback" id="sp-feedback" role="status" aria-live="polite" hidden></p>
+  </main>
+
+  <script>
+    (() => {
+      const root = document.querySelector('.settings-profile-prototype');
+      const profile = root.querySelector('#sp-profile');
+      const settings = root.querySelector('#sp-settings');
+      const viewButtons = [...root.querySelectorAll('[data-view]')];
+      const feedback = root.querySelector('#sp-feedback');
+
+      function showView(view) {
+        const isSettings = view === 'settings';
+        profile.hidden = isSettings;
+        settings.hidden = !isSettings;
+        viewButtons.forEach((button) => {
+          const active = button.dataset.view === view;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-pressed', String(active));
+        });
+        feedback.hidden = true;
+      }
+
+      function announce(message) {
+        feedback.textContent = message;
+        feedback.hidden = false;
+      }
+
+      viewButtons.forEach((button) => button.addEventListener('click', () => showView(button.dataset.view)));
+      root.querySelectorAll('[data-open-settings]').forEach((link) => link.addEventListener('click', (event) => {
+        event.preventDefault();
+        showView('settings');
+        root.querySelector('[data-view="settings"]').focus();
+      }));
+      root.querySelectorAll('[data-demo-message]').forEach((button) => button.addEventListener('click', () => announce(button.dataset.demoMessage)));
+
+      const form = root.querySelector('#sp-settings-form');
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        announce('Preview only — your changes have not been saved.');
+      });
+      form.addEventListener('reset', () => {
+        window.setTimeout(() => announce('Preferences reset to the prototype defaults.'), 0);
+      });
+    })();
+  </script>
+</body>
+</html>
