@@ -1277,6 +1277,8 @@ function navigateToCurrentView() {
     // Fresh menu, full pill.
     document.querySelector(".sidebar")?.classList.remove("is-compact");
     lastScrollY = window.scrollY;
+    navTravel = 0;
+    navLastDir = 0;
 
     if (activeRoute === "search") {
         document.querySelector("#search-input")?.focus({ preventScroll: true });
@@ -1305,10 +1307,14 @@ function navigateToCurrentView() {
     }
 }
 
-// Dynamic pill: minimize the mobile nav shortly after scrolling down,
-// restore it on any scroll up. CSS scopes the effect to the ≤768px bar.
+// Dynamic pill: minimize the mobile nav after sustained scrolling down,
+// restore it on sustained scroll up. Thresholds accumulate travel in one
+// direction (resetting on reversal) so scroll jitter never restarts the
+// 220ms transitions mid-flight. CSS scopes the effect to the ≤768px bar.
 let lastScrollY = window.scrollY;
 let navCompactRaf = 0;
+let navTravel = 0;
+let navLastDir = 0;
 
 function updateNavCompact() {
     navCompactRaf = 0;
@@ -1320,16 +1326,26 @@ function updateNavCompact() {
     }
 
     const y = window.scrollY;
-    const goingDown = y > lastScrollY + 2;
-    const goingUp = y < lastScrollY - 2;
+    const delta = y - lastScrollY;
+    lastScrollY = y;
 
-    if (goingDown && y > 24) {
-        sidebar.classList.add("is-compact");
-    } else if (goingUp || y <= 24) {
-        sidebar.classList.remove("is-compact");
+    if (Math.abs(delta) < 1) {
+        return;
     }
 
-    lastScrollY = y;
+    const dir = delta > 0 ? 1 : -1;
+    navTravel = dir === navLastDir ? navTravel + Math.abs(delta) : Math.abs(delta);
+    navLastDir = dir;
+
+    const compact = sidebar.classList.contains("is-compact");
+
+    if (!compact && dir > 0 && y > 24 && navTravel >= 24) {
+        sidebar.classList.add("is-compact");
+        navTravel = 0;
+    } else if (compact && ((dir < 0 && navTravel >= 8) || y <= 24)) {
+        sidebar.classList.remove("is-compact");
+        navTravel = 0;
+    }
 }
 
 window.addEventListener("scroll", () => {

@@ -1020,10 +1020,11 @@ h1 {
         -webkit-backdrop-filter: blur(18px) saturate(140%);
         backdrop-filter: blur(18px) saturate(140%);
 
-        /* Staged shrink: shell tightens after the labels clear.
-           (max-width animates smoothly; width: fit-content would
-           snap because auto isn't interpolable.) */
-        transition: padding 260ms ease 90ms, max-width 260ms ease 90ms;
+        /* Expand path: no delay so the shell leads content open.
+           The 90ms collapse delay lives on .is-compact so the
+           shell trails the labels shut. Width hugs content;
+           max-width only caps it. */
+        transition: padding 220ms ease, max-width 220ms ease, gap 220ms ease;
     }
 
     .sidebar.is-compact {
@@ -1033,6 +1034,7 @@ h1 {
         /* Tight cap matched to content (~191px: 4×44px links +
            tighter gaps + divider + padding). */
         max-width: 194px;
+        transition: padding 220ms ease 90ms, max-width 220ms ease 90ms, gap 220ms ease 90ms;
     }
 
     .brand-mark {
@@ -1047,7 +1049,7 @@ h1 {
         width: auto;
         margin: 0;
         gap: 8px;
-        transition: gap 200ms ease 90ms;
+        transition: gap 220ms ease;
     }
 
     .nav-icons a,
@@ -1062,15 +1064,19 @@ h1 {
         /* Fixed uniform container: identical highlight box for
            every icon regardless of label length. Horizontal padding
            widens the highlight without touching icon size
-           (box-sizing is border-box globally). */
+           (box-sizing is border-box globally). Explicit widths on
+           both states so the box interpolates instead of snapping
+           (auto widths are not animatable). */
+        width: 68px;
         min-width: 68px;
         padding: 4px 8px;
-        transition: padding 260ms ease 90ms, gap 200ms ease 90ms, width 200ms ease 90ms, min-width 200ms ease 90ms;
+        transition: padding 220ms ease, gap 220ms ease, width 220ms ease;
     }
 
     .sidebar.is-compact .nav-icons,
     .sidebar.is-compact .nav-icons-bottom {
         gap: 2px;
+        transition: gap 220ms ease 90ms;
     }
 
     .sidebar.is-compact .nav-icons a,
@@ -1079,6 +1085,7 @@ h1 {
         gap: 0;
         width: 44px;
         min-width: 0;
+        transition: padding 220ms ease 90ms, gap 220ms ease 90ms, width 220ms ease 90ms;
     }
 
     /* Highlighted box around the selected icon, echoing the
@@ -1104,15 +1111,21 @@ h1 {
         overflow: hidden;
         text-overflow: ellipsis;
 
-        /* Collapsible line: fades while shrinking so no sliver stays. */
+        /* Expand path: wait for the shell to start opening, then
+           swipe back up — mirrors the collapse order so both
+           directions take ~300ms total. (Collapse uses the
+           delay-free transition on .is-compact below.) */
         max-height: 12px;
         opacity: 1;
+        transform: translateY(0);
         overflow: hidden;
-        transition: opacity 140ms ease, max-height 180ms ease;
+        transition: opacity 140ms ease 60ms, max-height 180ms ease 60ms, transform 180ms ease 60ms;
     }
 
     .sidebar.is-compact .nav-label {
         opacity: 0;
+        transform: translateY(6px);
+        transition: opacity 140ms ease, max-height 180ms ease, transform 180ms ease;
         max-height: 0;
     }
 
@@ -1241,6 +1254,7 @@ h1 {
 
     .nav-icons a,
     .nav-icons-bottom a {
+        width: 56px;
         min-width: 56px;
     }
 }
