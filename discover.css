@@ -198,7 +198,7 @@
   .discover-prototype .type-tab { padding: 8px 8px; font-size: 11px; }
   .discover-prototype .genre-dropdown-button { min-height: 36px; padding: 0 8px; font-size: 11px; }
   .discover-prototype .genre-dropdown-label { max-width: 72px; overflow: hidden; text-overflow: ellipsis; }
-  .discover-prototype .movie-title-row h3 { font-size: 13px; }
+  .discover-prototype .movie-title-row h3 { font-size: 13px; font-stretch: condensed; letter-spacing: -.02em; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.7em; }
   .discover-prototype .movie-info > p { display: none; }
   .discover-prototype .popular-section { margin-top: 42px; }
   .discover-prototype .popular-strip { grid-template-columns: 1fr; }
