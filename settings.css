@@ -1,24 +1,14 @@
 /* Bastet Settings & Profile (integrated from the prototype).
    All page-specific styles are scoped to .sp-scope.
-   Colors defer to the main theme system (:root in styles.css); literals
-   remain only where they depict something else: light/dark theme preview
-   swatches, avatar gradient, and semantic status/danger hues. */
+   Every color reads straight from the main theme system (:root in
+   styles.css). Literals remain only where they depict fixed imagery:
+   light/dark theme preview swatches and the avatar gradient. */
 
 .sp-scope {
-  --sp-bg: var(--bg, #080909);
-  --sp-panel: var(--surface-raised, #141518);
-  --sp-control: var(--surface-control, #202023);
-  --sp-control-hover: var(--surface-control-hover, #343438);
-  --sp-text: var(--text-primary, #f5f3ef);
-  --sp-strong: var(--text-display, #fff8e9);
-  --sp-muted: var(--text-muted, #8e8e93);
-  --sp-soft: var(--text-soft, #aaaab0);
-  --sp-line: var(--line-frost, rgba(255,255,255,.12));
-  --sp-accent: var(--accent, #fff);
   width: min(100%, 1120px);
   margin-inline: auto;
-  padding: clamp(24px, 4vw, 52px) clamp(18px, 4vw, 48px) 56px;
-  color: var(--sp-text);
+  padding: 8px clamp(18px, 4vw, 48px) 56px;
+  color: var(--text-primary);
   font-family: "Google Sans", "Product Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   line-height: 1.5;
 }
@@ -45,7 +35,7 @@
 .sp-scope a:focus-visible,
 .sp-scope input:focus-visible,
 .sp-scope select:focus-visible {
-  outline: 2px solid var(--sp-text);
+  outline: 2px solid var(--text-primary);
   outline-offset: 4px;
 }
 
@@ -59,7 +49,7 @@
 
 .sp-scope .sp-eyebrow {
   margin: 0 0 8px;
-  color: var(--sp-muted);
+  color: var(--text-muted);
   font-size: 11px;
   font-weight: 650;
   letter-spacing: .16em;
@@ -73,7 +63,7 @@
 
 .sp-scope h1 {
   margin-bottom: 8px;
-  color: var(--sp-strong);
+  color: var(--text-display);
   font-size: clamp(30px, 4vw, 42px);
   font-weight: 650;
   letter-spacing: -.045em;
@@ -81,15 +71,15 @@
 }
 
 .sp-scope .sp-subtitle,
-.sp-scope .sp-muted { color: var(--sp-soft); }
+.sp-scope .sp-muted { color: var(--text-soft); }
 
 .sp-scope .sp-subtitle { margin-bottom: 0; font-size: 15px; }
 
 .sp-scope .sp-panel {
   min-width: 0;
-  border: 1px solid var(--sp-line);
+  border: 1px solid var(--line-frost);
   border-radius: 18px;
-  background: var(--sp-panel);
+  background: var(--surface-raised);
 }
 
 .sp-scope .sp-profile-hero {
@@ -100,7 +90,7 @@
   margin-bottom: 18px;
   background:
     radial-gradient(ellipse at 8% 0%, rgba(var(--frost-rgb), .075), transparent 45%),
-    var(--sp-panel);
+    var(--surface-raised);
 }
 
 .sp-scope .sp-avatar {
@@ -112,7 +102,7 @@
   border: 1px solid rgba(var(--frost-rgb), .24);
   border-radius: 28px;
   background: linear-gradient(145deg, #4a4a4d, #242427 72%);
-  color: #fff;
+  color: var(--accent);
   font-size: 27px;
   font-weight: 650;
   letter-spacing: -.06em;
@@ -123,7 +113,7 @@
 .sp-scope .sp-profile-intro .sp-eyebrow { margin-bottom: 5px; }
 .sp-scope .sp-profile-intro h2 {
   margin-bottom: 4px;
-  color: var(--sp-strong);
+  color: var(--text-display);
   font-size: clamp(23px, 3vw, 30px);
   font-weight: 650;
   letter-spacing: -.035em;
@@ -136,7 +126,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--sp-muted);
+  color: var(--text-muted);
   font-size: 12px;
 }
 .sp-scope .sp-inline-meta .material-symbols-rounded { font-size: 16px; }
@@ -158,12 +148,12 @@
 }
 .sp-scope .sp-button:active { transform: scale(.98); }
 .sp-scope .sp-button .material-symbols-rounded { font-size: 18px; }
-.sp-scope .sp-button-primary { background: var(--sp-accent); color: var(--accent-ink); }
+.sp-scope .sp-button-primary { background: var(--accent); color: var(--accent-ink); }
 .sp-scope .sp-button-primary:hover { background: var(--accent-hover); }
-.sp-scope .sp-button-quiet { border-color: var(--sp-line); background: transparent; color: var(--sp-text); }
-.sp-scope .sp-button-quiet:hover { background: var(--sp-control); }
-.sp-scope .sp-button-danger { border-color: rgba(255,125,125,.25); background: rgba(255,95,95,.07); color: #ffaaaa; }
-.sp-scope .sp-button-danger:hover { background: rgba(255,95,95,.14); }
+.sp-scope .sp-button-quiet { border-color: var(--line-frost); background: transparent; color: var(--text-primary); }
+.sp-scope .sp-button-quiet:hover { background: var(--surface-control); }
+.sp-scope .sp-button-danger { border-color: var(--danger-line); background: var(--danger-fill); color: var(--danger-text); }
+.sp-scope .sp-button-danger:hover { background: var(--danger-fill-hover); }
 
 .sp-scope .sp-profile-grid {
   display: grid;
@@ -180,7 +170,7 @@
 }
 .sp-scope .sp-section-heading h3 {
   margin: 0;
-  color: var(--sp-text);
+  color: var(--text-primary);
   font-size: 17px;
   font-weight: 620;
   letter-spacing: -.02em;
@@ -192,21 +182,21 @@
   gap: 7px;
   margin-left: auto;
   padding: 5px 9px;
-  border: 1px solid rgba(143,205,159,.2);
+  border: 1px solid var(--status-line);
   border-radius: 999px;
-  color: #a8d9b4;
+  color: var(--status-text);
   font-size: 11px;
   white-space: nowrap;
 }
-.sp-scope .sp-status-pill > span { width: 6px; height: 6px; border-radius: 50%; background: #8acb9a; }
+.sp-scope .sp-status-pill > span { width: 6px; height: 6px; border-radius: 50%; background: var(--status-dot); }
 .sp-scope .sp-account-details { margin: 22px 0 18px; }
-.sp-scope .sp-account-details > div { padding: 14px 0; border-bottom: 1px solid var(--sp-line); }
+.sp-scope .sp-account-details > div { padding: 14px 0; border-bottom: 1px solid var(--line-frost); }
 .sp-scope .sp-account-details > div:first-child { padding-top: 0; }
 .sp-scope .sp-account-details > div:last-child { border-bottom: 0; }
-.sp-scope .sp-account-details dt { margin-bottom: 5px; color: var(--sp-muted); font-size: 12px; }
-.sp-scope .sp-account-details dd { margin: 0; overflow-wrap: anywhere; color: var(--sp-text); font-size: 14px; font-weight: 550; }
-.sp-scope .sp-detail-note { color: var(--sp-muted); font-weight: 400; }
-.sp-scope .sp-text-link { display: inline-flex; align-items: center; gap: 7px; color: var(--sp-text); font-size: 13px; font-weight: 600; }
+.sp-scope .sp-account-details dt { margin-bottom: 5px; color: var(--text-muted); font-size: 12px; }
+.sp-scope .sp-account-details dd { margin: 0; overflow-wrap: anywhere; color: var(--text-primary); font-size: 14px; font-weight: 550; }
+.sp-scope .sp-detail-note { color: var(--text-muted); font-weight: 400; }
+.sp-scope .sp-text-link { display: inline-flex; align-items: center; gap: 7px; color: var(--text-primary); font-size: 13px; font-weight: 600; }
 .sp-scope .sp-text-link:hover { text-decoration: underline; text-underline-offset: 4px; }
 .sp-scope .sp-text-link .material-symbols-rounded { font-size: 17px; }
 
@@ -218,19 +208,19 @@
   gap: 13px;
   padding: 14px 0;
   border: 0;
-  border-top: 1px solid var(--sp-line);
+  border-top: 1px solid var(--line-frost);
   background: transparent;
   color: inherit;
   text-align: left;
   cursor: pointer;
 }
 .sp-scope .sp-menu-item:first-of-type { border-top: 0; }
-.sp-scope .sp-menu-item:hover .sp-menu-copy strong { color: #fff; }
-.sp-scope .sp-menu-icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border: 1px solid var(--sp-line); border-radius: 12px; color: var(--sp-soft); font-size: 20px; }
+.sp-scope .sp-menu-item:hover .sp-menu-copy strong { color: var(--text-primary); }
+.sp-scope .sp-menu-icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border: 1px solid var(--line-frost); border-radius: 12px; color: var(--text-soft); font-size: 20px; }
 .sp-scope .sp-menu-copy { display: grid; flex: 1 1 auto; gap: 3px; min-width: 0; }
 .sp-scope .sp-menu-copy strong { font-size: 13px; font-weight: 600; }
-.sp-scope .sp-menu-copy small { color: var(--sp-muted); font-size: 12px; line-height: 1.45; }
-.sp-scope .sp-menu-arrow { color: var(--sp-muted); font-size: 20px; }
+.sp-scope .sp-menu-copy small { color: var(--text-muted); font-size: 12px; line-height: 1.45; }
+.sp-scope .sp-menu-arrow { color: var(--text-muted); font-size: 20px; }
 
 .sp-scope .sp-profile-footer {
   display: flex;
@@ -239,7 +229,7 @@
   gap: 20px;
   margin-top: 18px;
   padding: 20px 24px;
-  border: 1px solid var(--sp-line);
+  border: 1px solid var(--line-frost);
   border-radius: 16px;
   background: rgba(var(--frost-rgb), .02);
 }
@@ -252,11 +242,11 @@
 .sp-scope .sp-settings-intro p:last-child { max-width: 620px; margin-bottom: 0; font-size: 14px; }
 
 .sp-scope .sp-settings-panel { margin-bottom: 14px; padding: clamp(20px, 3vw, 28px); }
-.sp-scope .sp-heading-icon { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; border: 1px solid var(--sp-line); border-radius: 14px; background: rgba(var(--frost-rgb), .035); color: var(--sp-soft); }
+.sp-scope .sp-heading-icon { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; border: 1px solid var(--line-frost); border-radius: 14px; background: rgba(var(--frost-rgb), .035); color: var(--text-soft); }
 .sp-scope .sp-heading-icon .material-symbols-rounded { font-size: 22px; }
 .sp-scope .sp-heading-copy { min-width: 0; }
 .sp-scope .sp-heading-copy h3 { margin-bottom: 3px; font-size: 16px; }
-.sp-scope .sp-heading-copy p { margin-bottom: 0; color: var(--sp-muted); font-size: 12px; }
+.sp-scope .sp-heading-copy p { margin-bottom: 0; color: var(--text-muted); font-size: 12px; }
 
 .sp-scope .sp-appearance-options {
   display: grid;
@@ -274,13 +264,13 @@
   align-items: center;
   min-width: 0;
   padding: 12px;
-  border: 1px solid var(--sp-line);
+  border: 1px solid var(--line-frost);
   border-radius: 14px;
   cursor: pointer;
   transition: border-color 160ms ease, background 160ms ease;
 }
 .sp-scope .sp-theme-option:has(input:checked) { border-color: rgba(var(--frost-rgb), .58); background: rgba(var(--frost-rgb), .045); }
-.sp-scope .sp-theme-option:focus-within { outline: 2px solid var(--sp-text); outline-offset: 3px; }
+.sp-scope .sp-theme-option:focus-within { outline: 2px solid var(--text-primary); outline-offset: 3px; }
 .sp-scope .sp-theme-option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .sp-scope .sp-theme-preview {
   display: flex;
@@ -308,9 +298,9 @@
 .sp-scope .sp-theme-preview-system i:first-child { background: linear-gradient(90deg, #343436 0 49%, #efeeeb 50%); }
 .sp-scope .sp-theme-label { display: grid; gap: 2px; min-width: 0; }
 .sp-scope .sp-theme-label strong { font-size: 13px; font-weight: 600; }
-.sp-scope .sp-theme-label small { color: var(--sp-muted); font-size: 11px; }
-.sp-scope .sp-radio-mark { width: 17px; height: 17px; border: 1px solid var(--sp-muted); border-radius: 50%; }
-.sp-scope .sp-theme-option input:checked ~ .sp-radio-mark { border: 5px solid var(--sp-text); }
+.sp-scope .sp-theme-label small { color: var(--text-muted); font-size: 11px; }
+.sp-scope .sp-radio-mark { width: 17px; height: 17px; border: 1px solid var(--text-muted); border-radius: 50%; }
+.sp-scope .sp-theme-option input:checked ~ .sp-radio-mark { border: 5px solid var(--text-primary); }
 
 .sp-scope .sp-preference-list { margin-top: 18px; }
 .sp-scope .sp-preference-row {
@@ -320,13 +310,13 @@
   gap: 24px;
   min-height: 65px;
   padding: 13px 0;
-  border-top: 1px solid var(--sp-line);
+  border-top: 1px solid var(--line-frost);
   cursor: pointer;
 }
 .sp-scope .sp-preference-row:first-child { border-top: 0; }
 .sp-scope .sp-preference-copy { display: grid; gap: 4px; min-width: 0; }
 .sp-scope .sp-preference-copy strong { font-size: 13px; font-weight: 570; }
-.sp-scope .sp-preference-copy small { color: var(--sp-muted); font-size: 12px; line-height: 1.5; }
+.sp-scope .sp-preference-copy small { color: var(--text-muted); font-size: 12px; line-height: 1.5; }
 
 .sp-scope .sp-switch {
   position: relative;
@@ -338,7 +328,7 @@
   -webkit-appearance: none;
   border: 1px solid rgba(var(--frost-rgb), .16);
   border-radius: 999px;
-  background: #37373a;
+  background: var(--switch-track);
   cursor: pointer;
   transition: background 160ms ease, border-color 160ms ease;
 }
@@ -349,25 +339,25 @@
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  background: #c5c5c8;
+  background: var(--switch-knob);
   content: "";
   transition: transform 160ms ease, background 160ms ease;
 }
-.sp-scope .sp-switch:checked { border-color: var(--sp-accent); background: var(--sp-accent); }
+.sp-scope .sp-switch:checked { border-color: var(--accent); background: var(--accent); }
 .sp-scope .sp-switch:checked::before { transform: translateX(17px); background: var(--accent-ink); }
 .sp-scope .sp-switch:focus-visible { outline-offset: 4px; }
 
 .sp-scope .sp-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
 .sp-scope .sp-field { display: grid; gap: 8px; min-width: 0; }
-.sp-scope .sp-field label { color: var(--sp-soft); font-size: 12px; font-weight: 550; }
+.sp-scope .sp-field label { color: var(--text-soft); font-size: 12px; font-weight: 550; }
 .sp-scope .sp-field select {
   width: 100%;
   min-height: 46px;
   padding: 0 38px 0 13px;
-  border: 1px solid var(--sp-line);
+  border: 1px solid var(--line-frost);
   border-radius: 11px;
-  background-color: var(--sp-control);
-  color: var(--sp-text);
+  background-color: var(--surface-control);
+  color: var(--text-primary);
   font-size: 13px;
   cursor: pointer;
 }
@@ -381,9 +371,9 @@
   gap: 18px;
   margin-top: 20px;
   padding: 18px 0 0;
-  border-top: 1px solid var(--sp-line);
+  border-top: 1px solid var(--line-frost);
 }
-.sp-scope .sp-form-note { display: flex; align-items: center; gap: 7px; margin: 0; color: var(--sp-muted); font-size: 12px; }
+.sp-scope .sp-form-note { display: flex; align-items: center; gap: 7px; margin: 0; color: var(--text-muted); font-size: 12px; }
 .sp-scope .sp-form-note .material-symbols-rounded { font-size: 17px; }
 .sp-scope .sp-action-buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
 
@@ -395,7 +385,7 @@
   max-width: 100%;
   margin: 20px auto 0;
   padding: 12px 16px;
-  border: 1px solid var(--sp-line);
+  border: 1px solid var(--line-frost);
   border-radius: 12px;
   background: var(--surface-raised);
   color: var(--text-primary);
@@ -425,7 +415,7 @@
 }
 
 @media (max-width: 520px) {
-  .sp-scope { padding: 24px 16px 40px; }
+  .sp-scope { padding: 8px 16px 40px; }
   .sp-scope .sp-profile-hero { gap: 16px; padding: 19px; }
   .sp-scope .sp-avatar { width: 68px; height: 68px; flex-basis: 68px; border-radius: 22px; font-size: 23px; }
   .sp-scope .sp-profile-intro { flex-basis: calc(100% - 84px); }

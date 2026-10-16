@@ -80,6 +80,17 @@
     /* Shadows. */
     --shadow-text: rgba(var(--shadow-rgb), 0.55);
     --shadow-logo: rgba(var(--shadow-rgb), 0.45);
+
+    /* State semantics (danger, status, switches). */
+    --danger-text: #ffaaaa;
+    --danger-line: rgba(255, 125, 125, 0.25);
+    --danger-fill: rgba(255, 95, 95, 0.07);
+    --danger-fill-hover: rgba(255, 95, 95, 0.14);
+    --status-text: #a8d9b4;
+    --status-line: rgba(143, 205, 159, 0.2);
+    --status-dot: #8acb9a;
+    --switch-track: #37373a;
+    --switch-knob: #c5c5c8;
 }
 
 /* Predictable element sizing */
@@ -293,6 +304,12 @@ button {
 
 .page-header {
     padding: 48px 24px 24px;
+}
+
+/* Tighter headers where transplanted settings content follows. */
+#settings .page-header,
+#profile .page-header {
+    padding: 28px 24px 16px;
 }
 
 .page-eyebrow {
