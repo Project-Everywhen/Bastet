@@ -1268,6 +1268,10 @@ function navigateToCurrentView() {
 
     if (activeRoute === "search") {
         document.querySelector("#search-input")?.focus({ preventScroll: true });
+
+        // Discover catalog lives inside the search view now; boot it
+        // lazily on first visit. Init itself runs only once.
+        queueMicrotask(() => initDiscoverView());
     }
 
     // Update the active navigation link for accessibility.
@@ -1337,6 +1341,7 @@ let searchDebounceTimer;
 
 async function runSearch(query) {
     const trimmed = query.trim();
+    const browseSection = document.querySelector("#discover-browse");
 
     if (!searchResults || !searchStatus) {
         return;
@@ -1345,7 +1350,18 @@ async function runSearch(query) {
     if (!trimmed) {
         searchResults.replaceChildren();
         searchStatus.textContent = "Type above to search TMDB.";
+
+        // Query cleared: bring the browse catalog back.
+        if (browseSection) {
+            browseSection.hidden = false;
+        }
+
         return;
+    }
+
+    // Query present: hide the browse catalog to make room for results.
+    if (browseSection) {
+        browseSection.hidden = true;
     }
 
     const requestId = ++searchRequestId;
@@ -1430,6 +1446,382 @@ if (searchClear) {
         searchInput.dispatchEvent(new Event("input"));
         searchInput.focus();
     });
+}
+
+// Discover catalog (lives inside the search view): live TMDB catalog with
+// mood/genre filters plus a weekly spotlight. Boots lazily on first
+// visit so home loads cost nothing extra.
+const discoverRoot = document.querySelector("#discover-browse");
+const discoverGrid = document.querySelector("#catalog-grid");
+
+const DISCOVER_MOVIE_GENRES = {
+    Action: 28,
+    Adventure: 12,
+    Animation: 16,
+    Comedy: 35,
+    Drama: 18,
+    Fantasy: 14,
+    Mystery: 9648,
+    "Sci-Fi": 878,
+    Thriller: 53
+};
+
+// TV genre list differs: combined entries share one id, and Thriller has
+// no TV equivalent, so Crime (80) stands in as the closest mood.
+const DISCOVER_TV_GENRES = {
+    Action: 10759,
+    Adventure: 10759,
+    Animation: 16,
+    Comedy: 35,
+    Drama: 18,
+    Fantasy: 10765,
+    Mystery: 9648,
+    "Sci-Fi": 10765,
+    Thriller: 80
+};
+
+let discoverBooted = false;
+let discoverType = "All";
+let discoverGenre = "All";
+let discoverRequestId = 0;
+let discoverGenreNames = null;
+
+function discoverGenreName(id) {
+    return discoverGenreNames?.get(Number(id)) || "";
+}
+
+async function loadDiscoverGenreNames() {
+    if (discoverGenreNames) {
+        return discoverGenreNames;
+    }
+
+    discoverGenreNames = new Map();
+
+    try {
+        const [movies, shows] = await Promise.all([
+            tmdb("/genre/movie/list", { language: TMDB_LANGUAGE }),
+            tmdb("/genre/tv/list", { language: TMDB_LANGUAGE })
+        ]);
+
+        for (const genre of [...(movies.genres || []), ...(shows.genres || [])]) {
+            if (!discoverGenreNames.has(genre.id)) {
+                discoverGenreNames.set(genre.id, genre.name);
+            }
+        }
+    } catch (error) {
+        console.error("Could not load TMDB genre names:", error);
+    }
+
+    return discoverGenreNames;
+}
+
+function createDiscoverCard(media) {
+    const isMovie = (media.media_type || "movie") !== "tv";
+    const typeLabel = isMovie ? "Movie" : "TV Show";
+    const title = media.title || media.name || "Untitled";
+    const releaseDate = media.release_date || media.first_air_date || "";
+    const year = releaseDate.slice(0, 4) || "—";
+    const rating = Number(media.vote_average || 0).toFixed(1);
+    const genreName =
+        discoverGenreName(media.genre_ids?.[0]) ||
+        (discoverGenre !== "All" ? discoverGenre : typeLabel);
+
+    const card = document.createElement("article");
+    card.className = "movie-card";
+    card.dataset.type = typeLabel;
+    card.dataset.genre = genreName;
+    card.dataset.title = title;
+
+    const posterWrap = document.createElement("div");
+    posterWrap.className = "poster-wrap";
+
+    if (media.poster_path) {
+        const image = document.createElement("img");
+        image.src = imageUrl(media.poster_path, "w500");
+        image.alt = `${title} poster`;
+        image.loading = "lazy";
+        image.decoding = "async";
+        posterWrap.append(image);
+    }
+
+    const info = document.createElement("div");
+    info.className = "movie-info";
+
+    const titleRow = document.createElement("div");
+    titleRow.className = "movie-title-row";
+
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+
+    const ratingBadge = document.createElement("span");
+    ratingBadge.className = "rating";
+    ratingBadge.textContent = `★ ${rating}`;
+
+    const metadata = document.createElement("p");
+    metadata.textContent = `${year} • ${typeLabel} `;
+
+    const genreLabel = document.createElement("span");
+    genreLabel.className = "genre-label";
+    genreLabel.textContent = genreName;
+    metadata.append(genreLabel);
+
+    titleRow.append(heading, ratingBadge);
+    info.append(titleRow, metadata);
+    card.append(posterWrap, info);
+
+    return card;
+}
+
+async function loadDiscoverCatalog() {
+    const count = discoverRoot.querySelector("#result-count");
+    const empty = discoverRoot.querySelector("#empty-state");
+
+    if (!discoverGrid || !count || !empty) {
+        return;
+    }
+
+    const requestId = ++discoverRequestId;
+
+    discoverGrid.replaceChildren();
+    empty.hidden = true;
+    count.textContent = "Loading…";
+
+    await loadDiscoverGenreNames();
+
+    // Stale filter pass: a newer request already took over.
+    if (requestId !== discoverRequestId) {
+        return;
+    }
+
+    const baseParams = { language: TMDB_LANGUAGE, page: 1, include_adult: "false" };
+
+    const discoverEndpoint = (mediaType, genreId) => tmdb(`/discover/${mediaType}`, {
+        ...baseParams,
+        sort_by: "popularity.desc",
+        ...(genreId ? { with_genres: genreId } : {})
+    }).then(data => (data.results || []).map(media => ({ ...media, media_type: mediaType === "movie" ? "movie" : "tv" })));
+
+    try {
+        let items = [];
+
+        if (discoverType === "Movie") {
+            items = await discoverEndpoint("movie", DISCOVER_MOVIE_GENRES[discoverGenre]);
+        } else if (discoverType === "TV Show") {
+            items = await discoverEndpoint("tv", DISCOVER_TV_GENRES[discoverGenre]);
+        } else if (discoverGenre === "All") {
+            const data = await tmdb("/trending/all/week", { language: TMDB_LANGUAGE });
+            items = (data.results || []).filter(media =>
+                ["movie", "tv"].includes(media.media_type)
+            );
+        } else {
+            const [movies, shows] = await Promise.all([
+                discoverEndpoint("movie", DISCOVER_MOVIE_GENRES[discoverGenre]),
+                discoverEndpoint("tv", DISCOVER_TV_GENRES[discoverGenre])
+            ]);
+            items = [...movies, ...shows].sort(
+                (a, b) => (b.popularity || 0) - (a.popularity || 0)
+            );
+        }
+
+        if (requestId !== discoverRequestId) {
+            return;
+        }
+
+        const cards = items
+            .filter(media => media.poster_path)
+            .slice(0, 18);
+
+        cards.forEach((media, index) => {
+            const card = createDiscoverCard(media);
+            card.style.animationDelay = `${index * 35}ms`;
+            discoverGrid.append(card);
+        });
+
+        count.textContent = `${cards.length} ${cards.length === 1 ? "title" : "titles"}`;
+        empty.hidden = cards.length !== 0;
+    } catch (error) {
+        if (requestId !== discoverRequestId) {
+            return;
+        }
+
+        console.error("Could not load the discover catalog:", error);
+        count.textContent = "Unable to load titles right now.";
+    }
+}
+
+async function loadDiscoverSpotlight() {
+    const image = discoverRoot.querySelector("#spotlight-image");
+    const meta = discoverRoot.querySelector("#spotlight-meta");
+    const title = discoverRoot.querySelector("#spotlight-title");
+    const description = discoverRoot.querySelector("#spotlight-description");
+    const rating = discoverRoot.querySelector("#spotlight-rating");
+
+    if (!image || !meta || !title || !description || !rating) {
+        return;
+    }
+
+    try {
+        const data = await tmdb("/trending/all/week", { language: TMDB_LANGUAGE });
+        const pick = (data.results || []).find(media =>
+            ["movie", "tv"].includes(media.media_type) && media.backdrop_path
+        );
+
+        if (!pick) {
+            title.textContent = "Spotlight unavailable";
+            description.textContent = "TMDB returned no spotlight pick this week.";
+            return;
+        }
+
+        await loadDiscoverGenreNames();
+
+        const pickTitle = pick.title || pick.name || "Untitled";
+        const year = (pick.release_date || pick.first_air_date || "").slice(0, 4) || "—";
+        const kind = pick.media_type === "tv" ? "TV" : "MOVIE";
+        const mood = (discoverGenreName(pick.genre_ids?.[0]) || kind).toUpperCase();
+
+        image.src = imageUrl(pick.backdrop_path, "w1280");
+        image.alt = "";
+        meta.textContent = `FEATURED PICK • ${year} • ${mood}`;
+        title.textContent = pickTitle;
+
+        const overview = (pick.overview || "").trim();
+        description.textContent = overview.length > 160
+            ? `${overview.slice(0, 160).trimEnd()}…`
+            : overview || "No synopsis available yet.";
+
+        const score = Number(pick.vote_average || 0).toFixed(1);
+        rating.textContent = "";
+        rating.append("★ ", Object.assign(document.createElement("b"), { textContent: score }), " / 10");
+    } catch (error) {
+        console.error("Could not load the discover spotlight:", error);
+        title.textContent = "Spotlight unavailable";
+        description.textContent = "Unable to reach TMDB right now.";
+    }
+}
+
+function syncGenreDropdown(genre) {
+    const radios = discoverRoot.querySelectorAll(
+        '#genre-dropdown-list input[type="radio"]'
+    );
+    const match = [...radios].find(radio => radio.value === genre);
+
+    if (!match) {
+        return;
+    }
+
+    radios.forEach(radio => {
+        radio.checked = radio === match;
+    });
+
+    const label = discoverRoot.querySelector("#genre-dropdown-label");
+
+    if (label) {
+        label.textContent = match.dataset.label || match.value;
+    }
+}
+
+function setDiscoverGenre(genre) {
+    discoverGenre = genre;
+
+    syncGenreDropdown(genre);
+
+    loadDiscoverCatalog();
+
+    if (genre !== "All") {
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        discoverRoot.querySelector("#catalog-heading")?.scrollIntoView({
+            behavior: reduceMotion ? "auto" : "smooth",
+            block: "start"
+        });
+    }
+}
+
+function initDiscoverView() {
+    if (discoverBooted || !discoverRoot || !discoverGrid) {
+        return;
+    }
+
+    discoverBooted = true;
+
+    discoverRoot.querySelectorAll(".type-tab").forEach(button => {
+        button.addEventListener("click", () => {
+            discoverType = button.dataset.type;
+
+            discoverRoot.querySelectorAll(".type-tab").forEach(tab => {
+                const selected = tab === button;
+                tab.classList.toggle("is-active", selected);
+                tab.setAttribute("aria-pressed", String(selected));
+            });
+
+            loadDiscoverCatalog();
+        });
+    });
+
+    const genreDropdown = discoverRoot.querySelector("[data-genre-dropdown]");
+    const genreButton = discoverRoot.querySelector("#genre-dropdown-button");
+    const genreList = discoverRoot.querySelector("#genre-dropdown-list");
+
+    const setGenreDropdownOpen = open => {
+        if (!genreButton || !genreList) {
+            return;
+        }
+
+        genreButton.setAttribute("aria-expanded", String(open));
+        genreList.hidden = !open;
+        genreDropdown?.classList.toggle("open", open);
+    };
+
+    genreButton?.addEventListener("click", () => {
+        setGenreDropdownOpen(genreList.hidden);
+    });
+
+    genreList?.addEventListener("change", event => {
+        setDiscoverGenre(event.target.value);
+        setGenreDropdownOpen(false);
+        genreButton?.focus();
+    });
+
+    genreDropdown?.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            setGenreDropdownOpen(false);
+            genreButton?.focus();
+        }
+    });
+
+    document.addEventListener("pointerdown", event => {
+        if (genreList && !genreList.hidden && !genreDropdown?.contains(event.target)) {
+            setGenreDropdownOpen(false);
+        }
+    });
+
+    syncGenreDropdown(discoverGenre);
+
+    discoverRoot.querySelector("#reset-filters")?.addEventListener("click", () => {
+        discoverType = "All";
+
+        discoverRoot.querySelectorAll(".type-tab").forEach(button => {
+            const selected = button.dataset.type === "All";
+            button.classList.toggle("is-active", selected);
+            button.setAttribute("aria-pressed", String(selected));
+        });
+
+        setDiscoverGenre("All");
+    });
+
+    discoverRoot.querySelector("#spotlight-browse")?.addEventListener("click", () => {
+        discoverType = "All";
+
+        discoverRoot.querySelectorAll(".type-tab").forEach(button => {
+            const selected = button.dataset.type === "All";
+            button.classList.toggle("is-active", selected);
+            button.setAttribute("aria-pressed", String(selected));
+        });
+
+        setDiscoverGenre("Sci-Fi");
+    });
+
+    loadDiscoverSpotlight();
+    loadDiscoverCatalog();
 }
 
 // Settings & Profile views: prototype-only feedback announcer.
