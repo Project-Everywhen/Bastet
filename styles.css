@@ -1365,14 +1365,16 @@ h1 {
     }
 }
 
-.hero-content-enter {
+/* Animate the copy's children individually so the action buttons
+   stay rigid in place while the logo and metadata slide in. */
+.hero-content-enter > *:not(.hero-actions) {
     animation: hero-content-enter 350ms ease both;
 }
 
 @media (prefers-reduced-motion: reduce) {
     .media-card,
     .media-image,
-    .hero-content-enter,
+    .hero-content-enter > *,
     .hero-dot,
     .sidebar,
     .sidebar .nav-icons,
