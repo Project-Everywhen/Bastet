@@ -10,6 +10,15 @@ import {
 const API_BASE = "https://api.themoviedb.org/3";
 const IMAGE_BASE = "https://image.tmdb.org/t/p/";
 
+// TMDB artwork size presets. Backdrops render wider than TMDB's
+// largest fixed size (w1280) on most screens, so they use the stored
+// original; smaller artwork stays near 2-3x its display size.
+const BACKDROP_SIZE = "original";
+const LOGO_SIZE = "original";
+const CONTINUE_BANNER_SIZE = "w780";
+const CARD_POSTER_SIZE = "w342";
+const DISCOVER_POSTER_SIZE = "w500";
+
 let currentFeaturedIndex = 0;
 let isFeaturedLoading = false;
 let currentFeaturedRef = null;
@@ -82,7 +91,7 @@ function featuredImageUrls(movie) {
     const urls = [];
 
     if (movie.backdrop_path) {
-        urls.push(imageUrl(movie.backdrop_path, "w1280"));
+        urls.push(imageUrl(movie.backdrop_path, BACKDROP_SIZE));
     }
 
     const logos = movie.images?.logos || [];
@@ -92,7 +101,7 @@ function featuredImageUrls(movie) {
         logos[0];
 
     if (selectedLogo?.file_path) {
-        urls.push(imageUrl(selectedLogo.file_path, "w500"));
+        urls.push(imageUrl(selectedLogo.file_path, LOGO_SIZE));
     }
 
     return urls;
@@ -117,12 +126,14 @@ async function getFeaturedDetails(index) {
     return movie;
 }
 
-// Fetch neighbor details and images in the background so carousel
-// turns never wait on the network twice for the same movie.
+// Warm only the next slide's details and artwork in the background
+// so forward turns never wait on the network. The previous slide is
+// already in the browser cache from when it was active, and any
+// never-warmed slide fetches its original at render time (on swipe).
 function warmFeaturedNeighbors(activeIndex) {
     const total = FEATURED_MOVIES.length;
 
-    [activeIndex + 1, activeIndex - 1].forEach(offset => {
+    [activeIndex + 1].forEach(offset => {
         const index = (offset + total) % total;
 
         if (featuredCache.has(index)) {
@@ -172,7 +183,7 @@ function createStarIcon(extraClass = "") {
 }
 
 function createMediaCard(media, options = {}) {
-    const { progress } = options;
+    const { progress, bannerPath } = options;
     const isContinue = Number.isFinite(progress);
 
     const title = media.title || media.name || "Untitled";
@@ -187,7 +198,7 @@ function createMediaCard(media, options = {}) {
     artwork.className = "media-art";
 
     const posterPath = isContinue
-        ? media.backdrop_path || media.poster_path
+        ? bannerPath || media.backdrop_path || media.poster_path
         : media.poster_path || media.backdrop_path;
 
     if (posterPath) {
@@ -196,7 +207,7 @@ function createMediaCard(media, options = {}) {
         image.className = "media-image";
         image.src = imageUrl(
             posterPath,
-            isContinue ? "w780" : "w342"
+            isContinue ? CONTINUE_BANNER_SIZE : CARD_POSTER_SIZE
         );
         image.alt = `${title} ${isContinue ? "backdrop" : "poster"}`;
         image.loading = "lazy";
@@ -210,11 +221,26 @@ function createMediaCard(media, options = {}) {
     const year = releaseDate.slice(0, 4) || "—";
 
     if (isContinue) {
-        // Title lives on the artwork, above the progress bar. The
+        // Text stack lives on the artwork, above the progress bar. The
         // overlay goes in first so its dark gradient never dims the
         // white progress fill painted after it.
         const overlay = document.createElement("div");
         overlay.className = "media-overlay";
+
+        // TV shows expose the latest episode; movies show just the
+        // title, so no extra lines are added for them.
+        const episode = currentEpisodeOf(media);
+
+        if (
+            Number.isFinite(episode?.season_number) &&
+            Number.isFinite(episode?.episode_number)
+        ) {
+            const episodeTag = document.createElement("p");
+            episodeTag.className = "media-overlay-episode";
+            episodeTag.textContent =
+                `S${episode.season_number} E${episode.episode_number}`;
+            overlay.append(episodeTag);
+        }
 
         const heading = document.createElement("h3");
         heading.className = "media-overlay-title";
@@ -223,11 +249,33 @@ function createMediaCard(media, options = {}) {
         label.textContent = title;
         heading.append(label);
 
-        const metadata = document.createElement("p");
-        metadata.textContent = `${year} · ${progress}% watched`;
+        overlay.append(heading);
 
-        overlay.append(heading, metadata);
+        const subtitleText = episode?.name;
+
+        if (subtitleText) {
+            const subtitle = document.createElement("p");
+            subtitle.className = "media-overlay-sub";
+            subtitle.textContent = subtitleText;
+            overlay.append(subtitle);
+        }
+
         artwork.append(overlay);
+
+        // Movies expose `runtime`; TV exposes the runtime of the
+        // episode being continued, falling back to the average
+        // episode length.
+        const runtimeMinutes = Number.isFinite(media.runtime)
+            ? media.runtime
+            : episode?.runtime || media.episode_run_time?.[0];
+        const timeLeft = formatTimeLeft(runtimeMinutes, progress);
+
+        if (timeLeft) {
+            const badge = document.createElement("div");
+            badge.className = "media-time-left";
+            badge.textContent = timeLeft;
+            artwork.append(badge);
+        }
 
         const track = document.createElement("div");
         track.className = "media-progress";
@@ -336,6 +384,91 @@ function formatRuntime(minutes) {
     return mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
 }
 
+// Remaining watch time for a partially watched title (progress is a
+// percentage: 0-100) as "12m left" or "1h 12m left".
+function formatTimeLeft(runtimeMinutes, progressPercent) {
+    if (
+        !Number.isFinite(runtimeMinutes) ||
+        runtimeMinutes <= 0 ||
+        !Number.isFinite(progressPercent)
+    ) {
+        return "";
+    }
+
+    const watched = Math.min(100, Math.max(0, progressPercent));
+    const remaining = Math.round(runtimeMinutes * (1 - watched / 100));
+    const formatted = formatRuntime(remaining);
+
+    return formatted ? `${formatted} left` : "";
+}
+
+// ── Episode banners ──────────────────────────────────────────────
+// The episode a TV title is currently on: the latest aired episode,
+// or the next one when nothing has aired yet. Shared by Continue
+// Watching cards and (future) detail pages.
+function currentEpisodeOf(media) {
+    return media?.last_episode_to_air || media?.next_episode_to_air || null;
+}
+
+// Fetch the 16:9 banner (`still_path`) for a single episode. TV
+// detail responses usually embed the still already; pass it as
+// `knownStill` to skip the extra request. Returns "" when TMDB has
+// no artwork for the episode.
+async function fetchEpisodeBanner(
+    tvId,
+    seasonNumber,
+    episodeNumber,
+    knownStill = ""
+) {
+    if (knownStill) {
+        return knownStill;
+    }
+
+    if (
+        !Number.isFinite(tvId) ||
+        !Number.isFinite(seasonNumber) ||
+        !Number.isFinite(episodeNumber)
+    ) {
+        return "";
+    }
+
+    try {
+        const episode = await tmdb(
+            `/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`,
+            { language: TMDB_LANGUAGE }
+        );
+
+        return episode.still_path || "";
+    } catch (error) {
+        console.warn(
+            `Could not fetch banner for TV ${tvId} ` +
+                `S${seasonNumber}E${episodeNumber}:`,
+            error
+        );
+
+        return "";
+    }
+}
+
+// Banner path for a TV title's current episode, falling back to the
+// show backdrop so a card always has artwork.
+async function resolveEpisodeBanner(media) {
+    const episode = currentEpisodeOf(media);
+
+    if (!episode) {
+        return "";
+    }
+
+    const still = await fetchEpisodeBanner(
+        media.id,
+        episode.season_number,
+        episode.episode_number,
+        episode.still_path
+    );
+
+    return still || media.backdrop_path || "";
+}
+
 // Populate the hero section with the movie's title, artwork, and metadata.
 function renderFeaturedMovie(movie, featuredConfig) {
     const hero = document.querySelector("#featured-hero");
@@ -363,7 +496,7 @@ function renderFeaturedMovie(movie, featuredConfig) {
     if (backdrop) {
         hero.style.setProperty(
             "--hero-backdrop",
-            `url("${imageUrl(backdrop, "w1280")}")`
+            `url("${imageUrl(backdrop, BACKDROP_SIZE)}")`
         );
     } else {
         hero.style.removeProperty("--hero-backdrop");
@@ -378,7 +511,7 @@ function renderFeaturedMovie(movie, featuredConfig) {
         logos[0];
 
     if (selectedLogo?.file_path) {
-        logo.src = imageUrl(selectedLogo.file_path, "w500");
+        logo.src = imageUrl(selectedLogo.file_path, LOGO_SIZE);
         logo.alt = `${displayTitle} logo`;
         logo.hidden = false;
         title.hidden = true;
@@ -389,18 +522,48 @@ function renderFeaturedMovie(movie, featuredConfig) {
         };
     }
 
-    // Update the movie metadata, using friendly fallbacks for missing fields.
-    document.querySelector("#featured-year").textContent =
-        (movie.release_date || movie.first_air_date || "").slice(0, 4) || "—";
+    // Movies show release year; TV shows show a release period range.
+    const mediaType = featuredConfig?.mediaType || "movie";
+    const yearElement = document.querySelector("#featured-year");
+
+    if (mediaType === "tv") {
+        const startYear = (movie.first_air_date || "").slice(0, 4);
+        const isOngoing = movie.in_production ||
+            movie.status === "Returning Series";
+        const endYear = (movie.last_air_date || "").slice(0, 4);
+
+        if (startYear) {
+            yearElement.textContent = isOngoing
+                ? `${startYear}–Present`
+                : endYear && endYear !== startYear
+                    ? `${startYear}–${endYear}`
+                    : startYear;
+        } else {
+            yearElement.textContent = "—";
+        }
+    } else {
+        yearElement.textContent =
+            (movie.release_date || "").slice(0, 4) || "—";
+    }
 
     document.querySelector("#featured-rating").textContent =
         Number(movie.vote_average || 0).toFixed(1);
 
-    document.querySelector("#featured-genres").textContent =
-        (movie.genres || [])
-            .slice(0, 3)
-            .map(genre => genre.name)
-            .join(", ") || "Movie";
+    const genresElement = document.querySelector("#featured-genres");
+    const genreNames = (movie.genres || []).slice(0, 2).map(g => g.name);
+
+    genresElement.textContent = "";
+
+    const displayGenres = genreNames.length > 0
+        ? genreNames
+        : [mediaType === "tv" ? "TV Show" : "Movie"];
+
+    displayGenres.forEach(name => {
+        const tag = document.createElement("span");
+        tag.className = "genre-tag";
+        tag.textContent = name;
+        genresElement.append(tag);
+    });
 
     // Movies expose `runtime`; TV exposes `episode_run_time[]`.
     const runtimeMinutes = Number.isFinite(movie.runtime)
@@ -670,15 +833,26 @@ const HERO_SWIPE_COMMIT = 60;
 const HERO_SWIPE_FLICK = 0.45; // px per ms
 const HERO_SWIPE_RESISTANCE = 0.35;
 
+// Hero info elements: everything in .hero-copy except the action buttons,
+// so buttons stay fixed during swipe drag and fly-out animations.
+function heroInfoElements() {
+    if (!heroCopy) return [];
+    return Array.from(heroCopy.children).filter(
+        el => !el.classList.contains('hero-actions')
+    );
+}
+
 function resetHeroDragVisual() {
     if (!heroCopy) {
         return;
     }
 
-    heroCopy.style.transition = "";
-    heroCopy.style.transform = "";
-    heroCopy.style.opacity = "";
-    heroCopy.style.willChange = "";
+    heroInfoElements().forEach(el => {
+        el.style.transition = "";
+        el.style.transform = "";
+        el.style.opacity = "";
+        el.style.willChange = "";
+    });
 }
 
 function paintHeroDrag(dx) {
@@ -688,12 +862,16 @@ function paintHeroDrag(dx) {
 
     // The entrance animation would override the drag transform.
     heroCopy.classList.remove("hero-content-enter");
-    heroCopy.style.transition = "none";
-    heroCopy.style.willChange = "transform, opacity";
-    heroCopy.style.transform =
-        `translate3d(${(dx * HERO_SWIPE_RESISTANCE).toFixed(1)}px, 0, 0)`;
-    heroCopy.style.opacity =
-        `${Math.max(0.45, 1 - Math.abs(dx) / 700)}`;
+
+    const translatedX = (dx * HERO_SWIPE_RESISTANCE).toFixed(1);
+    const fadeOpacity = `${Math.max(0.45, 1 - Math.abs(dx) / 700)}`;
+
+    heroInfoElements().forEach(el => {
+        el.style.transition = "none";
+        el.style.willChange = "transform, opacity";
+        el.style.transform = `translate3d(${translatedX}px, 0, 0)`;
+        el.style.opacity = fadeOpacity;
+    });
 }
 
 hero.addEventListener("pointerdown", event => {
@@ -787,12 +965,14 @@ function endHeroSwipe(event) {
         const direction = dx < 0 ? 1 : -1;
 
         if (heroCopy && !reduceMotion) {
-            // Fly the old copy out; the fresh render flies in.
-            heroCopy.style.transition =
-                "transform 200ms ease-out, opacity 200ms ease-out";
-            heroCopy.style.transform =
-                `translate3d(${direction * 110}px, 0, 0)`;
-            heroCopy.style.opacity = "0";
+            // Fly the old info out; the action buttons stay in place.
+            heroInfoElements().forEach(el => {
+                el.style.transition =
+                    "transform 200ms ease-out, opacity 200ms ease-out";
+                el.style.transform =
+                    `translate3d(${direction * 110}px, 0, 0)`;
+                el.style.opacity = "0";
+            });
         } else {
             resetHeroDragVisual();
         }
@@ -801,15 +981,19 @@ function endHeroSwipe(event) {
             .finally(resetHeroDragVisual);
     } else if (heroCopy && !reduceMotion) {
         // Spring back to rest.
-        heroCopy.style.transition =
-            "transform 240ms ease-out, opacity 240ms ease-out";
-        heroCopy.style.transform = "";
-        heroCopy.style.opacity = "";
+        heroInfoElements().forEach(el => {
+            el.style.transition =
+                "transform 240ms ease-out, opacity 240ms ease-out";
+            el.style.transform = "";
+            el.style.opacity = "";
+        });
 
         heroSnapTimer = setTimeout(() => {
             if (heroCopy && !heroSwiping) {
-                heroCopy.style.transition = "";
-                heroCopy.style.willChange = "";
+                heroInfoElements().forEach(el => {
+                    el.style.transition = "";
+                    el.style.willChange = "";
+                });
             }
         }, 260);
     } else {
@@ -855,9 +1039,17 @@ async function loadContinueWatching() {
                         language: TMDB_LANGUAGE
                     });
 
+                    const withType = { ...media, media_type: type };
+
+                    // TV cards prefer the current episode's own banner.
+                    const bannerPath = type === "tv"
+                        ? await resolveEpisodeBanner(withType)
+                        : "";
+
                     return {
-                        media: { ...media, media_type: type },
-                        progress: entry.progress
+                        media: withType,
+                        progress: entry.progress,
+                        bannerPath
                     };
                 } catch (error) {
                     console.warn(
@@ -877,8 +1069,8 @@ async function loadContinueWatching() {
             return;
         }
 
-        validItems.forEach(({ media, progress }, index) => {
-            const card = createMediaCard(media, { progress });
+        validItems.forEach(({ media, progress, bannerPath }, index) => {
+            const card = createMediaCard(media, { progress, bannerPath });
 
             card.style.animationDelay = `${index * 35}ms`;
             container.append(card);
@@ -1565,7 +1757,7 @@ function createDiscoverCard(media) {
 
     if (media.poster_path) {
         const image = document.createElement("img");
-        image.src = imageUrl(media.poster_path, "w500");
+        image.src = imageUrl(media.poster_path, DISCOVER_POSTER_SIZE);
         image.alt = `${title} poster`;
         image.loading = "lazy";
         image.decoding = "async";
@@ -1708,7 +1900,7 @@ async function loadDiscoverSpotlight() {
         const kind = pick.media_type === "tv" ? "TV" : "MOVIE";
         const mood = (discoverGenreName(pick.genre_ids?.[0]) || kind).toUpperCase();
 
-        image.src = imageUrl(pick.backdrop_path, "w1280");
+        image.src = imageUrl(pick.backdrop_path, BACKDROP_SIZE);
         image.alt = "";
         meta.textContent = `FEATURED PICK • ${year} • ${mood}`;
 
@@ -1738,7 +1930,7 @@ async function loadDiscoverSpotlight() {
                 logos[0];
 
             if (selectedLogo?.file_path && logo) {
-                logo.src = imageUrl(selectedLogo.file_path, "w500");
+                logo.src = imageUrl(selectedLogo.file_path, LOGO_SIZE);
                 logo.alt = `${pickTitle} logo`;
                 logo.hidden = false;
                 title.hidden = true;

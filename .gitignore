@@ -1,3 +1,4 @@
 # Local credentials/configuration. Track config.example.js instead.
 config.js
 merger-guide-strict.md
+/.playwright-mcp

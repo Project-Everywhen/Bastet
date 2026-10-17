@@ -496,6 +496,16 @@ h1 {
     color: var(--text-separator);
 }
 
+#featured-genres {
+    display: inline-flex;
+    align-items: center;
+}
+
+.genre-tag:not(:last-child)::after {
+    content: ",";
+    margin-right: 6px;
+}
+
 .rating {
     display: inline-flex;
     align-items: center;
@@ -592,14 +602,14 @@ h1 {
 
 .hero-logo {
     display: block;
-    width: clamp(200px, 42vw, 460px);
+    width: clamp(160px, 32vw, 340px);
     max-width: 100%;
-    max-height: clamp(80px, 20vh, 168px);
+    max-height: clamp(60px, 14vh, 120px);
 
     object-fit: contain;
     object-position: left center;
 
-    margin: 0 0 24px 0px;
+    margin: 0 0 18px 0px;
     filter: drop-shadow(0 4px 24px var(--shadow-logo));
 }
 
@@ -829,7 +839,7 @@ h1 {
     transform: scale(1.035);
 }
 
-/* Continue Watching overlay: title lives on the artwork. */
+/* Continue Watching overlay: text stack lives on the artwork. */
 .media-card--continue .media-card-details {
     display: none;
 }
@@ -841,16 +851,16 @@ h1 {
     left: 0;
 
     /* Bottom padding clears the progress bar. */
-    padding: 28px 10px 16px;
+    padding: 40px 12px 16px;
 
     background: linear-gradient(transparent, rgba(var(--bg-rgb), 0.88));
     text-align: left;
 }
 
 .media-overlay-title {
-    margin: 0 0 2px;
+    margin: 0;
     font-size: 14px;
-    font-weight: 650;
+    font-weight: 700;
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -863,10 +873,21 @@ h1 {
     transform-origin: left center;
 }
 
-.media-overlay p {
-    margin: 0;
+.media-overlay-episode {
+    margin: 0 0 3px;
+    color: var(--text-primary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.media-overlay-sub {
+    margin: 3px 0 0;
     color: var(--text-muted);
     font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Playback progress */
@@ -876,7 +897,7 @@ h1 {
     bottom: 8px;
     left: 8px;
 
-    height: 4px;
+    height: 3px;
     overflow: hidden;
     border-radius: 99px;
     background: var(--track-frost);
@@ -886,6 +907,25 @@ h1 {
     height: 100%;
     background: var(--accent);
     border-radius: 99px;
+}
+
+/* Time-remaining badge on Continue Watching artwork. */
+.media-time-left {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+
+    padding: 3px 7px;
+    border-radius: 5px;
+
+    background: rgba(var(--bg-rgb), 0.78);
+    color: var(--text-primary);
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
 }
 
 /* Card text */
@@ -936,15 +976,6 @@ h1 {
     }
 }
 
-/* Very small screens: keep only year · rating · runtime in the
-   metadata line; genres (the longest part) are hidden with the
-   separator that introduced them. */
-@media (max-width: 480px) {
-    #featured-genres,
-    .meta-separator:has(+ #featured-genres) {
-        display: none;
-    }
-}
 
 @media (max-width: 640px) {
     .hero {
@@ -959,9 +990,9 @@ h1 {
     }
 
     .hero-logo {
-        width: min(280px, 100%);
-        max-height: clamp(64px, 14svh, 105px);
-        margin-bottom: 18px;
+        width: min(220px, 100%);
+        max-height: clamp(48px, 11svh, 80px);
+        margin-bottom: 14px;
     }
 
     .hero-carousel {
@@ -1157,12 +1188,44 @@ h1 {
     .hero-logo {
         object-position: center;
         margin-inline: auto;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
     }
 
+    /* Hero metadata: on mobile, show only Genre 1 • Genre 2 • Year/Period */
     .metadata {
         justify-content: center;
         margin-bottom: 10px;
+        gap: 10px;
+    }
+
+    .metadata .meta-separator,
+    .metadata .rating,
+    .metadata #featured-runtime {
+        display: none;
+    }
+
+    #featured-genres {
+        order: 1;
+        gap: 10px;
+    }
+
+    .genre-tag:not(:last-child)::after {
+        content: "•";
+        color: var(--text-separator);
+        margin-left: 10px;
+        margin-right: 0;
+    }
+
+    #featured-year {
+        order: 2;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    #featured-year::before {
+        content: "•";
+        color: var(--text-separator);
+        margin-right: 10px;
     }
 
     h1 {
