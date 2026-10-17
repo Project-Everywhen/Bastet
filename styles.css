@@ -839,7 +839,7 @@ h1 {
     transform: scale(1.035);
 }
 
-/* Continue Watching overlay: title lives on the artwork. */
+/* Continue Watching overlay: text stack lives on the artwork. */
 .media-card--continue .media-card-details {
     display: none;
 }
@@ -851,16 +851,16 @@ h1 {
     left: 0;
 
     /* Bottom padding clears the progress bar. */
-    padding: 28px 10px 16px;
+    padding: 40px 12px 16px;
 
     background: linear-gradient(transparent, rgba(var(--bg-rgb), 0.88));
     text-align: left;
 }
 
 .media-overlay-title {
-    margin: 0 0 2px;
+    margin: 0;
     font-size: 14px;
-    font-weight: 650;
+    font-weight: 700;
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -873,10 +873,21 @@ h1 {
     transform-origin: left center;
 }
 
-.media-overlay p {
-    margin: 0;
+.media-overlay-episode {
+    margin: 0 0 3px;
+    color: var(--text-primary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.media-overlay-sub {
+    margin: 3px 0 0;
     color: var(--text-muted);
     font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Playback progress */
@@ -886,7 +897,7 @@ h1 {
     bottom: 8px;
     left: 8px;
 
-    height: 4px;
+    height: 3px;
     overflow: hidden;
     border-radius: 99px;
     background: var(--track-frost);
@@ -912,7 +923,7 @@ h1 {
     color: var(--text-primary);
 
     font-size: 10px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.01em;
     line-height: 1.2;
 }

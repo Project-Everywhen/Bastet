@@ -210,11 +210,26 @@ function createMediaCard(media, options = {}) {
     const year = releaseDate.slice(0, 4) || "—";
 
     if (isContinue) {
-        // Title lives on the artwork, above the progress bar. The
+        // Text stack lives on the artwork, above the progress bar. The
         // overlay goes in first so its dark gradient never dims the
         // white progress fill painted after it.
         const overlay = document.createElement("div");
         overlay.className = "media-overlay";
+
+        // TV shows expose the latest episode; movies show just the
+        // title, so no extra lines are added for them.
+        const episode = media.last_episode_to_air || media.next_episode_to_air;
+
+        if (
+            Number.isFinite(episode?.season_number) &&
+            Number.isFinite(episode?.episode_number)
+        ) {
+            const episodeTag = document.createElement("p");
+            episodeTag.className = "media-overlay-episode";
+            episodeTag.textContent =
+                `S${episode.season_number} E${episode.episode_number}`;
+            overlay.append(episodeTag);
+        }
 
         const heading = document.createElement("h3");
         heading.className = "media-overlay-title";
@@ -223,16 +238,25 @@ function createMediaCard(media, options = {}) {
         label.textContent = title;
         heading.append(label);
 
-        const metadata = document.createElement("p");
-        metadata.textContent = `${year} · ${progress}% watched`;
+        overlay.append(heading);
 
-        overlay.append(heading, metadata);
+        const subtitleText = episode?.name;
+
+        if (subtitleText) {
+            const subtitle = document.createElement("p");
+            subtitle.className = "media-overlay-sub";
+            subtitle.textContent = subtitleText;
+            overlay.append(subtitle);
+        }
+
         artwork.append(overlay);
 
-        // Movies expose `runtime`; TV exposes `episode_run_time[]`.
+        // Movies expose `runtime`; TV exposes the runtime of the
+        // episode being continued, falling back to the average
+        // episode length.
         const runtimeMinutes = Number.isFinite(media.runtime)
             ? media.runtime
-            : media.episode_run_time?.[0];
+            : episode?.runtime || media.episode_run_time?.[0];
         const timeLeft = formatTimeLeft(runtimeMinutes, progress);
 
         if (timeLeft) {
