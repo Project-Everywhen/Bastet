@@ -80,6 +80,17 @@
     /* Shadows. */
     --shadow-text: rgba(var(--shadow-rgb), 0.55);
     --shadow-logo: rgba(var(--shadow-rgb), 0.45);
+
+    /* State semantics (danger, status, switches). */
+    --danger-text: #ffaaaa;
+    --danger-line: rgba(255, 125, 125, 0.25);
+    --danger-fill: rgba(255, 95, 95, 0.07);
+    --danger-fill-hover: rgba(255, 95, 95, 0.14);
+    --status-text: #a8d9b4;
+    --status-line: rgba(143, 205, 159, 0.2);
+    --status-dot: #8acb9a;
+    --switch-track: #37373a;
+    --switch-knob: #c5c5c8;
 }
 
 /* Predictable element sizing */
@@ -252,48 +263,6 @@ button {
     display: none;
 }
 
-/* Account options list (Profile view). */
-.profile-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    max-width: 560px;
-    padding: 0 24px 40px;
-}
-
-.profile-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-
-    padding: 14px 16px;
-
-    border: 1px solid var(--line-frost);
-    border-radius: 12px;
-    background: var(--surface-raised);
-    color: var(--text-primary);
-}
-
-.profile-menu-item:hover {
-    background: var(--surface-control);
-}
-
-.profile-menu-item .material-symbols-rounded {
-    color: var(--text-muted);
-    flex: 0 0 auto;
-}
-
-.profile-menu-label {
-    flex: 1 1 auto;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.profile-menu-chevron {
-    opacity: 0.7;
-}
-
 /* Outlined icons by default; the selected destination is filled. */
 .nav-icons .material-symbols-rounded,
 .nav-icons-bottom .material-symbols-rounded {
@@ -334,25 +303,26 @@ button {
 }
 
 .page-header {
-    padding: 48px 24px 24px;
+    padding: 24px 24px 16px;
 }
 
 .page-eyebrow {
-    margin: 0 0 10px;
+    margin: 0 0 6px;
     color: var(--text-faint);
     font-size: 12px;
     letter-spacing: 0.14em;
 }
 
 .page-header h2 {
-    margin: 0 0 12px;
+    margin: 0 0 6px;
     font-size: clamp(28px, 3vw, 40px);
     font-weight: 650;
 }
 
 .page-header > p:last-child {
+    margin: 0;
     color: var(--text-soft);
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* Search view */
@@ -440,6 +410,10 @@ button {
     padding: 0 24px 40px;
 }
 
+.search-grid:empty {
+    display: none;
+}
+
 .search-grid .media-card {
     flex: none;
     width: 100%;
@@ -523,11 +497,24 @@ h1 {
 }
 
 .rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     white-space: nowrap;
 }
 
 .rating > span {
     color: inherit;
+}
+
+.rating-star,
+.rating .material-symbols-rounded {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15em;
+    line-height: 1;
+    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 20;
 }
 
 .synopsis {
@@ -925,9 +912,21 @@ h1 {
 }
 
 .media-card-details p {
+    display: flex;
+    align-items: center;
+    gap: 3px;
     margin: 0;
     color: var(--text-muted);
     font-size: 11px;
+}
+
+.media-card-details p .material-symbols-rounded {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 20;
 }
 
 /* Half-width windows and smaller: drop the synopsis to reduce clutter. */
@@ -983,11 +982,11 @@ h1 {
         bottom: calc(12px + env(safe-area-inset-bottom));
         left: 12px;
 
-        /* Centered floating bar: capped just past content width so
-           no dead space sits inside the pill. Content is ~313px
+        /* Centered floating bar: hug content so side gaps equal
+           the 4px top/bottom padding. Content is ~313px
            (4×68px links + gaps + divider + padding). */
-        width: auto;
-        max-width: 316px;
+        width: fit-content;
+        max-width: calc(100vw - 24px);
         margin-inline: auto;
         height: auto;
         flex-direction: row;
@@ -1021,10 +1020,12 @@ h1 {
         -webkit-backdrop-filter: blur(18px) saturate(140%);
         backdrop-filter: blur(18px) saturate(140%);
 
-        /* Staged shrink: shell tightens after the labels clear.
-           (max-width animates smoothly; width: fit-content would
-           snap because auto isn't interpolable.) */
-        transition: padding 260ms ease 90ms, max-width 260ms ease 90ms;
+        /* Expand path: no delay so the shell leads content open.
+           The 90ms collapse delay lives on .is-compact so the
+           shell trails the labels shut. Width hugs content;
+           max-width only caps it. Long soft curve so the
+           growth lands gently instead of stopping flat. */
+        transition: padding 300ms cubic-bezier(0.2, 0.8, 0.2, 1), max-width 300ms cubic-bezier(0.2, 0.8, 0.2, 1), gap 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     .sidebar.is-compact {
@@ -1034,6 +1035,7 @@ h1 {
         /* Tight cap matched to content (~191px: 4×44px links +
            tighter gaps + divider + padding). */
         max-width: 194px;
+        transition: padding 220ms ease 90ms, max-width 220ms ease 90ms, gap 220ms ease 90ms;
     }
 
     .brand-mark {
@@ -1048,7 +1050,7 @@ h1 {
         width: auto;
         margin: 0;
         gap: 8px;
-        transition: gap 200ms ease 90ms;
+        transition: gap 300ms cubic-bezier(0.2, 0.8, 0.2, 1) 40ms;
     }
 
     .nav-icons a,
@@ -1061,17 +1063,23 @@ h1 {
         flex: none;
 
         /* Fixed uniform container: identical highlight box for
-           every icon regardless of label length. Horizontal padding
-           widens the highlight without touching icon size
-           (box-sizing is border-box globally). */
-        min-width: 68px;
+           every icon regardless of label length. Width alone sets
+           the size (min-width stays 0 so it never snaps ahead of
+           the width animation — that instant flip was killing the
+           expand). Horizontal padding widens the highlight without
+           touching icon size (box-sizing is border-box globally).
+           Explicit widths on both states so the box interpolates
+           instead of snapping (auto widths are not animatable). */
+        width: 68px;
+        min-width: 0;
         padding: 4px 8px;
-        transition: padding 260ms ease 90ms, gap 200ms ease 90ms, width 200ms ease 90ms, min-width 200ms ease 90ms;
+        transition: padding 300ms cubic-bezier(0.2, 0.8, 0.2, 1) 40ms, gap 300ms cubic-bezier(0.2, 0.8, 0.2, 1) 40ms, width 300ms cubic-bezier(0.2, 0.8, 0.2, 1) 40ms;
     }
 
     .sidebar.is-compact .nav-icons,
     .sidebar.is-compact .nav-icons-bottom {
         gap: 2px;
+        transition: gap 220ms ease 90ms;
     }
 
     .sidebar.is-compact .nav-icons a,
@@ -1080,6 +1088,7 @@ h1 {
         gap: 0;
         width: 44px;
         min-width: 0;
+        transition: padding 220ms ease 90ms, gap 220ms ease 90ms, width 220ms ease 90ms;
     }
 
     /* Highlighted box around the selected icon, echoing the
@@ -1105,22 +1114,27 @@ h1 {
         overflow: hidden;
         text-overflow: ellipsis;
 
-        /* Collapsible line: fades while shrinking so no sliver stays. */
+        /* Expand path: shell (no delay) opens first, icon boxes
+           follow at 40ms, text lands last at 140ms — the reverse
+           of the collapse order. (Collapse uses the delay-free
+           transition on .is-compact below.) */
         max-height: 12px;
         opacity: 1;
+        transform: translateY(0);
         overflow: hidden;
-        transition: opacity 140ms ease, max-height 180ms ease;
+        transition: opacity 140ms ease 140ms, max-height 200ms cubic-bezier(0.2, 0.8, 0.2, 1) 140ms, transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1) 140ms;
     }
 
     .sidebar.is-compact .nav-label {
         opacity: 0;
+        transform: translateY(6px);
+        transition: opacity 140ms ease, max-height 180ms ease, transform 180ms ease;
         max-height: 0;
     }
 
+    /* No divider in the mobile pill; desktop rail keeps its hairline. */
     .nav-icons-bottom::before {
-        width: 1px;
-        height: 24px;
-        align-self: center;
+        display: none;
     }
 
     /* Content reclaims the rail width; bottom pad clears the bar. */
@@ -1219,6 +1233,10 @@ h1 {
         margin: 0 16px 8px;
     }
 
+    .page-header {
+        padding: 20px 16px 16px;
+    }
+
     .search-status {
         margin: 12px 16px 16px;
     }
@@ -1239,7 +1257,8 @@ h1 {
 
     .nav-icons a,
     .nav-icons-bottom a {
-        min-width: 56px;
+        width: 56px;
+        min-width: 0;
     }
 }
 
