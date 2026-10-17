@@ -10,6 +10,15 @@ import {
 const API_BASE = "https://api.themoviedb.org/3";
 const IMAGE_BASE = "https://image.tmdb.org/t/p/";
 
+// TMDB artwork size presets. Backdrops render wider than TMDB's
+// largest fixed size (w1280) on most screens, so they use the stored
+// original; smaller artwork stays near 2-3x its display size.
+const BACKDROP_SIZE = "original";
+const LOGO_SIZE = "original";
+const CONTINUE_BANNER_SIZE = "w780";
+const CARD_POSTER_SIZE = "w342";
+const DISCOVER_POSTER_SIZE = "w500";
+
 let currentFeaturedIndex = 0;
 let isFeaturedLoading = false;
 let currentFeaturedRef = null;
@@ -82,7 +91,7 @@ function featuredImageUrls(movie) {
     const urls = [];
 
     if (movie.backdrop_path) {
-        urls.push(imageUrl(movie.backdrop_path, "w1280"));
+        urls.push(imageUrl(movie.backdrop_path, BACKDROP_SIZE));
     }
 
     const logos = movie.images?.logos || [];
@@ -92,7 +101,7 @@ function featuredImageUrls(movie) {
         logos[0];
 
     if (selectedLogo?.file_path) {
-        urls.push(imageUrl(selectedLogo.file_path, "w500"));
+        urls.push(imageUrl(selectedLogo.file_path, LOGO_SIZE));
     }
 
     return urls;
@@ -117,12 +126,14 @@ async function getFeaturedDetails(index) {
     return movie;
 }
 
-// Fetch neighbor details and images in the background so carousel
-// turns never wait on the network twice for the same movie.
+// Warm only the next slide's details and artwork in the background
+// so forward turns never wait on the network. The previous slide is
+// already in the browser cache from when it was active, and any
+// never-warmed slide fetches its original at render time (on swipe).
 function warmFeaturedNeighbors(activeIndex) {
     const total = FEATURED_MOVIES.length;
 
-    [activeIndex + 1, activeIndex - 1].forEach(offset => {
+    [activeIndex + 1].forEach(offset => {
         const index = (offset + total) % total;
 
         if (featuredCache.has(index)) {
@@ -172,7 +183,7 @@ function createStarIcon(extraClass = "") {
 }
 
 function createMediaCard(media, options = {}) {
-    const { progress } = options;
+    const { progress, bannerPath } = options;
     const isContinue = Number.isFinite(progress);
 
     const title = media.title || media.name || "Untitled";
@@ -187,7 +198,7 @@ function createMediaCard(media, options = {}) {
     artwork.className = "media-art";
 
     const posterPath = isContinue
-        ? media.backdrop_path || media.poster_path
+        ? bannerPath || media.backdrop_path || media.poster_path
         : media.poster_path || media.backdrop_path;
 
     if (posterPath) {
@@ -196,7 +207,7 @@ function createMediaCard(media, options = {}) {
         image.className = "media-image";
         image.src = imageUrl(
             posterPath,
-            isContinue ? "w780" : "w342"
+            isContinue ? CONTINUE_BANNER_SIZE : CARD_POSTER_SIZE
         );
         image.alt = `${title} ${isContinue ? "backdrop" : "poster"}`;
         image.loading = "lazy";
@@ -218,7 +229,7 @@ function createMediaCard(media, options = {}) {
 
         // TV shows expose the latest episode; movies show just the
         // title, so no extra lines are added for them.
-        const episode = media.last_episode_to_air || media.next_episode_to_air;
+        const episode = currentEpisodeOf(media);
 
         if (
             Number.isFinite(episode?.season_number) &&
@@ -391,6 +402,73 @@ function formatTimeLeft(runtimeMinutes, progressPercent) {
     return formatted ? `${formatted} left` : "";
 }
 
+// ── Episode banners ──────────────────────────────────────────────
+// The episode a TV title is currently on: the latest aired episode,
+// or the next one when nothing has aired yet. Shared by Continue
+// Watching cards and (future) detail pages.
+function currentEpisodeOf(media) {
+    return media?.last_episode_to_air || media?.next_episode_to_air || null;
+}
+
+// Fetch the 16:9 banner (`still_path`) for a single episode. TV
+// detail responses usually embed the still already; pass it as
+// `knownStill` to skip the extra request. Returns "" when TMDB has
+// no artwork for the episode.
+async function fetchEpisodeBanner(
+    tvId,
+    seasonNumber,
+    episodeNumber,
+    knownStill = ""
+) {
+    if (knownStill) {
+        return knownStill;
+    }
+
+    if (
+        !Number.isFinite(tvId) ||
+        !Number.isFinite(seasonNumber) ||
+        !Number.isFinite(episodeNumber)
+    ) {
+        return "";
+    }
+
+    try {
+        const episode = await tmdb(
+            `/tv/${tvId}/season/${seasonNumber}/episode/${episodeNumber}`,
+            { language: TMDB_LANGUAGE }
+        );
+
+        return episode.still_path || "";
+    } catch (error) {
+        console.warn(
+            `Could not fetch banner for TV ${tvId} ` +
+                `S${seasonNumber}E${episodeNumber}:`,
+            error
+        );
+
+        return "";
+    }
+}
+
+// Banner path for a TV title's current episode, falling back to the
+// show backdrop so a card always has artwork.
+async function resolveEpisodeBanner(media) {
+    const episode = currentEpisodeOf(media);
+
+    if (!episode) {
+        return "";
+    }
+
+    const still = await fetchEpisodeBanner(
+        media.id,
+        episode.season_number,
+        episode.episode_number,
+        episode.still_path
+    );
+
+    return still || media.backdrop_path || "";
+}
+
 // Populate the hero section with the movie's title, artwork, and metadata.
 function renderFeaturedMovie(movie, featuredConfig) {
     const hero = document.querySelector("#featured-hero");
@@ -418,7 +496,7 @@ function renderFeaturedMovie(movie, featuredConfig) {
     if (backdrop) {
         hero.style.setProperty(
             "--hero-backdrop",
-            `url("${imageUrl(backdrop, "w1280")}")`
+            `url("${imageUrl(backdrop, BACKDROP_SIZE)}")`
         );
     } else {
         hero.style.removeProperty("--hero-backdrop");
@@ -433,7 +511,7 @@ function renderFeaturedMovie(movie, featuredConfig) {
         logos[0];
 
     if (selectedLogo?.file_path) {
-        logo.src = imageUrl(selectedLogo.file_path, "w500");
+        logo.src = imageUrl(selectedLogo.file_path, LOGO_SIZE);
         logo.alt = `${displayTitle} logo`;
         logo.hidden = false;
         title.hidden = true;
@@ -961,9 +1039,17 @@ async function loadContinueWatching() {
                         language: TMDB_LANGUAGE
                     });
 
+                    const withType = { ...media, media_type: type };
+
+                    // TV cards prefer the current episode's own banner.
+                    const bannerPath = type === "tv"
+                        ? await resolveEpisodeBanner(withType)
+                        : "";
+
                     return {
-                        media: { ...media, media_type: type },
-                        progress: entry.progress
+                        media: withType,
+                        progress: entry.progress,
+                        bannerPath
                     };
                 } catch (error) {
                     console.warn(
@@ -983,8 +1069,8 @@ async function loadContinueWatching() {
             return;
         }
 
-        validItems.forEach(({ media, progress }, index) => {
-            const card = createMediaCard(media, { progress });
+        validItems.forEach(({ media, progress, bannerPath }, index) => {
+            const card = createMediaCard(media, { progress, bannerPath });
 
             card.style.animationDelay = `${index * 35}ms`;
             container.append(card);
@@ -1671,7 +1757,7 @@ function createDiscoverCard(media) {
 
     if (media.poster_path) {
         const image = document.createElement("img");
-        image.src = imageUrl(media.poster_path, "w500");
+        image.src = imageUrl(media.poster_path, DISCOVER_POSTER_SIZE);
         image.alt = `${title} poster`;
         image.loading = "lazy";
         image.decoding = "async";
@@ -1814,7 +1900,7 @@ async function loadDiscoverSpotlight() {
         const kind = pick.media_type === "tv" ? "TV" : "MOVIE";
         const mood = (discoverGenreName(pick.genre_ids?.[0]) || kind).toUpperCase();
 
-        image.src = imageUrl(pick.backdrop_path, "w1280");
+        image.src = imageUrl(pick.backdrop_path, BACKDROP_SIZE);
         image.alt = "";
         meta.textContent = `FEATURED PICK • ${year} • ${mood}`;
 
@@ -1844,7 +1930,7 @@ async function loadDiscoverSpotlight() {
                 logos[0];
 
             if (selectedLogo?.file_path && logo) {
-                logo.src = imageUrl(selectedLogo.file_path, "w500");
+                logo.src = imageUrl(selectedLogo.file_path, LOGO_SIZE);
                 logo.alt = `${pickTitle} logo`;
                 logo.hidden = false;
                 title.hidden = true;
