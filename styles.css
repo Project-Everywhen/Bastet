@@ -609,7 +609,7 @@ h1 {
     object-fit: contain;
     object-position: left center;
 
-    margin: 0 0 18px 0px;
+    margin: 0 0 26px 0px;
     filter: drop-shadow(0 4px 24px var(--shadow-logo));
 }
 
@@ -992,7 +992,7 @@ h1 {
     .hero-logo {
         width: min(220px, 100%);
         max-height: clamp(48px, 11svh, 80px);
-        margin-bottom: 14px;
+        margin-bottom: 20px;
     }
 
     .hero-carousel {
@@ -1188,7 +1188,7 @@ h1 {
     .hero-logo {
         object-position: center;
         margin-inline: auto;
-        margin-bottom: 12px;
+        margin-bottom: 20px;
     }
 
     /* Hero metadata: on mobile, show only Genre 1 • Genre 2 • Year/Period */

@@ -11,13 +11,31 @@ const API_BASE = "https://api.themoviedb.org/3";
 const IMAGE_BASE = "https://image.tmdb.org/t/p/";
 
 // TMDB artwork size presets. Backdrops render wider than TMDB's
-// largest fixed size (w1280) on most screens, so they use the stored
-// original; smaller artwork stays near 2-3x its display size.
+// largest fixed size (w1280) on most screens, so desktop uses the
+// stored original; phones get a ~1080p-class file instead. Logos do
+// the same at a smaller scale. Smaller artwork stays near 2-3x its
+// display size.
 const BACKDROP_SIZE = "original";
+const MOBILE_BACKDROP_SIZE = "w1280";
 const LOGO_SIZE = "original";
+const MOBILE_LOGO_SIZE = "w500";
 const CONTINUE_BANNER_SIZE = "w780";
 const CARD_POSTER_SIZE = "w342";
 const DISCOVER_POSTER_SIZE = "w500";
+
+// Mirrors the stylesheet's mobile breakpoint. Sizes are read through
+// backdropSize()/logoSize() at fetch time, so crossing the breakpoint
+// swaps classes without a reload; the listener at the bottom of the
+// file re-renders on-screen artwork to match.
+const mobileMedia = window.matchMedia("(max-width: 640px)");
+
+function backdropSize() {
+    return mobileMedia.matches ? MOBILE_BACKDROP_SIZE : BACKDROP_SIZE;
+}
+
+function logoSize() {
+    return mobileMedia.matches ? MOBILE_LOGO_SIZE : LOGO_SIZE;
+}
 
 let currentFeaturedIndex = 0;
 let isFeaturedLoading = false;
@@ -91,7 +109,7 @@ function featuredImageUrls(movie) {
     const urls = [];
 
     if (movie.backdrop_path) {
-        urls.push(imageUrl(movie.backdrop_path, BACKDROP_SIZE));
+        urls.push(imageUrl(movie.backdrop_path, backdropSize()));
     }
 
     const logos = movie.images?.logos || [];
@@ -101,7 +119,7 @@ function featuredImageUrls(movie) {
         logos[0];
 
     if (selectedLogo?.file_path) {
-        urls.push(imageUrl(selectedLogo.file_path, LOGO_SIZE));
+        urls.push(imageUrl(selectedLogo.file_path, logoSize()));
     }
 
     return urls;
@@ -496,7 +514,7 @@ function renderFeaturedMovie(movie, featuredConfig) {
     if (backdrop) {
         hero.style.setProperty(
             "--hero-backdrop",
-            `url("${imageUrl(backdrop, BACKDROP_SIZE)}")`
+            `url("${imageUrl(backdrop, backdropSize())}")`
         );
     } else {
         hero.style.removeProperty("--hero-backdrop");
@@ -511,7 +529,7 @@ function renderFeaturedMovie(movie, featuredConfig) {
         logos[0];
 
     if (selectedLogo?.file_path) {
-        logo.src = imageUrl(selectedLogo.file_path, LOGO_SIZE);
+        logo.src = imageUrl(selectedLogo.file_path, logoSize());
         logo.alt = `${displayTitle} logo`;
         logo.hidden = false;
         title.hidden = true;
@@ -1869,6 +1887,24 @@ async function loadDiscoverCatalog() {
     }
 }
 
+// Remembered so a viewport-class change can swap the spotlight
+// artwork without another TMDB request.
+let spotlightBackdropPath = "";
+let spotlightLogoPath = "";
+
+function updateSpotlightArtwork() {
+    const image = discoverRoot?.querySelector("#spotlight-image");
+    const logo = discoverRoot?.querySelector("#spotlight-logo");
+
+    if (image && spotlightBackdropPath) {
+        image.src = imageUrl(spotlightBackdropPath, backdropSize());
+    }
+
+    if (logo && spotlightLogoPath) {
+        logo.src = imageUrl(spotlightLogoPath, logoSize());
+    }
+}
+
 async function loadDiscoverSpotlight() {
     const image = discoverRoot.querySelector("#spotlight-image");
     const meta = discoverRoot.querySelector("#spotlight-meta");
@@ -1900,7 +1936,8 @@ async function loadDiscoverSpotlight() {
         const kind = pick.media_type === "tv" ? "TV" : "MOVIE";
         const mood = (discoverGenreName(pick.genre_ids?.[0]) || kind).toUpperCase();
 
-        image.src = imageUrl(pick.backdrop_path, BACKDROP_SIZE);
+        spotlightBackdropPath = pick.backdrop_path;
+        image.src = imageUrl(spotlightBackdropPath, backdropSize());
         image.alt = "";
         meta.textContent = `FEATURED PICK • ${year} • ${mood}`;
 
@@ -1930,7 +1967,8 @@ async function loadDiscoverSpotlight() {
                 logos[0];
 
             if (selectedLogo?.file_path && logo) {
-                logo.src = imageUrl(selectedLogo.file_path, LOGO_SIZE);
+                spotlightLogoPath = selectedLogo.file_path;
+                logo.src = imageUrl(spotlightLogoPath, logoSize());
                 logo.alt = `${pickTitle} logo`;
                 logo.hidden = false;
                 title.hidden = true;
@@ -2117,3 +2155,17 @@ if (spSettingsForm) {
         }, 0);
     });
 }
+
+// Keep artwork in step with the viewport class: crossing the mobile
+// breakpoint in either direction re-renders the active hero and swaps
+// the spotlight artwork so both re-fetch at the right size. Other
+// artwork picks up its size lazily on the next render.
+mobileMedia.addEventListener("change", () => {
+    const movie = featuredCache.get(currentFeaturedIndex);
+
+    if (movie) {
+        renderFeaturedMovie(movie, FEATURED_MOVIES[currentFeaturedIndex]);
+    }
+
+    updateSpotlightArtwork();
+});
