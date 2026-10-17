@@ -496,6 +496,16 @@ h1 {
     color: var(--text-separator);
 }
 
+#featured-genres {
+    display: inline-flex;
+    align-items: center;
+}
+
+.genre-tag:not(:last-child)::after {
+    content: ",";
+    margin-right: 6px;
+}
+
 .rating {
     display: inline-flex;
     align-items: center;
@@ -592,14 +602,14 @@ h1 {
 
 .hero-logo {
     display: block;
-    width: clamp(200px, 42vw, 460px);
+    width: clamp(160px, 32vw, 340px);
     max-width: 100%;
-    max-height: clamp(80px, 20vh, 168px);
+    max-height: clamp(60px, 14vh, 120px);
 
     object-fit: contain;
     object-position: left center;
 
-    margin: 0 0 24px 0px;
+    margin: 0 0 18px 0px;
     filter: drop-shadow(0 4px 24px var(--shadow-logo));
 }
 
@@ -888,6 +898,25 @@ h1 {
     border-radius: 99px;
 }
 
+/* Time-remaining badge on Continue Watching artwork. */
+.media-time-left {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+
+    padding: 3px 7px;
+    border-radius: 5px;
+
+    background: rgba(var(--bg-rgb), 0.78);
+    color: var(--text-primary);
+
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+}
+
 /* Card text */
 .media-card-details {
     padding: 6px 2px;
@@ -936,15 +965,6 @@ h1 {
     }
 }
 
-/* Very small screens: keep only year · rating · runtime in the
-   metadata line; genres (the longest part) are hidden with the
-   separator that introduced them. */
-@media (max-width: 480px) {
-    #featured-genres,
-    .meta-separator:has(+ #featured-genres) {
-        display: none;
-    }
-}
 
 @media (max-width: 640px) {
     .hero {
@@ -959,9 +979,9 @@ h1 {
     }
 
     .hero-logo {
-        width: min(280px, 100%);
-        max-height: clamp(64px, 14svh, 105px);
-        margin-bottom: 18px;
+        width: min(220px, 100%);
+        max-height: clamp(48px, 11svh, 80px);
+        margin-bottom: 14px;
     }
 
     .hero-carousel {
@@ -1157,12 +1177,44 @@ h1 {
     .hero-logo {
         object-position: center;
         margin-inline: auto;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
     }
 
+    /* Hero metadata: on mobile, show only Genre 1 • Genre 2 • Year/Period */
     .metadata {
         justify-content: center;
         margin-bottom: 10px;
+        gap: 10px;
+    }
+
+    .metadata .meta-separator,
+    .metadata .rating,
+    .metadata #featured-runtime {
+        display: none;
+    }
+
+    #featured-genres {
+        order: 1;
+        gap: 10px;
+    }
+
+    .genre-tag:not(:last-child)::after {
+        content: "•";
+        color: var(--text-separator);
+        margin-left: 10px;
+        margin-right: 0;
+    }
+
+    #featured-year {
+        order: 2;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    #featured-year::before {
+        content: "•";
+        color: var(--text-separator);
+        margin-right: 10px;
     }
 
     h1 {

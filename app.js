@@ -229,6 +229,19 @@ function createMediaCard(media, options = {}) {
         overlay.append(heading, metadata);
         artwork.append(overlay);
 
+        // Movies expose `runtime`; TV exposes `episode_run_time[]`.
+        const runtimeMinutes = Number.isFinite(media.runtime)
+            ? media.runtime
+            : media.episode_run_time?.[0];
+        const timeLeft = formatTimeLeft(runtimeMinutes, progress);
+
+        if (timeLeft) {
+            const badge = document.createElement("div");
+            badge.className = "media-time-left";
+            badge.textContent = timeLeft;
+            artwork.append(badge);
+        }
+
         const track = document.createElement("div");
         track.className = "media-progress";
 
@@ -336,6 +349,24 @@ function formatRuntime(minutes) {
     return mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
 }
 
+// Remaining watch time for a partially watched title (progress is a
+// percentage: 0-100) as "12m left" or "1h 12m left".
+function formatTimeLeft(runtimeMinutes, progressPercent) {
+    if (
+        !Number.isFinite(runtimeMinutes) ||
+        runtimeMinutes <= 0 ||
+        !Number.isFinite(progressPercent)
+    ) {
+        return "";
+    }
+
+    const watched = Math.min(100, Math.max(0, progressPercent));
+    const remaining = Math.round(runtimeMinutes * (1 - watched / 100));
+    const formatted = formatRuntime(remaining);
+
+    return formatted ? `${formatted} left` : "";
+}
+
 // Populate the hero section with the movie's title, artwork, and metadata.
 function renderFeaturedMovie(movie, featuredConfig) {
     const hero = document.querySelector("#featured-hero");
@@ -389,18 +420,48 @@ function renderFeaturedMovie(movie, featuredConfig) {
         };
     }
 
-    // Update the movie metadata, using friendly fallbacks for missing fields.
-    document.querySelector("#featured-year").textContent =
-        (movie.release_date || movie.first_air_date || "").slice(0, 4) || "—";
+    // Movies show release year; TV shows show a release period range.
+    const mediaType = featuredConfig?.mediaType || "movie";
+    const yearElement = document.querySelector("#featured-year");
+
+    if (mediaType === "tv") {
+        const startYear = (movie.first_air_date || "").slice(0, 4);
+        const isOngoing = movie.in_production ||
+            movie.status === "Returning Series";
+        const endYear = (movie.last_air_date || "").slice(0, 4);
+
+        if (startYear) {
+            yearElement.textContent = isOngoing
+                ? `${startYear}–Present`
+                : endYear && endYear !== startYear
+                    ? `${startYear}–${endYear}`
+                    : startYear;
+        } else {
+            yearElement.textContent = "—";
+        }
+    } else {
+        yearElement.textContent =
+            (movie.release_date || "").slice(0, 4) || "—";
+    }
 
     document.querySelector("#featured-rating").textContent =
         Number(movie.vote_average || 0).toFixed(1);
 
-    document.querySelector("#featured-genres").textContent =
-        (movie.genres || [])
-            .slice(0, 3)
-            .map(genre => genre.name)
-            .join(", ") || "Movie";
+    const genresElement = document.querySelector("#featured-genres");
+    const genreNames = (movie.genres || []).slice(0, 2).map(g => g.name);
+
+    genresElement.textContent = "";
+
+    const displayGenres = genreNames.length > 0
+        ? genreNames
+        : [mediaType === "tv" ? "TV Show" : "Movie"];
+
+    displayGenres.forEach(name => {
+        const tag = document.createElement("span");
+        tag.className = "genre-tag";
+        tag.textContent = name;
+        genresElement.append(tag);
+    });
 
     // Movies expose `runtime`; TV exposes `episode_run_time[]`.
     const runtimeMinutes = Number.isFinite(movie.runtime)
@@ -670,15 +731,26 @@ const HERO_SWIPE_COMMIT = 60;
 const HERO_SWIPE_FLICK = 0.45; // px per ms
 const HERO_SWIPE_RESISTANCE = 0.35;
 
+// Hero info elements: everything in .hero-copy except the action buttons,
+// so buttons stay fixed during swipe drag and fly-out animations.
+function heroInfoElements() {
+    if (!heroCopy) return [];
+    return Array.from(heroCopy.children).filter(
+        el => !el.classList.contains('hero-actions')
+    );
+}
+
 function resetHeroDragVisual() {
     if (!heroCopy) {
         return;
     }
 
-    heroCopy.style.transition = "";
-    heroCopy.style.transform = "";
-    heroCopy.style.opacity = "";
-    heroCopy.style.willChange = "";
+    heroInfoElements().forEach(el => {
+        el.style.transition = "";
+        el.style.transform = "";
+        el.style.opacity = "";
+        el.style.willChange = "";
+    });
 }
 
 function paintHeroDrag(dx) {
@@ -688,12 +760,16 @@ function paintHeroDrag(dx) {
 
     // The entrance animation would override the drag transform.
     heroCopy.classList.remove("hero-content-enter");
-    heroCopy.style.transition = "none";
-    heroCopy.style.willChange = "transform, opacity";
-    heroCopy.style.transform =
-        `translate3d(${(dx * HERO_SWIPE_RESISTANCE).toFixed(1)}px, 0, 0)`;
-    heroCopy.style.opacity =
-        `${Math.max(0.45, 1 - Math.abs(dx) / 700)}`;
+
+    const translatedX = (dx * HERO_SWIPE_RESISTANCE).toFixed(1);
+    const fadeOpacity = `${Math.max(0.45, 1 - Math.abs(dx) / 700)}`;
+
+    heroInfoElements().forEach(el => {
+        el.style.transition = "none";
+        el.style.willChange = "transform, opacity";
+        el.style.transform = `translate3d(${translatedX}px, 0, 0)`;
+        el.style.opacity = fadeOpacity;
+    });
 }
 
 hero.addEventListener("pointerdown", event => {
@@ -787,12 +863,14 @@ function endHeroSwipe(event) {
         const direction = dx < 0 ? 1 : -1;
 
         if (heroCopy && !reduceMotion) {
-            // Fly the old copy out; the fresh render flies in.
-            heroCopy.style.transition =
-                "transform 200ms ease-out, opacity 200ms ease-out";
-            heroCopy.style.transform =
-                `translate3d(${direction * 110}px, 0, 0)`;
-            heroCopy.style.opacity = "0";
+            // Fly the old info out; the action buttons stay in place.
+            heroInfoElements().forEach(el => {
+                el.style.transition =
+                    "transform 200ms ease-out, opacity 200ms ease-out";
+                el.style.transform =
+                    `translate3d(${direction * 110}px, 0, 0)`;
+                el.style.opacity = "0";
+            });
         } else {
             resetHeroDragVisual();
         }
@@ -801,15 +879,19 @@ function endHeroSwipe(event) {
             .finally(resetHeroDragVisual);
     } else if (heroCopy && !reduceMotion) {
         // Spring back to rest.
-        heroCopy.style.transition =
-            "transform 240ms ease-out, opacity 240ms ease-out";
-        heroCopy.style.transform = "";
-        heroCopy.style.opacity = "";
+        heroInfoElements().forEach(el => {
+            el.style.transition =
+                "transform 240ms ease-out, opacity 240ms ease-out";
+            el.style.transform = "";
+            el.style.opacity = "";
+        });
 
         heroSnapTimer = setTimeout(() => {
             if (heroCopy && !heroSwiping) {
-                heroCopy.style.transition = "";
-                heroCopy.style.willChange = "";
+                heroInfoElements().forEach(el => {
+                    el.style.transition = "";
+                    el.style.willChange = "";
+                });
             }
         }, 260);
     } else {
