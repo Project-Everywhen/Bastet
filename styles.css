@@ -813,7 +813,10 @@ h1 {
 .media-card {
     flex: 0 0 150px;
     min-width: 0;
-    transition: transform 400ms ease;
+
+    /* M3 motion: on-screen state change → Standard easing,
+       medium duration (300ms). Reads responsive but lands softly. */
+    transition: transform 300ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 .media-card--continue {
