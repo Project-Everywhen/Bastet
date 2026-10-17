@@ -300,7 +300,11 @@ function createMediaCard(media, options = {}) {
 
         const fill = document.createElement("div");
         fill.className = "media-progress-fill";
-        fill.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+
+        // Start empty; loadContinueWatching draws it to the stored
+        // target once the card is in the document (M3 fill motion).
+        fill.dataset.targetWidth = `${Math.min(100, Math.max(0, progress))}%`;
+        fill.style.width = "0%";
 
         track.append(fill);
         artwork.append(track);
@@ -986,7 +990,7 @@ function endHeroSwipe(event) {
             // Fly the old info out; the action buttons stay in place.
             heroInfoElements().forEach(el => {
                 el.style.transition =
-                    "transform 200ms ease-out, opacity 200ms ease-out";
+                    "transform 200ms cubic-bezier(0.3, 0, 1, 1), opacity 200ms cubic-bezier(0.3, 0, 1, 1)";
                 el.style.transform =
                     `translate3d(${direction * 110}px, 0, 0)`;
                 el.style.opacity = "0";
@@ -1001,7 +1005,7 @@ function endHeroSwipe(event) {
         // Spring back to rest.
         heroInfoElements().forEach(el => {
             el.style.transition =
-                "transform 240ms ease-out, opacity 240ms ease-out";
+                "transform 250ms cubic-bezier(0.2, 0, 0, 1), opacity 250ms cubic-bezier(0.2, 0, 0, 1)";
             el.style.transform = "";
             el.style.opacity = "";
         });
@@ -1013,7 +1017,7 @@ function endHeroSwipe(event) {
                     el.style.willChange = "";
                 });
             }
-        }, 260);
+        }, 280);
     } else {
         resetHeroDragVisual();
     }
@@ -1093,6 +1097,18 @@ async function loadContinueWatching() {
             card.style.animationDelay = `${index * 35}ms`;
             container.append(card);
             fitCardTitle(card);
+
+            const fill = card.querySelector(".media-progress-fill");
+
+            if (fill?.dataset.targetWidth) {
+                // Two frames: paint the 0% state, then draw to target
+                // so the width transition always runs.
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        fill.style.width = fill.dataset.targetWidth;
+                    });
+                });
+            }
         });
     } catch (error) {
         console.error("Could not load Continue Watching titles:", error);
@@ -1468,6 +1484,10 @@ if (document.fonts?.ready) {
 
 fitNavLabels();
 
+// M3 fade-through bookkeeping for page-view switches.
+const VIEW_FADE_OUT_MS = 100;
+let viewSwitchTimer = 0;
+
 function navigateToCurrentView() {
     const requestedRoute = window.location.hash.slice(1) || "home";
 
@@ -1479,10 +1499,45 @@ function navigateToCurrentView() {
 
     const activeRoute = matchingView ? requestedRoute : "home";
 
-    // Display the selected page and hide the rest.
-    views.forEach(view => {
-        view.hidden = view.id !== activeRoute;
-    });
+    const currentView =
+        [...views].find(view => !view.hidden && !view.classList.contains("view-leaving")) ||
+        [...views].find(view => !view.hidden);
+    const activeView = [...views].find(view => view.id === activeRoute);
+    const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    window.clearTimeout(viewSwitchTimer);
+
+    if (currentView && activeView && currentView !== activeView && !reduceMotion) {
+        // M3 fade-through: the outgoing page leaves first, the
+        // incoming page follows after it. Views left over from an
+        // interrupted switch are settled immediately.
+        views.forEach(view => {
+            if (view !== currentView && view !== activeView) {
+                view.hidden = true;
+                view.classList.remove("view-leaving", "view-entering");
+            }
+        });
+
+        currentView.classList.remove("view-entering");
+        currentView.classList.add("view-leaving");
+
+        activeView.hidden = false;
+        activeView.classList.remove("view-leaving");
+        activeView.classList.add("view-entering");
+
+        viewSwitchTimer = window.setTimeout(() => {
+            currentView.hidden = true;
+            currentView.classList.remove("view-leaving");
+        }, VIEW_FADE_OUT_MS);
+    } else {
+        // Display the selected page and hide the rest.
+        views.forEach(view => {
+            view.hidden = view.id !== activeRoute;
+            view.classList.remove("view-leaving", "view-entering");
+        });
+    }
 
     // Fresh menu, full pill.
     document.querySelector(".sidebar")?.classList.remove("is-compact");
