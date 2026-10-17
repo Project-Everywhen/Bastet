@@ -758,6 +758,13 @@ h1 {
     margin-right: -24px;
     padding-right: 24px;
 
+    /* Headroom for the hover pop (see .media-card:hover) so the
+       row's overflow never clips the scaled card. The negative
+       margins cancel the extra box, keeping spacing identical. */
+    margin-top: -8px;
+    margin-bottom: -8px;
+    padding-top: 8px;
+
     scroll-behavior: auto;
     overscroll-behavior-x: contain;
 }
@@ -806,7 +813,7 @@ h1 {
 .media-card {
     flex: 0 0 150px;
     min-width: 0;
-    transition: transform 200ms ease;
+    transition: transform 400ms ease;
 }
 
 .media-card--continue {
@@ -835,8 +842,9 @@ h1 {
     transition: transform 260ms ease-out;
 }
 
-.media-card:hover .media-image {
-    transform: scale(1.035);
+.media-card:hover {
+    transform: scale(1.045);
+    z-index: 5;
 }
 
 /* Continue Watching overlay: text stack lives on the artwork. */
@@ -1338,7 +1346,9 @@ h1 {
 }
 
 .media-card {
-    animation: card-enter 420ms ease both;
+    /* `backwards` (not `both`) so the finished enter animation stops
+       pinning `transform` and the hover pop can take effect. */
+    animation: card-enter 420ms ease backwards;
 }
 
 @keyframes hero-content-enter {
