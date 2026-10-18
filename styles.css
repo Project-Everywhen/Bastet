@@ -1,19 +1,5 @@
-/* Self-hosted Google Sans variable fonts (OFL licensed, see zip). */
-@font-face {
-    font-family: "Google Sans";
-    src: url("assets/fonts/GoogleSans-Variable.ttf") format("truetype-variations");
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Google Sans";
-    src: url("assets/fonts/GoogleSans-Italic-Variable.ttf") format("truetype-variations");
-    font-weight: 100 900;
-    font-style: italic;
-    font-display: swap;
-}
+/* Google Sans Flex loads from Google Fonts (see index.html).
+   Variable axes available: wght 1-1000, wdth 25-151. */
 
 /* ————————————————————————————————————————————————————————————————
    Color system. Every colored surface and text in the app reads from
@@ -24,7 +10,7 @@
    ———————————————————————————————————————————————————————————————— */
 :root {
     color-scheme: dark;
-    font-family: "Google Sans", "Product Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: "Google Sans Flex", "Product Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 
     /* Brand accent (default: monochrome white). */
     --accent: #ffffff;
@@ -327,7 +313,7 @@ button {
 .page-header h2 {
     margin: 0 0 6px;
     font-size: clamp(28px, 3vw, 40px);
-    font-weight: 650;
+    font-weight: 700;
 }
 
 .page-header > p:last-child {
@@ -1060,7 +1046,6 @@ h1 {
            full-width square bar. */
         border: 1px solid var(--line-frost);
         box-shadow: 0 4px 16px rgba(var(--shadow-rgb), 0.35);
-        background-clip: padding-box;
         overflow: clip;
 
         /* Same acrylic, fading upward instead of sideways. */
@@ -1070,6 +1055,11 @@ h1 {
             var(--tint-rail-2) 70%,
             var(--tint-rail-3) 100%
         );
+        /* Must follow the background shorthand: keep the tint out of
+           the border ring so the hairline reads the same on all four
+           edges instead of the gradient's ends landing under the top
+           and bottom borders. */
+        background-clip: padding-box;
 
         /* Lighter blur for mobile GPUs. */
         -webkit-backdrop-filter: blur(18px) saturate(140%);
