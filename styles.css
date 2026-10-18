@@ -67,6 +67,34 @@
     --shadow-text: rgba(var(--shadow-rgb), 0.55);
     --shadow-logo: rgba(var(--shadow-rgb), 0.45);
 
+    /* M3 motion tokens (m3.material.io/styles/motion). Curves and
+       durations mirror the Material 3 system tokens. Pair them per
+       the spec: enter → decelerate, exit → accelerate, in-place
+       state changes → standard. */
+    --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --motion-ease-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+    --motion-ease-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+    --motion-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --motion-ease-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+    --motion-ease-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+    --motion-ease-linear: cubic-bezier(0, 0, 1, 1);
+    --motion-duration-short1: 50ms;
+    --motion-duration-short2: 100ms;
+    --motion-duration-short3: 150ms;
+    --motion-duration-short4: 200ms;
+    --motion-duration-medium1: 250ms;
+    --motion-duration-medium2: 300ms;
+    --motion-duration-medium3: 350ms;
+    --motion-duration-medium4: 400ms;
+    --motion-duration-long1: 450ms;
+    --motion-duration-long2: 500ms;
+    --motion-duration-long3: 550ms;
+    --motion-duration-long4: 600ms;
+    --motion-duration-extra-long1: 700ms;
+    --motion-duration-extra-long2: 800ms;
+    --motion-duration-extra-long3: 900ms;
+    --motion-duration-extra-long4: 1000ms;
+
     /* State semantics (danger, status, switches). */
     --danger-text: #ffaaaa;
     --danger-line: rgba(255, 125, 125, 0.25);
@@ -292,11 +320,11 @@ button {
    the incoming page follows after it. Classes are driven by app.js. */
 .page-view.view-leaving {
     opacity: 0;
-    transition: opacity 100ms cubic-bezier(0.3, 0, 1, 1);
+    transition: opacity var(--motion-duration-short2) var(--motion-ease-standard-accelerate);
 }
 
 .page-view.view-entering {
-    animation: view-fade-in 200ms cubic-bezier(0, 0, 0, 1) 100ms both;
+    animation: view-fade-in var(--motion-duration-short4) var(--motion-ease-standard-decelerate) var(--motion-duration-short2) both;
 }
 
 .page-header {
@@ -867,7 +895,7 @@ h1 {
 .media-overlay-title {
     margin: 0;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -884,7 +912,7 @@ h1 {
     margin: 0 0 3px;
     color: var(--text-primary);
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 550;
     letter-spacing: 0.04em;
 }
 
@@ -1393,7 +1421,7 @@ h1 {
 
 /* Settings feedback: quick rise-in whenever it is re-shown. */
 .sp-feedback:not([hidden]) {
-    animation: feedback-enter 200ms cubic-bezier(0, 0, 0, 1) both;
+    animation: feedback-enter var(--motion-duration-short4) var(--motion-ease-standard-decelerate) both;
 }
 
 /* Animate the copy's children individually so the action buttons

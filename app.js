@@ -201,21 +201,28 @@ function createStarIcon(extraClass = "") {
 }
 
 function createMediaCard(media, options = {}) {
-    const { progress, bannerPath } = options;
+    const {
+        progress,
+        bannerPath,
+        upcoming = false,
+        episode = null,
+        airLabel = ""
+    } = options;
     const isContinue = Number.isFinite(progress);
+    const isUpcoming = Boolean(upcoming);
 
     const title = media.title || media.name || "Untitled";
     const releaseDate = media.release_date || media.first_air_date || "";
 
     const card = document.createElement("article");
     card.className = `media-card ${
-        isContinue ? "media-card--continue" : "media-card--poster"
-    }`;
+        isContinue || isUpcoming ? "media-card--continue" : "media-card--poster"
+    }${isUpcoming ? " media-card--upcoming" : ""}`;
 
     const artwork = document.createElement("div");
     artwork.className = "media-art";
 
-    const posterPath = isContinue
+    const posterPath = isContinue || isUpcoming
         ? bannerPath || media.backdrop_path || media.poster_path
         : media.poster_path || media.backdrop_path;
 
@@ -225,9 +232,9 @@ function createMediaCard(media, options = {}) {
         image.className = "media-image";
         image.src = imageUrl(
             posterPath,
-            isContinue ? CONTINUE_BANNER_SIZE : CARD_POSTER_SIZE
+            isContinue || isUpcoming ? CONTINUE_BANNER_SIZE : CARD_POSTER_SIZE
         );
-        image.alt = `${title} ${isContinue ? "backdrop" : "poster"}`;
+        image.alt = `${title} ${isContinue || isUpcoming ? "backdrop" : "poster"}`;
         image.loading = "lazy";
         image.decoding = "async";
 
@@ -237,6 +244,53 @@ function createMediaCard(media, options = {}) {
     }
 
     const year = releaseDate.slice(0, 4) || "—";
+
+    if (isUpcoming) {
+        // Upcoming episode: same overlay copy as a Continue Watching
+        // card, plus an air-date badge instead of playback progress.
+        const overlay = document.createElement("div");
+        overlay.className = "media-overlay";
+
+        if (
+            Number.isFinite(episode?.season_number) &&
+            Number.isFinite(episode?.episode_number)
+        ) {
+            const episodeTag = document.createElement("p");
+            episodeTag.className = "media-overlay-episode";
+            episodeTag.textContent =
+                `S${episode.season_number} E${episode.episode_number}`;
+            overlay.append(episodeTag);
+        }
+
+        const heading = document.createElement("h3");
+        heading.className = "media-overlay-title";
+
+        const label = document.createElement("span");
+        label.textContent = title;
+        heading.append(label);
+
+        overlay.append(heading);
+
+        if (episode?.name) {
+            const subtitle = document.createElement("p");
+            subtitle.className = "media-overlay-sub";
+            subtitle.textContent = episode.name;
+            overlay.append(subtitle);
+        }
+
+        artwork.append(overlay);
+
+        if (airLabel) {
+            const badge = document.createElement("div");
+            badge.className = "media-time-left";
+            badge.textContent = airLabel;
+            artwork.append(badge);
+        }
+
+        card.append(artwork);
+
+        return card;
+    }
 
     if (isContinue) {
         // Text stack lives on the artwork, above the progress bar. The
@@ -422,6 +476,35 @@ function formatTimeLeft(runtimeMinutes, progressPercent) {
     const formatted = formatRuntime(remaining);
 
     return formatted ? `${formatted} left` : "";
+}
+
+// Air-date countdown for upcoming episode cards: "Airs today",
+// "Airs tomorrow", or "Airs in N Days".
+function formatAirLabel(airDate) {
+    if (!airDate) {
+        return "";
+    }
+
+    const [year, month, day] = airDate.split("-").map(Number);
+
+    if (!year || !month || !day) {
+        return "";
+    }
+
+    const now = new Date();
+    const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    const airUtc = Date.UTC(year, month - 1, day);
+    const days = Math.round((airUtc - todayUtc) / 86400000);
+
+    if (days <= 0) {
+        return "Airs today";
+    }
+
+    if (days === 1) {
+        return "Airs tomorrow";
+    }
+
+    return `Airs in ${days} Days`;
 }
 
 // ── Episode banners ──────────────────────────────────────────────
@@ -1063,6 +1146,31 @@ async function loadContinueWatching() {
 
                     const withType = { ...media, media_type: type };
 
+                    if (entry.upcoming) {
+                        // Scheduled next episode drives the card:
+                        // S/E, episode name, still, and the air badge.
+                        const episode = withType.next_episode_to_air;
+
+                        if (!episode?.air_date) {
+                            return null;
+                        }
+
+                        const still = await fetchEpisodeBanner(
+                            withType.id,
+                            episode.season_number,
+                            episode.episode_number,
+                            episode.still_path
+                        );
+
+                        return {
+                            media: withType,
+                            upcoming: true,
+                            episode,
+                            airLabel: formatAirLabel(episode.air_date),
+                            bannerPath: still || withType.backdrop_path || ""
+                        };
+                    }
+
                     // TV cards prefer the current episode's own banner.
                     const bannerPath = type === "tv"
                         ? await resolveEpisodeBanner(withType)
@@ -1091,8 +1199,14 @@ async function loadContinueWatching() {
             return;
         }
 
-        validItems.forEach(({ media, progress, bannerPath }, index) => {
-            const card = createMediaCard(media, { progress, bannerPath });
+        validItems.forEach(({ media, progress, bannerPath, upcoming, episode, airLabel }, index) => {
+            const card = createMediaCard(media, {
+                progress,
+                bannerPath,
+                upcoming,
+                episode,
+                airLabel
+            });
 
             card.style.animationDelay = `${index * 35}ms`;
             container.append(card);
@@ -2113,15 +2227,42 @@ function initDiscoverView() {
     const genreDropdown = discoverRoot.querySelector("[data-genre-dropdown]");
     const genreButton = discoverRoot.querySelector("#genre-dropdown-button");
     const genreList = discoverRoot.querySelector("#genre-dropdown-list");
+    let genreCloseTimer = 0;
 
     const setGenreDropdownOpen = open => {
         if (!genreButton || !genreList) {
             return;
         }
 
-        genreButton.setAttribute("aria-expanded", String(open));
-        genreList.hidden = !open;
-        genreDropdown?.classList.toggle("open", open);
+        window.clearTimeout(genreCloseTimer);
+
+        if (open) {
+            genreDropdown?.classList.remove("is-closing");
+            genreList.hidden = false;
+            genreButton.setAttribute("aria-expanded", "true");
+            genreDropdown?.classList.add("open");
+            return;
+        }
+
+        genreButton.setAttribute("aria-expanded", "false");
+        genreDropdown?.classList.remove("open");
+
+        if (genreList.hidden) {
+            return;
+        }
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            genreDropdown?.classList.remove("is-closing");
+            genreList.hidden = true;
+            return;
+        }
+
+        // Let the M3 exit curve finish before display:none.
+        genreDropdown?.classList.add("is-closing");
+        genreCloseTimer = window.setTimeout(() => {
+            genreDropdown?.classList.remove("is-closing");
+            genreList.hidden = true;
+        }, 170);
     };
 
     genreButton?.addEventListener("click", () => {

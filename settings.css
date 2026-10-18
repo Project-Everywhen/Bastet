@@ -144,7 +144,7 @@
   font-size: 13px;
   font-weight: 650;
   white-space: nowrap;
-  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition: background var(--motion-duration-short4) var(--motion-ease-standard), border-color var(--motion-duration-short4) var(--motion-ease-standard), transform var(--motion-duration-short3) var(--motion-ease-standard);
 }
 .sp-scope .sp-button:active { transform: scale(.98); }
 .sp-scope .sp-button .material-symbols-rounded { font-size: 18px; }
@@ -213,12 +213,13 @@
   color: inherit;
   text-align: left;
   cursor: pointer;
+  transition: background var(--motion-duration-short4) var(--motion-ease-standard);
 }
 .sp-scope .sp-menu-item:first-of-type { border-top: 0; }
 .sp-scope .sp-menu-item:hover .sp-menu-copy strong { color: var(--text-primary); }
 .sp-scope .sp-menu-icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border: 1px solid var(--line-frost); border-radius: 12px; color: var(--text-soft); font-size: 20px; }
 .sp-scope .sp-menu-copy { display: grid; flex: 1 1 auto; gap: 3px; min-width: 0; }
-.sp-scope .sp-menu-copy strong { font-size: 13px; font-weight: 600; }
+.sp-scope .sp-menu-copy strong { font-size: 13px; font-weight: 600; transition: color var(--motion-duration-short4) var(--motion-ease-standard); }
 .sp-scope .sp-menu-copy small { color: var(--text-muted); font-size: 12px; line-height: 1.45; }
 .sp-scope .sp-menu-arrow { color: var(--text-muted); font-size: 20px; }
 
@@ -267,7 +268,7 @@
   border: 1px solid var(--line-frost);
   border-radius: 14px;
   cursor: pointer;
-  transition: border-color 160ms ease, background 160ms ease;
+  transition: border-color var(--motion-duration-short4) var(--motion-ease-standard), background var(--motion-duration-short4) var(--motion-ease-standard);
 }
 .sp-scope .sp-theme-option:has(input:checked) { border-color: rgba(var(--frost-rgb), .58); background: rgba(var(--frost-rgb), .045); }
 .sp-scope .sp-theme-option:focus-within { outline: 2px solid var(--text-primary); outline-offset: 3px; }
@@ -299,8 +300,10 @@
 .sp-scope .sp-theme-label { display: grid; gap: 2px; min-width: 0; }
 .sp-scope .sp-theme-label strong { font-size: 13px; font-weight: 600; }
 .sp-scope .sp-theme-label small { color: var(--text-muted); font-size: 11px; }
-.sp-scope .sp-radio-mark { width: 17px; height: 17px; border: 1px solid var(--text-muted); border-radius: 50%; }
-.sp-scope .sp-theme-option input:checked ~ .sp-radio-mark { border: 5px solid var(--text-primary); }
+.sp-scope .sp-radio-mark { position: relative; width: 17px; height: 17px; border: 1px solid var(--text-muted); border-radius: 50%; transition: border-color var(--motion-duration-short3) var(--motion-ease-standard); }
+.sp-scope .sp-radio-mark::after { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: var(--text-primary); transform: scale(0); transition: transform var(--motion-duration-short4) var(--motion-ease-emphasized-decelerate); }
+.sp-scope .sp-theme-option input:checked ~ .sp-radio-mark { border-color: var(--text-primary); }
+.sp-scope .sp-theme-option input:checked ~ .sp-radio-mark::after { transform: scale(1); }
 
 .sp-scope .sp-preference-list { margin-top: 18px; }
 .sp-scope .sp-preference-row {
@@ -330,7 +333,7 @@
   border-radius: 999px;
   background: var(--switch-track);
   cursor: pointer;
-  transition: background 160ms ease, border-color 160ms ease;
+  transition: background var(--motion-duration-short4) var(--motion-ease-standard), border-color var(--motion-duration-short4) var(--motion-ease-standard);
 }
 .sp-scope .sp-switch::before {
   position: absolute;
@@ -341,7 +344,7 @@
   border-radius: 50%;
   background: var(--switch-knob);
   content: "";
-  transition: transform 160ms ease, background 160ms ease;
+  transition: transform var(--motion-duration-medium1) var(--motion-ease-emphasized), background var(--motion-duration-short4) var(--motion-ease-standard);
 }
 .sp-scope .sp-switch:checked { border-color: var(--accent); background: var(--accent); }
 .sp-scope .sp-switch:checked::before { transform: translateX(17px); background: var(--accent-ink); }
@@ -360,6 +363,7 @@
   color: var(--text-primary);
   font-size: 13px;
   cursor: pointer;
+  transition: border-color var(--motion-duration-short4) var(--motion-ease-standard), background-color var(--motion-duration-short4) var(--motion-ease-standard);
 }
 .sp-scope .sp-field select:hover { border-color: rgba(var(--frost-rgb), .28); }
 .sp-scope .sp-field select option { background: var(--surface-control); color: var(--text-primary); }

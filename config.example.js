@@ -21,6 +21,7 @@ export const FEATURED_MOVIES = [
 ];
 
 export const CONTINUE_WATCHING = [
+    { id: 213375, mediaType: "tv", upcoming: true },
     { id: 157336, mediaType: "movie", progress: 64 },
     { id: 27205, mediaType: "movie", progress: 37 },
     { id: 155, mediaType: "movie", progress: 81 }
